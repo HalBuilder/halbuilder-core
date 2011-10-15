@@ -23,7 +23,7 @@ public class HalResource {
     private String href;
     private Map<String, String> namespaces = new HashMap<String, String>();
     private Map<String, String> links = new HashMap<String, String>();
-    private Map<String, String> properties = new HashMap<String, String>();
+    private Map<String, Object> properties = new HashMap<String, Object>();
     private Map<String, HalResource> resources = new HashMap<String, HalResource>();
 
     private HalResource(String href) {
@@ -42,7 +42,7 @@ public class HalResource {
         return this;
     }
 
-    public HalResource withProperty(String name, String value) {
+    public HalResource withProperty(String name, Object value) {
         if (properties.containsKey(name)) {
             throw new HalResourceException(format("Duplicate property '%s' found for resource %s", name, href));
         }
@@ -81,7 +81,7 @@ public class HalResource {
         //add an attribute to the root element
         resourceElement.setAttribute("href", baseHref);
         for (Map.Entry<String, String> entry : resource.namespaces.entrySet()) {
-            resourceElement.addNamespaceDeclaration(Namespace.getNamespace(entry.getKey(), entry.getValue()));
+            resourceElement.addNamespaceDeclaration(Namespace.getNamespace(entry.getKey(), resolveRelativeHref(baseHref, entry.getValue())));
         }
 
         //add a comment
@@ -96,9 +96,9 @@ public class HalResource {
         }
 
         // add properties
-        for (Map.Entry<String, String> entry : resource.properties.entrySet()) {
+        for (Map.Entry<String, Object> entry : resource.properties.entrySet()) {
             Element propertyElement = new Element(entry.getKey());
-            propertyElement.setContent(new Text(entry.getValue()));
+            propertyElement.setContent(new Text(entry.getValue().toString()));
             resourceElement.addContent(propertyElement);
         }
 
@@ -171,7 +171,7 @@ public class HalResource {
         if (!resource.namespaces.isEmpty()) {
             g.writeObjectFieldStart("_curies");
             for (Map.Entry<String, String> entry : resource.namespaces.entrySet()) {
-                g.writeStringField(entry.getKey(), entry.getValue());
+                g.writeStringField(entry.getKey(), resolveRelativeHref(baseHref, entry.getValue()));
             }
             g.writeEndObject();
         }
@@ -186,8 +186,8 @@ public class HalResource {
             g.writeEndObject();
         }
 
-        for (Map.Entry<String, String> entry : resource.properties.entrySet()) {
-            g.writeStringField(entry.getKey(), entry.getValue());
+        for (Map.Entry<String, Object> entry : resource.properties.entrySet()) {
+            g.writeObjectField(entry.getKey(), entry.getValue());
         }
 
         if (!resource.resources.isEmpty()) {
