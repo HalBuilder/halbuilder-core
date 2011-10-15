@@ -1,0 +1,31 @@
+<resource href="/todo-list" xmlns:td="http://example.com/todoapp/rels/">
+    <link rel="td:search" href="/todo-list/search;{searchterm}" />
+    <link rel="td:description" href="/todo-list/description" />
+    <created_at>2010-01-16</created_at>
+    <updated_at>2010-02-21</updated_at>
+    <summary>An example list</summary>
+    <resource rel="td:owner" href="http://example.com/mike">
+        <name>Mike</name>
+        <age>36</age>
+        <link rel="td:friend" href="http://example.com/mamund" />
+    </resource>
+    <resource rel="td:item" name="1" href="http://example.com/tasks/126">
+        <title>Find Mug</title>
+        <details>Find my mug.</details>
+        <resource rel="td:attachment" name="places_to_look" type="text/plain" href="http://home.com/tasks/126/attachment/1">
+            **********************************
+                PLACES MY MUG COULD BE
+            **********************************
+              - Garden
+              - Roof
+              - Zipcar
+              - Shelf
+        </resource>
+        <link rel="td:next" href="http://example.org/todos/make-some-tea" />
+    </resource>
+    <resource rel="td:item" name="2" href="http://example.org/todos/make-some-tea">
+        <title>Make tea</title>
+        <details>Make nice tea that is green. (Gyokuro)</details>
+        <link rel="td:prev" href="http://example.com/tasks/126" />
+    </resource>
+</resource>
