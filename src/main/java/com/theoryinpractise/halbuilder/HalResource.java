@@ -3,12 +3,16 @@ package com.theoryinpractise.halbuilder;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.util.DefaultPrettyPrinter;
-import org.jdom.*;
+import org.jdom.Element;
+import org.jdom.Namespace;
+import org.jdom.Text;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,8 +30,8 @@ public class HalResource {
         this.href = href;
     }
 
-    public static HalResource newHalResource(String url) {
-        return new HalResource(url);
+    public static HalResource newHalResource(String href) {
+        return new HalResource(href);
     }
 
     public HalResource withLink(String rel, String url) {
@@ -62,13 +66,21 @@ public class HalResource {
         return this;
     }
 
-    private Element renderElement() {
+    private String resolveRelativeHref(String baseHref, String href) {
+        try {
+            return new URL(new URL(baseHref), href).toExternalForm();
+        } catch (MalformedURLException e) {
+            throw new HalResourceException(e.getMessage());
+        }
+    }
+
+    private Element renderElement(String baseHref, HalResource resource) {
 
         // Create the root element
         Element resourceElement = new Element("resource");
         //add an attribute to the root element
-        resourceElement.setAttribute(new Attribute("href", href));
-        for (Map.Entry<String, String> entry : namespaces.entrySet()) {
+        resourceElement.setAttribute("href", baseHref);
+        for (Map.Entry<String, String> entry : resource.namespaces.entrySet()) {
             resourceElement.addNamespaceDeclaration(Namespace.getNamespace(entry.getKey(), entry.getValue()));
         }
 
@@ -76,28 +88,38 @@ public class HalResource {
 //        resourceElement.addContent(new Comment("Description of a resource"));
 
         // add links
-        for (Map.Entry<String, String> entry : links.entrySet()) {
+        for (Map.Entry<String, String> entry : resource.links.entrySet()) {
             Element linkElement = new Element("link");
-            linkElement.setAttribute("rel", entry.getKey() );
-            linkElement.setAttribute("href", entry.getValue() );
+            linkElement.setAttribute("rel", entry.getKey());
+            linkElement.setAttribute("href", resolveRelativeHref(baseHref, entry.getValue()));
             resourceElement.addContent(linkElement);
         }
 
         // add properties
-        for (Map.Entry<String, String> entry : properties.entrySet()) {
+        for (Map.Entry<String, String> entry : resource.properties.entrySet()) {
             Element propertyElement = new Element(entry.getKey());
             propertyElement.setContent(new Text(entry.getValue()));
             resourceElement.addContent(propertyElement);
         }
 
         // add subresources
-        for (Map.Entry<String, HalResource> entry : resources.entrySet()) {
-            Element resource = entry.getValue().renderElement();
-            resource.setAttribute("rel", entry.getKey());
-            resourceElement.addContent(resource);
+        for (Map.Entry<String, HalResource> entry : resource.resources.entrySet()) {
+            String subResourceBaseHref = resolveRelativeHref(baseHref, entry.getValue().href);
+            Element subResource = renderElement(subResourceBaseHref, entry.getValue());
+            subResource.setAttribute("rel", entry.getKey());
+            resourceElement.addContent(subResource);
         }
 
         return resourceElement;
+    }
+
+    public HalResource withBaseHref(String baseHref) {
+        try {
+            this.href = new URL(new URL(baseHref), this.href).toExternalForm();
+        } catch (MalformedURLException e) {
+            throw new HalResourceException(e.getMessage());
+        }
+        return this;
     }
 
     private void validateNamespaces(HalResource resource) {
@@ -133,7 +155,7 @@ public class HalResource {
             g.setPrettyPrinter(new DefaultPrettyPrinter());
 
             g.writeStartObject();
-            renderJson(g, this);
+            renderJson(href, g, this);
             g.writeEndObject();
             g.close();
         } catch (IOException e) {
@@ -142,9 +164,9 @@ public class HalResource {
         return sw.toString();
     }
 
-    private void renderJson(JsonGenerator g, HalResource resource) throws IOException {
+    private void renderJson(String baseHref, JsonGenerator g, HalResource resource) throws IOException {
 
-        g.writeStringField("_href", resource.href);
+        g.writeStringField("_href", resolveRelativeHref(href, resource.href));
 
         if (!resource.namespaces.isEmpty()) {
             g.writeObjectFieldStart("_curies");
@@ -158,7 +180,7 @@ public class HalResource {
             g.writeObjectFieldStart("_links");
             for (Map.Entry<String, String> entry : resource.links.entrySet()) {
                 g.writeObjectFieldStart(entry.getKey());
-                g.writeStringField("_href", entry.getValue());
+                g.writeStringField("_href", resolveRelativeHref(href, entry.getValue()));
                 g.writeEndObject();
             }
             g.writeEndObject();
@@ -172,7 +194,9 @@ public class HalResource {
             g.writeObjectFieldStart("_resources");
             for (Map.Entry<String, HalResource> entry : resource.resources.entrySet()) {
                 g.writeObjectFieldStart(entry.getKey());
-                renderJson(g, entry.getValue());
+                String subResourceBaseHref = resolveRelativeHref(baseHref, entry.getValue().href);
+
+                renderJson(subResourceBaseHref, g, entry.getValue());
                 g.writeEndObject();
             }
         }
@@ -181,9 +205,8 @@ public class HalResource {
 
     public String renderXml() {
         validateNamespaces(this);
-        Element element = renderElement();
+        Element element = renderElement(href, this);
         XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
         return outputter.outputString(element);
     }
-
 }

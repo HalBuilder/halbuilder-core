@@ -2,14 +2,16 @@ package com.theoryinpractise.halbuilder;
 
 import org.testng.annotations.Test;
 
+import static org.fest.assertions.Assertions.assertThat;
+
 public class HalResourceTest {
 
     @Test
     public void testHalBuilder() {
 
         HalResource owner = HalResource
-                .newHalResource("http://example.com/mike")
-                .withLink("td:friend", "http://example.com/mamund")
+                .newHalResource("/mike")
+                .withLink("td:friend", "/mamund")
                 .withProperty("name", "Mike")
                 .withProperty("age", "36");
 
@@ -60,6 +62,51 @@ public class HalResourceTest {
                 .withProperty("name", "Example User")
                 .renderXml();
 
+    }
+
+    @Test
+    public void testHalResourceHrefShouldBeFullyQualified() {
+        String xml = HalResource.newHalResource("/test")
+                .withBaseHref("http://localhost")
+                .renderXml();
+
+        System.out.println(xml);
+
+        assertThat(xml).contains("http://localhost/test");
+    }
+
+    @Test
+    public void testRelativeLinksRenderFullyQualified() {
+        String xml = HalResource.newHalResource("/")
+                .withLink("test", "/test")
+                .withBaseHref("http://localhost")
+                .renderXml();
+
+        assertThat(xml).contains("http://localhost/test");
+    }
+
+    @Test
+    public void testRelativeResourceRenderFullyQualified() {
+        String xml = HalResource.newHalResource("/")
+                .withSubresource("test", HalResource.newHalResource("subresource"))
+                .withBaseHref("http://localhost")
+                .renderXml();
+
+        assertThat(xml).contains("http://localhost/subresource");
+    }
+
+    @Test
+    public void testRelativeResourceLinksRenderFullyQualified() {
+        String xml = HalResource.newHalResource("/")
+                .withSubresource("test", HalResource
+                        .newHalResource("subresource/")
+                        .withLink("sub", "/sublink1")
+                        .withLink("sub2", "sublink2"))
+                .withBaseHref("http://localhost")
+                .renderXml();
+
+        assertThat(xml).contains("http://localhost/sublink1");
+        assertThat(xml).contains("http://localhost/subresource/sublink2");
     }
 
 }
