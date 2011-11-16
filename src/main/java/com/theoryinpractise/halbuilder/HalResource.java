@@ -1,5 +1,7 @@
 package com.theoryinpractise.halbuilder;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.util.DefaultPrettyPrinter;
@@ -13,6 +15,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,9 +25,9 @@ public class HalResource {
 
     private String href;
     private Map<String, String> namespaces = new HashMap<String, String>();
-    private Map<String, String> links = new HashMap<String, String>();
+    private Multimap<String, String> links = ArrayListMultimap.create();
     private Map<String, Object> properties = new HashMap<String, Object>();
-    private Map<String, HalResource> resources = new HashMap<String, HalResource>();
+    private Multimap<String, HalResource> resources = ArrayListMultimap.create();
 
     private HalResource(String href) {
         this.href = href;
@@ -35,9 +38,6 @@ public class HalResource {
     }
 
     public HalResource withLink(String rel, String url) {
-        if (links.containsKey(rel)) {
-            throw new HalResourceException(format("Duplicate link '%s' found for resource %s", rel, href));
-        }
         links.put(rel, url);
         return this;
     }
@@ -59,16 +59,19 @@ public class HalResource {
     }
 
     public HalResource withSubresource(String rel, HalResource resource) {
-        if (resources.containsKey(rel)) {
-            throw new HalResourceException(format("Duplicate subresource rel '%s' found for resource %s", rel, href));
-        }
         resources.put(rel, resource);
         return this;
     }
 
     private String resolveRelativeHref(String baseHref, String href) {
         try {
-            return new URL(new URL(baseHref), href).toExternalForm();
+            if (href.startsWith("?")) {
+                return new URL(baseHref + href).toExternalForm();
+            } else if (href.startsWith("~/")) {
+                return new URL(baseHref + href.substring(1)).toExternalForm();
+            } else {
+                return new URL(new URL(baseHref), href).toExternalForm();
+            }
         } catch (MalformedURLException e) {
             throw new HalResourceException(e.getMessage());
         }
@@ -88,11 +91,13 @@ public class HalResource {
 //        resourceElement.addContent(new Comment("Description of a resource"));
 
         // add links
-        for (Map.Entry<String, String> entry : resource.links.entrySet()) {
-            Element linkElement = new Element("link");
-            linkElement.setAttribute("rel", entry.getKey());
-            linkElement.setAttribute("href", resolveRelativeHref(baseHref, entry.getValue()));
-            resourceElement.addContent(linkElement);
+        for (Map.Entry<String, Collection<String>> linkEntry : resource.links.asMap().entrySet()) {
+            for (String url : linkEntry.getValue()) {
+                Element linkElement = new Element("link");
+                linkElement.setAttribute("rel", linkEntry.getKey());
+                linkElement.setAttribute("href", resolveRelativeHref(baseHref, url));
+                resourceElement.addContent(linkElement);
+            }
         }
 
         // add properties
@@ -103,11 +108,13 @@ public class HalResource {
         }
 
         // add subresources
-        for (Map.Entry<String, HalResource> entry : resource.resources.entrySet()) {
-            String subResourceBaseHref = resolveRelativeHref(baseHref, entry.getValue().href);
-            Element subResource = renderElement(subResourceBaseHref, entry.getValue());
-            subResource.setAttribute("rel", entry.getKey());
-            resourceElement.addContent(subResource);
+        for (Map.Entry<String, Collection<HalResource>> resourceEntry : resource.resources.asMap().entrySet()) {
+            for (HalResource halResource : resourceEntry.getValue()) {
+                String subResourceBaseHref = resolveRelativeHref(baseHref, halResource.href);
+                Element subResourceElement = renderElement(subResourceBaseHref, halResource);
+                subResourceElement.setAttribute("rel", resourceEntry.getKey());
+                resourceElement.addContent(subResourceElement);
+            }
         }
 
         return resourceElement;
@@ -126,9 +133,11 @@ public class HalResource {
         for (String rel : resource.links.keySet()) {
             validateNamespaces(resource.href, rel);
         }
-        for (Map.Entry<String, HalResource> entry : resource.resources.entrySet()) {
-            validateNamespaces(resource.href, entry.getKey());
-            validateNamespaces(entry.getValue());
+        for (Map.Entry<String, Collection<HalResource>> entry : resource.resources.asMap().entrySet()) {
+            for (HalResource halResource : entry.getValue()) {
+                validateNamespaces(resource.href, entry.getKey());
+                validateNamespaces(halResource);
+            }
         }
     }
 
@@ -178,10 +187,20 @@ public class HalResource {
 
         if (!resource.links.isEmpty()) {
             g.writeObjectFieldStart("_links");
-            for (Map.Entry<String, String> entry : resource.links.entrySet()) {
-                g.writeObjectFieldStart(entry.getKey());
-                g.writeStringField("_href", resolveRelativeHref(href, entry.getValue()));
-                g.writeEndObject();
+            for (Map.Entry<String, Collection<String>> linkEntry : resource.links.asMap().entrySet()) {
+                if (linkEntry.getValue().size() == 1) {
+                    g.writeObjectFieldStart(linkEntry.getKey());
+                    g.writeStringField("_href", resolveRelativeHref(href, linkEntry.getValue().iterator().next()));
+                    g.writeEndObject();
+                } else {
+                    g.writeArrayFieldStart(linkEntry.getKey());
+                    for (String url : linkEntry.getValue()) {
+                        g.writeStartObject();
+                        g.writeStringField("_href", resolveRelativeHref(href, url));
+                        g.writeEndObject();
+                    }
+                    g.writeEndArray();
+                }
             }
             g.writeEndObject();
         }
@@ -192,12 +211,24 @@ public class HalResource {
 
         if (!resource.resources.isEmpty()) {
             g.writeObjectFieldStart("_resources");
-            for (Map.Entry<String, HalResource> entry : resource.resources.entrySet()) {
-                g.writeObjectFieldStart(entry.getKey());
-                String subResourceBaseHref = resolveRelativeHref(baseHref, entry.getValue().href);
+            for (Map.Entry<String, Collection<HalResource>> resourceEntry : resource.resources.asMap().entrySet()) {
+                if (resourceEntry.getValue().size() == 1) {
+                    g.writeObjectFieldStart(resourceEntry.getKey());
+                    HalResource subResource = resourceEntry.getValue().iterator().next();
+                    String subResourceBaseHref = resolveRelativeHref(baseHref, subResource.href);
+                    renderJson(subResourceBaseHref, g, subResource);
+                    g.writeEndObject();
+                } else {
+                    g.writeArrayFieldStart(resourceEntry.getKey());
+                    for (HalResource halResource : resourceEntry.getValue()) {
+                        g.writeStartObject();
+                        HalResource subResource = resourceEntry.getValue().iterator().next();
+                        String subResourceBaseHref = resolveRelativeHref(baseHref, subResource.href);
+                        renderJson(subResourceBaseHref, g, subResource);
+                        g.writeEndObject();
 
-                renderJson(subResourceBaseHref, g, entry.getValue());
-                g.writeEndObject();
+                    }
+                }
             }
         }
 
