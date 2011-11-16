@@ -2,16 +2,9 @@ package com.theoryinpractise.halbuilder;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.util.DefaultPrettyPrinter;
-import org.jdom.Element;
-import org.jdom.Namespace;
-import org.jdom.Text;
-import org.jdom.output.Format;
-import org.jdom.output.XMLOutputter;
+import com.theoryinpractise.halbuilder.renderer.JsonHalRenderer;
+import com.theoryinpractise.halbuilder.renderer.XmlHalRenderer;
 
-import java.io.IOException;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -63,7 +56,27 @@ public class HalResource {
         return this;
     }
 
-    private String resolveRelativeHref(String baseHref, String href) {
+    public String getHref() {
+        return href;
+    }
+
+    public Map<String, String> getNamespaces() {
+        return namespaces;
+    }
+
+    public Multimap<String, String> getLinks() {
+        return links;
+    }
+
+    public Map<String, Object> getProperties() {
+        return properties;
+    }
+
+    public Multimap<String, HalResource> getResources() {
+        return resources;
+    }
+
+    public static String resolveRelativeHref(String baseHref, String href) {
         try {
             if (href.startsWith("?")) {
                 return new URL(baseHref + href).toExternalForm();
@@ -75,49 +88,6 @@ public class HalResource {
         } catch (MalformedURLException e) {
             throw new HalResourceException(e.getMessage());
         }
-    }
-
-    private Element renderElement(String baseHref, HalResource resource) {
-
-        // Create the root element
-        Element resourceElement = new Element("resource");
-        //add an attribute to the root element
-        resourceElement.setAttribute("href", baseHref);
-        for (Map.Entry<String, String> entry : resource.namespaces.entrySet()) {
-            resourceElement.addNamespaceDeclaration(Namespace.getNamespace(entry.getKey(), resolveRelativeHref(baseHref, entry.getValue())));
-        }
-
-        //add a comment
-//        resourceElement.addContent(new Comment("Description of a resource"));
-
-        // add links
-        for (Map.Entry<String, Collection<String>> linkEntry : resource.links.asMap().entrySet()) {
-            for (String url : linkEntry.getValue()) {
-                Element linkElement = new Element("link");
-                linkElement.setAttribute("rel", linkEntry.getKey());
-                linkElement.setAttribute("href", resolveRelativeHref(baseHref, url));
-                resourceElement.addContent(linkElement);
-            }
-        }
-
-        // add properties
-        for (Map.Entry<String, Object> entry : resource.properties.entrySet()) {
-            Element propertyElement = new Element(entry.getKey());
-            propertyElement.setContent(new Text(entry.getValue().toString()));
-            resourceElement.addContent(propertyElement);
-        }
-
-        // add subresources
-        for (Map.Entry<String, Collection<HalResource>> resourceEntry : resource.resources.asMap().entrySet()) {
-            for (HalResource halResource : resourceEntry.getValue()) {
-                String subResourceBaseHref = resolveRelativeHref(baseHref, halResource.href);
-                Element subResourceElement = renderElement(subResourceBaseHref, halResource);
-                subResourceElement.setAttribute("rel", resourceEntry.getKey());
-                resourceElement.addContent(subResourceElement);
-            }
-        }
-
-        return resourceElement;
     }
 
     public HalResource withBaseHref(String baseHref) {
@@ -153,91 +123,18 @@ public class HalResource {
     }
 
     public String renderJson() {
-        validateNamespaces(this);
-
-        StringWriter sw = new StringWriter();
-        JsonFactory f = new JsonFactory();
-        f.enable(JsonGenerator.Feature.QUOTE_FIELD_NAMES);
-
-        try {
-            JsonGenerator g = f.createJsonGenerator(sw);
-            g.setPrettyPrinter(new DefaultPrettyPrinter());
-
-            g.writeStartObject();
-            renderJson(href, g, this);
-            g.writeEndObject();
-            g.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return sw.toString();
-    }
-
-    private void renderJson(String baseHref, JsonGenerator g, HalResource resource) throws IOException {
-
-        g.writeStringField("_href", resolveRelativeHref(href, resource.href));
-
-        if (!resource.namespaces.isEmpty()) {
-            g.writeObjectFieldStart("_curies");
-            for (Map.Entry<String, String> entry : resource.namespaces.entrySet()) {
-                g.writeStringField(entry.getKey(), resolveRelativeHref(baseHref, entry.getValue()));
-            }
-            g.writeEndObject();
-        }
-
-        if (!resource.links.isEmpty()) {
-            g.writeObjectFieldStart("_links");
-            for (Map.Entry<String, Collection<String>> linkEntry : resource.links.asMap().entrySet()) {
-                if (linkEntry.getValue().size() == 1) {
-                    g.writeObjectFieldStart(linkEntry.getKey());
-                    g.writeStringField("_href", resolveRelativeHref(href, linkEntry.getValue().iterator().next()));
-                    g.writeEndObject();
-                } else {
-                    g.writeArrayFieldStart(linkEntry.getKey());
-                    for (String url : linkEntry.getValue()) {
-                        g.writeStartObject();
-                        g.writeStringField("_href", resolveRelativeHref(href, url));
-                        g.writeEndObject();
-                    }
-                    g.writeEndArray();
-                }
-            }
-            g.writeEndObject();
-        }
-
-        for (Map.Entry<String, Object> entry : resource.properties.entrySet()) {
-            g.writeObjectField(entry.getKey(), entry.getValue());
-        }
-
-        if (!resource.resources.isEmpty()) {
-            g.writeObjectFieldStart("_resources");
-            for (Map.Entry<String, Collection<HalResource>> resourceEntry : resource.resources.asMap().entrySet()) {
-                if (resourceEntry.getValue().size() == 1) {
-                    g.writeObjectFieldStart(resourceEntry.getKey());
-                    HalResource subResource = resourceEntry.getValue().iterator().next();
-                    String subResourceBaseHref = resolveRelativeHref(baseHref, subResource.href);
-                    renderJson(subResourceBaseHref, g, subResource);
-                    g.writeEndObject();
-                } else {
-                    g.writeArrayFieldStart(resourceEntry.getKey());
-                    for (HalResource halResource : resourceEntry.getValue()) {
-                        g.writeStartObject();
-                        HalResource subResource = resourceEntry.getValue().iterator().next();
-                        String subResourceBaseHref = resolveRelativeHref(baseHref, subResource.href);
-                        renderJson(subResourceBaseHref, g, subResource);
-                        g.writeEndObject();
-
-                    }
-                }
-            }
-        }
-
+        return renderJson(new JsonHalRenderer());
     }
 
     public String renderXml() {
+        return renderJson(new XmlHalRenderer());
+    }
+
+    private String renderJson(final HalRenderer renderer) {
         validateNamespaces(this);
-        Element element = renderElement(href, this);
-        XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
-        return outputter.outputString(element);
+
+        StringWriter sw = new StringWriter();
+        renderer.render(this, sw);
+        return sw.toString();
     }
 }
