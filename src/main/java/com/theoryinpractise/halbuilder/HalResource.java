@@ -5,7 +5,14 @@ import com.google.common.collect.Multimap;
 import com.theoryinpractise.halbuilder.renderer.JsonHalRenderer;
 import com.theoryinpractise.halbuilder.renderer.XmlHalRenderer;
 
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.io.StringWriter;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
@@ -41,6 +48,39 @@ public class HalResource {
         }
         properties.put(name, value);
         return this;
+    }
+
+    public HalResource withBean(Object value) {
+        try {
+            BeanInfo beanInfo = Introspector.getBeanInfo(value.getClass());
+            for (PropertyDescriptor pd : beanInfo.getPropertyDescriptors()) {
+                if (!"class".equals(pd.getName())) {
+                    withProperty(pd.getName(), pd.getReadMethod().invoke(value));
+                }
+            }
+
+        } catch (IntrospectionException e) {
+            throw new RuntimeException(e);
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+        return this;
+    }
+
+    public HalResource withFields(Object value) {
+        try {
+            for (Field field : value.getClass().getDeclaredFields()) {
+                if (Modifier.isPublic(field.getModifiers())) {
+                    withProperty(field.getName(), field.get(value));
+                }
+            }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+        return this;
+
     }
 
     public HalResource withNamespace(String namespace, String url) {
