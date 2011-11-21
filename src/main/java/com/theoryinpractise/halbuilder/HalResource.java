@@ -83,6 +83,14 @@ public class HalResource {
 
     }
 
+    public HalResource withFieldBasedSubresource(String rel, String href, Object o) {
+        return withSubresource(rel, HalResource.newHalResource(href).withFields(o));
+    }
+
+    public HalResource withBeanBasedSubresource(String rel, String href, Object o) {
+        return withSubresource(rel, HalResource.newHalResource(href).withBean(o));
+    }
+
     public HalResource withNamespace(String namespace, String url) {
         if (namespaces.containsKey(namespace)) {
             throw new HalResourceException(format("Duplicate namespace '%s' found for resource %s", namespace, href));
@@ -177,4 +185,5 @@ public class HalResource {
         renderer.render(this, sw);
         return sw.toString();
     }
+
 }
