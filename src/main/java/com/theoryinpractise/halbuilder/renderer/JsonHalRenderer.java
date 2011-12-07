@@ -15,6 +15,11 @@ import static com.theoryinpractise.halbuilder.HalResource.resolveRelativeHref;
 
 public class JsonHalRenderer implements HalRenderer {
 
+    public static final String HREF = "_href";
+    public static final String CURIES = "_curies";
+    public static final String LINKS = "_links";
+    public static final String EMBEDDED = "_embedded";
+
     public void render(HalResource resource, Writer writer) {
 
         JsonFactory f = new JsonFactory();
@@ -36,10 +41,10 @@ public class JsonHalRenderer implements HalRenderer {
 
     private void renderJson(String baseHref, JsonGenerator g, HalResource resource) throws IOException {
 
-        g.writeStringField("_href", resolveRelativeHref(baseHref, resource.getHref()));
+        g.writeStringField(HREF, resolveRelativeHref(baseHref, resource.getHref()));
 
         if (!resource.getNamespaces().isEmpty()) {
-            g.writeObjectFieldStart("_curies");
+            g.writeObjectFieldStart(CURIES);
             for (Map.Entry<String, String> entry : resource.getNamespaces().entrySet()) {
                 g.writeStringField(entry.getKey(), resolveRelativeHref(baseHref, entry.getValue()));
             }
@@ -47,17 +52,17 @@ public class JsonHalRenderer implements HalRenderer {
         }
 
         if (!resource.getLinks().isEmpty()) {
-            g.writeObjectFieldStart("_links");
+            g.writeObjectFieldStart(LINKS);
             for (Map.Entry<String, Collection<String>> linkEntry : resource.getLinks().asMap().entrySet()) {
                 if (linkEntry.getValue().size() == 1) {
                     g.writeObjectFieldStart(linkEntry.getKey());
-                    g.writeStringField("_href", resolveRelativeHref(baseHref, linkEntry.getValue().iterator().next()));
+                    g.writeStringField(HREF, resolveRelativeHref(baseHref, linkEntry.getValue().iterator().next()));
                     g.writeEndObject();
                 } else {
                     g.writeArrayFieldStart(linkEntry.getKey());
                     for (String url : linkEntry.getValue()) {
                         g.writeStartObject();
-                        g.writeStringField("_href", resolveRelativeHref(baseHref, url));
+                        g.writeStringField(HREF, resolveRelativeHref(baseHref, url));
                         g.writeEndObject();
                     }
                     g.writeEndArray();
@@ -71,7 +76,7 @@ public class JsonHalRenderer implements HalRenderer {
         }
 
         if (!resource.getResources().isEmpty()) {
-            g.writeObjectFieldStart("_embedded");
+            g.writeObjectFieldStart(EMBEDDED);
             for (Map.Entry<String, Collection<HalResource>> resourceEntry : resource.getResources().asMap().entrySet()) {
                 if (resourceEntry.getValue().size() == 1) {
                     g.writeObjectFieldStart(resourceEntry.getKey());
