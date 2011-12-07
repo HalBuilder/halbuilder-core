@@ -28,7 +28,6 @@ public class JsonHalRenderer implements HalRenderer {
         try {
             JsonGenerator g = f.createJsonGenerator(writer);
             g.setPrettyPrinter(new DefaultPrettyPrinter());
-
             g.writeStartObject();
             renderJson(resource.getHref(), g, resource);
             g.writeEndObject();
