@@ -71,7 +71,7 @@ public class JsonHalRenderer implements HalRenderer {
         }
 
         if (!resource.getResources().isEmpty()) {
-            g.writeObjectFieldStart("_resources");
+            g.writeObjectFieldStart("_embedded");
             for (Map.Entry<String, Collection<HalResource>> resourceEntry : resource.getResources().asMap().entrySet()) {
                 if (resourceEntry.getValue().size() == 1) {
                     g.writeObjectFieldStart(resourceEntry.getKey());

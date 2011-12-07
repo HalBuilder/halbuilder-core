@@ -12,7 +12,7 @@
       "_href" : "https://example.com/api/customer/1234"
     }
   },
-  "_resources" : {
+  "_embedded" : {
     "ns:user role:admin" : {
       "_href" : "https://example.com/user/11",
       "age" : 32,
