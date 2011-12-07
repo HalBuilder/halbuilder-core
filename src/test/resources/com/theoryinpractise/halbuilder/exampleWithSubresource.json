@@ -1,0 +1,24 @@
+{
+  "_href" : "https://example.com/api/customer/123456",
+  "_curies" : {
+    "ns" : "https://example.com/apidocs/accounts",
+    "role" : "https://example.com/apidocs/roles"
+  },
+  "_links" : {
+    "ns:users" : {
+      "_href" : "https://example.com/api/customer/123456?users"
+    },
+    "ns:parent" : {
+      "_href" : "https://example.com/api/customer/1234"
+    }
+  },
+  "_resources" : {
+    "ns:user role:admin" : {
+      "_href" : "https://example.com/user/11",
+      "age" : 32,
+      "expired" : false,
+      "id" : 11,
+      "name" : "Example User"
+    }
+  }
+}

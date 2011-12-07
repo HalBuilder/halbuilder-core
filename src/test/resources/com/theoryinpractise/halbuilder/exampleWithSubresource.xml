@@ -1,0 +1,10 @@
+<resource xmlns:ns="https://example.com/apidocs/accounts" xmlns:role="https://example.com/apidocs/roles" href="https://example.com/api/customer/123456">
+  <link rel="ns:users" href="https://example.com/api/customer/123456?users" />
+  <link rel="ns:parent" href="https://example.com/api/customer/1234" />
+  <resource href="https://example.com/user/11" rel="ns:user role:admin">
+    <age>32</age>
+    <expired>false</expired>
+    <id>11</id>
+    <name>Example User</name>
+  </resource>
+</resource>

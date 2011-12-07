@@ -1,7 +1,9 @@
 package com.theoryinpractise.halbuilder;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Ordering;
 import com.theoryinpractise.halbuilder.renderer.JsonHalRenderer;
 import com.theoryinpractise.halbuilder.renderer.XmlHalRenderer;
 
@@ -18,15 +20,16 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import static java.lang.String.format;
 
 public class HalResource {
 
     private String href;
-    private Map<String, String> namespaces = new HashMap<String, String>();
+    private TreeMap<String, String> namespaces = Maps.newTreeMap(Ordering.usingToString());
     private Multimap<String, String> links = ArrayListMultimap.create();
-    private Map<String, Object> properties = new HashMap<String, Object>();
+    private TreeMap<String, Object> properties = Maps.newTreeMap(Ordering.usingToString());
     private Multimap<String, HalResource> resources = ArrayListMultimap.create();
 
     private HalResource(String href) {
