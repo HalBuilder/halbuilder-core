@@ -12,7 +12,7 @@ public class HalReaderTest {
     @Test
     public void testXmlReader() {
 
-        HalResource halResource = new XmlHalReader().read(new InputStreamReader(HalReaderTest.class.getResourceAsStream("example.xml")));
+        HalResource halResource = HalResource.newHalResource(new InputStreamReader(HalReaderTest.class.getResourceAsStream("example.xml")));
 
         assertThat(halResource.getHref()).isEqualTo("https://example.com/api/customer/123456");
         assertThat(halResource.getNamespaces()).hasSize(2);
@@ -24,7 +24,7 @@ public class HalReaderTest {
     @Test
     public void testSubXmlReader() {
 
-        HalResource halResource = new XmlHalReader().read(new InputStreamReader(HalReaderTest.class.getResourceAsStream("exampleWithSubresource.xml")));
+        HalResource halResource = HalResource.newHalResource(new InputStreamReader(HalReaderTest.class.getResourceAsStream("exampleWithSubresource.xml")));
 
         assertThat(halResource.getHref()).isEqualTo("https://example.com/api/customer/123456");
         assertThat(halResource.getNamespaces()).hasSize(2);

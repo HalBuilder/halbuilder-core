@@ -4,6 +4,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
+import com.theoryinpractise.halbuilder.reader.XmlHalReader;
 import com.theoryinpractise.halbuilder.renderer.JsonHalRenderer;
 import com.theoryinpractise.halbuilder.renderer.XmlHalRenderer;
 
@@ -11,6 +12,8 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.io.IOException;
+import java.io.Reader;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -18,7 +21,6 @@ import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -38,6 +40,20 @@ public class HalResource {
 
     public static HalResource newHalResource(String href) {
         return new HalResource(href);
+    }
+
+    public static HalResource newHalResource(Reader reader) {
+        String halSource = null;
+        try {
+            halSource = com.google.common.io.CharStreams.toString(reader);
+            if (halSource.startsWith("<")) {
+                return new XmlHalReader().read(halSource);
+            }
+
+            throw new IllegalArgumentException("Unknown resource format");
+        } catch (IOException e) {
+            throw new HalResourceException(e);
+        }
     }
 
     public HalResource withLink(String rel, String url) {

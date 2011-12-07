@@ -8,13 +8,13 @@ import org.jdom.input.SAXBuilder;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.io.StringReader;
 import java.util.List;
 
 public class XmlHalReader implements HalReader {
-    public HalResource read(Reader reader) {
-
+    public HalResource read(String source) {
         try {
-            Document d = new SAXBuilder().build(reader);
+            Document d = new SAXBuilder().build(new StringReader(source));
             Element root = d.getRootElement();
             return readResource(root);
         } catch (JDOMException e) {
@@ -22,7 +22,6 @@ public class XmlHalReader implements HalReader {
         } catch (IOException e) {
             throw new HalResourceException(e);
         }
-
     }
 
     private HalResource readResource(Element root) {
