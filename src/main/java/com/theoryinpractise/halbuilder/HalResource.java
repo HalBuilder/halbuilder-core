@@ -141,6 +141,11 @@ public class HalResource {
         }
     }
 
+    public HalResource withHref(String href) {
+        this.href = href;
+        return this;
+    }
+
     public HalResource withBaseHref(String baseHref) {
         try {
             this.href = new URL(new URL(baseHref), this.href).toExternalForm();
