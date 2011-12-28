@@ -1,6 +1,7 @@
 package com.theoryinpractise.halbuilder;
 
 import com.google.common.base.Function;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import javax.annotation.Nullable;
@@ -25,15 +26,36 @@ public class InterfaceSatisfactionTest {
         Integer getJobId();
     }
 
-    @Test
-    public void testSimpleInterfaceSatisfaction() {
+    public static interface ISimpleJob {
+        Integer jobId();
+    }
+
+    @DataProvider
+    public Object[][] providerSatisfactionData() {
+        return new Object[][] {
+                {IPerson.class, true},
+                {INamed.class, true},
+                {IJob.class, false},
+                {ISimpleJob.class, false},
+        };
+    }
+
+    @Test(dataProvider = "providerSatisfactionData")
+    public void testSimpleInterfaceSatisfaction(Class<?> aClass, boolean shouldBeSatisfied) {
 
         HalResource halResource = HalResource.newHalResource(new InputStreamReader(HalReaderTest.class.getResourceAsStream("example.xml")));
+        assertThat(halResource.isSatisfiedBy(aClass)).isEqualTo(shouldBeSatisfied);
 
-        assertThat(halResource.isSatisfiedBy(IPerson.class)).isTrue();
-        assertThat(halResource.isSatisfiedBy(INamed.class)).isTrue();
-        assertThat(halResource.isSatisfiedBy(IJob.class)).isFalse();
+    }
 
+    @Test
+    public void testClassRendering() {
+        HalResource halResource = HalResource.newHalResource(new InputStreamReader(HalReaderTest.class.getResourceAsStream("example.xml")));
+
+        assertThat(halResource.renderClass(INamed.class).get().name()).isEqualTo("Example Resource");
+        assertThat(halResource.renderClass(IPerson.class).get().getName()).isEqualTo("Example Resource");
+        assertThat(halResource.renderClass(ISimpleJob.class).isPresent()).isFalse();
+        assertThat(halResource.renderClass(IJob.class).isPresent()).isFalse();
     }
 
     @Test

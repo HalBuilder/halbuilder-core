@@ -218,6 +218,12 @@ public class HalResource {
         return sw.toString();
     }
 
+    private String derivePropertyNameFromMethod(Method method) {
+        return method.getName().startsWith("get")
+                ? method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4)
+                : method.getName();
+    }
+
     /**
      * Test whether the HalResource in its current state satisfies the provided interface.
      *
@@ -227,16 +233,11 @@ public class HalResource {
     public <T> boolean isSatisfiedBy(Class<T> anInterface) {
         Preconditions.checkArgument(anInterface.isInterface(), "Provided class MUST be an interface.");
 
-        BeanInfo beanInfo = null;
-        try {
-            beanInfo = Introspector.getBeanInfo(anInterface);
-            for (PropertyDescriptor pd : beanInfo.getPropertyDescriptors()) {
-                if (!"class".equals(pd.getName()) && !properties.containsKey(pd.getName())) {
-                    return false;
-                }
+        for (Method method : anInterface.getDeclaredMethods()) {
+            String propertyName = derivePropertyNameFromMethod(method);
+            if (!"class".equals(propertyName) && !properties.containsKey(propertyName)) {
+                return false;
             }
-        } catch (IntrospectionException e) {
-            Throwables.propagate(e);
         }
 
         return true;
@@ -262,9 +263,7 @@ public class HalResource {
             T proxy = (T) Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{anInterface}, new InvocationHandler() {
                 public Object invoke(Object o, Method method, Object[] objects) throws Throwable {
 
-                    String propertyName = method.getName().startsWith("get")
-                            ? method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4)
-                            : method.getName();
+                    String propertyName = derivePropertyNameFromMethod(method);
 
                     Object propertyValue = HalResource.this.getProperties().get(propertyName);
 
