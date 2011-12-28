@@ -1,9 +1,14 @@
 package com.theoryinpractise.halbuilder;
 
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
+import com.google.common.io.CharStreams;
 import com.theoryinpractise.halbuilder.reader.XmlHalReader;
 import com.theoryinpractise.halbuilder.renderer.JsonHalRenderer;
 import com.theoryinpractise.halbuilder.renderer.XmlHalRenderer;
@@ -16,8 +21,11 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
@@ -45,7 +53,7 @@ public class HalResource {
     public static HalResource newHalResource(Reader reader) {
         String halSource = null;
         try {
-            halSource = com.google.common.io.CharStreams.toString(reader);
+            halSource = CharStreams.toString(reader);
             if (halSource.startsWith("<")) {
                 return new XmlHalReader().read(halSource);
             }
@@ -208,6 +216,68 @@ public class HalResource {
         StringWriter sw = new StringWriter();
         renderer.render(this, sw);
         return sw.toString();
+    }
+
+    /**
+     * Test whether the HalResource in its current state satisfies the provided interface.
+     *
+     * @param anInterface The interface we wish to check
+     * @return Is that HalResource structurally like the interface?
+     */
+    public <T> boolean isSatisfiedBy(Class<T> anInterface) {
+        Preconditions.checkArgument(anInterface.isInterface(), "Provided class MUST be an interface.");
+
+        BeanInfo beanInfo = null;
+        try {
+            beanInfo = Introspector.getBeanInfo(anInterface);
+            for (PropertyDescriptor pd : beanInfo.getPropertyDescriptors()) {
+                if (!"class".equals(pd.getName()) && !properties.containsKey(pd.getName())) {
+                    return false;
+                }
+            }
+        } catch (IntrospectionException e) {
+            Throwables.propagate(e);
+        }
+
+        return true;
+
+    }
+
+    public <T, V> Optional<V> ifSatisfiedBy(Class<T> aClass, Function<T, V> function) {
+        Optional<T> proxy = renderClass(aClass);
+        if (proxy.isPresent()) {
+            return Optional.of(function.apply(proxy.get()));
+        }
+        return Optional.absent();
+    }
+
+    /**
+     * Renders the current HalResource as a proxy to the provider interface
+     *
+     * @param anInterface The interface we wish to proxy the resource as
+     * @return A Guava Optional of the rendered class, this will be absent if the interface doesn't satisfy the interface
+     */
+    public <T> Optional<T> renderClass(Class<T> anInterface) {
+        if (isSatisfiedBy(anInterface)) {
+            T proxy = (T) Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{anInterface}, new InvocationHandler() {
+                public Object invoke(Object o, Method method, Object[] objects) throws Throwable {
+
+                    String propertyName = method.getName().startsWith("get")
+                            ? method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4)
+                            : method.getName();
+
+                    Object propertyValue = HalResource.this.getProperties().get(propertyName);
+
+                    Class<?> returnType = method.getReturnType();
+                    Object returnValue = returnType.getConstructor(propertyValue.getClass()).newInstance(propertyValue);
+
+                    return returnValue;
+                }
+            });
+            return Optional.of(proxy);
+        } else {
+            return Optional.absent();
+        }
     }
 
 }
