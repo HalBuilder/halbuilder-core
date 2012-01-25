@@ -18,7 +18,8 @@
       "age" : 32,
       "expired" : false,
       "id" : 11,
-      "name" : "Example User"
+      "name" : "Example User",
+      "optional" : true
     }
   }
 }

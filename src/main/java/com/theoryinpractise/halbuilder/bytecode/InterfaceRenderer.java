@@ -2,8 +2,8 @@ package com.theoryinpractise.halbuilder.bytecode;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.theoryinpractise.halbuilder.HalRenderer;
-import com.theoryinpractise.halbuilder.HalResource;
+import com.theoryinpractise.halbuilder.Renderer;
+import com.theoryinpractise.halbuilder.ReadableResource;
 
 import java.io.Writer;
 import java.lang.reflect.InvocationHandler;
@@ -15,7 +15,7 @@ import static com.theoryinpractise.halbuilder.bytecode.InterfaceSupport.derivePr
 /**
  * Java Interface based "renderer", this will render the resource as a Proxy to a Java interface.
  */
-public class InterfaceRenderer<T> implements HalRenderer<T> {
+public class InterfaceRenderer<T> implements Renderer<T> {
 
     private Class<T> anInterface;
 
@@ -28,10 +28,10 @@ public class InterfaceRenderer<T> implements HalRenderer<T> {
         this.anInterface = anInterface;
     }
 
-    public Optional<T> render(final HalResource resource, Writer writer) {
+    public Optional<T> render(final ReadableResource resource, Writer writer) {
         Preconditions.checkArgument(writer == null, "Writer argument should be null for " + InterfaceRenderer.class.getName());
 
-        if (resource.isSatisfiedBy(InterfaceContract.createInterfaceContract(anInterface))) {
+        if (resource.isSatisfiedBy(InterfaceContract.newInterfaceContract(anInterface))) {
             T proxy = (T) Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{anInterface}, new InvocationHandler() {
                 public Object invoke(Object o, Method method, Object[] objects) throws Throwable {
 

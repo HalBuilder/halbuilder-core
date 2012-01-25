@@ -1,8 +1,8 @@
 package com.theoryinpractise.halbuilder.bytecode;
 
 import com.google.common.base.Preconditions;
-import com.theoryinpractise.halbuilder.HalContract;
-import com.theoryinpractise.halbuilder.HalResource;
+import com.theoryinpractise.halbuilder.Contract;
+import com.theoryinpractise.halbuilder.ReadableResource;
 
 import java.lang.reflect.Method;
 
@@ -11,11 +11,11 @@ import static com.theoryinpractise.halbuilder.bytecode.InterfaceSupport.derivePr
 /**
  * A Java Interface matching contract
  */
-public class InterfaceContract<T> implements HalContract {
+public class InterfaceContract<T> implements Contract {
 
     private Class<T> anInterface;
 
-    public static <T> InterfaceContract<T> createInterfaceContract(Class<T> anInterface) {
+    public static <T> InterfaceContract<T> newInterfaceContract(Class<T> anInterface) {
         return new InterfaceContract<T>(anInterface);
     }
 
@@ -24,7 +24,7 @@ public class InterfaceContract<T> implements HalContract {
         this.anInterface = anInterface;
     }
 
-    public boolean isSatisfiedBy(HalResource resource) {
+    public boolean isSatisfiedBy(ReadableResource resource) {
 
         for (Method method : anInterface.getDeclaredMethods()) {
             String propertyName = derivePropertyNameFromMethod(method);

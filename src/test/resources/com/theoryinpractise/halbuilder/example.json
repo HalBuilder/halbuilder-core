@@ -15,5 +15,6 @@
   "age" : 33,
   "expired" : false,
   "id" : 123456,
-  "name" : "Example Resource"
+  "name" : "Example Resource",
+  "optional" : true
 }
