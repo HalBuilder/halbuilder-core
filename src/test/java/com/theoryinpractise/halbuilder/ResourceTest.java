@@ -4,32 +4,34 @@ import org.testng.annotations.Test;
 
 import static org.fest.assertions.Assertions.assertThat;
 
-public class HalResourceTest {
+public class ResourceTest {
 
-    @Test(expectedExceptions = HalResourceException.class)
+    private ResourceFactory resourceFactory = new ResourceFactory();
+
+    @Test(expectedExceptions = ResourceException.class)
     public void testUndeclaredLinkNamespace() {
-        HalResource.newHalResource("http://localhost/test")
+        resourceFactory.newHalResource("http://localhost/test")
                 .withLink("td:test", "http://localhost/test/2")
                 .renderXml();
     }
 
-    @Test(expectedExceptions = HalResourceException.class)
+    @Test(expectedExceptions = ResourceException.class)
     public void testUndeclaredResourceNamespace() {
-        HalResource.newHalResource("http://localhost/test")
-                .withSubresource("td:test", HalResource.newHalResource("/"))
+        resourceFactory.newHalResource("http://localhost/test")
+                .withSubresource("td:test", resourceFactory.newHalResource("/"))
                 .renderXml();
     }
 
-    @Test(expectedExceptions = HalResourceException.class)
+    @Test(expectedExceptions = ResourceException.class)
     public void testUndeclaredResourceLinkNamespace() {
-        HalResource.newHalResource("http://localhost/test")
-                .withSubresource("test", HalResource.newHalResource("/").withLink("td:test", "/"))
+        resourceFactory.newHalResource("http://localhost/test")
+                .withSubresource("test", resourceFactory.newHalResource("/").withLink("td:test", "/"))
                 .renderXml();
     }
 
-    @Test(expectedExceptions = HalResourceException.class)
+    @Test(expectedExceptions = ResourceException.class)
     public void testDuplicatePropertyDefinitions() {
-        HalResource.newHalResource("http://localhost/test")
+        resourceFactory.newHalResource("http://localhost/test")
                 .withProperty("name", "Example User")
                 .withProperty("name", "Example User")
                 .renderXml();
@@ -37,7 +39,7 @@ public class HalResourceTest {
 
     @Test
     public void testHalResourceHrefShouldBeFullyQualified() {
-        String xml = HalResource.newHalResource("/test")
+        String xml = resourceFactory.newHalResource("/test")
                 .withBaseHref("http://localhost")
                 .renderXml();
 
@@ -46,7 +48,7 @@ public class HalResourceTest {
 
     @Test
     public void testRelativeLinksRenderFullyQualified() {
-        String xml = HalResource.newHalResource("/")
+        String xml = resourceFactory.newHalResource("/")
                 .withLink("test", "/test")
                 .withBaseHref("http://localhost")
                 .renderXml();
@@ -56,8 +58,8 @@ public class HalResourceTest {
 
     @Test
     public void testRelativeResourceRenderFullyQualified() {
-        String xml = HalResource.newHalResource("/")
-                .withSubresource("test", HalResource.newHalResource("subresource"))
+        String xml = resourceFactory.newHalResource("/")
+                .withSubresource("test", resourceFactory.newHalResource("subresource"))
                 .withBaseHref("http://localhost")
                 .renderXml();
 
@@ -66,8 +68,8 @@ public class HalResourceTest {
 
     @Test
     public void testRelativeResourceLinksRenderFullyQualified() {
-        String xml = HalResource.newHalResource("/")
-                .withSubresource("test", HalResource
+        String xml = resourceFactory.newHalResource("/")
+                .withSubresource("test", resourceFactory
                         .newHalResource("subresource/")
                         .withLink("sub", "/sublink1")
                         .withLink("sub2", "sublink2"))

@@ -1,7 +1,8 @@
-package com.theoryinpractise.halbuilder.renderer;
+package com.theoryinpractise.halbuilder.json;
 
-import com.theoryinpractise.halbuilder.HalRenderer;
-import com.theoryinpractise.halbuilder.HalResource;
+import com.google.common.base.Optional;
+import com.theoryinpractise.halbuilder.Renderer;
+import com.theoryinpractise.halbuilder.ReadableResource;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.util.DefaultPrettyPrinter;
@@ -11,16 +12,16 @@ import java.io.Writer;
 import java.util.Collection;
 import java.util.Map;
 
-import static com.theoryinpractise.halbuilder.HalResource.resolveRelativeHref;
+import static com.theoryinpractise.halbuilder.resources.MutableResource.resolveRelativeHref;
 
-public class JsonHalRenderer implements HalRenderer {
+public class JsonRenderer<T> implements Renderer<T> {
 
     public static final String HREF = "_href";
     public static final String CURIES = "_curies";
     public static final String LINKS = "_links";
     public static final String EMBEDDED = "_embedded";
 
-    public void render(HalResource resource, Writer writer) {
+    public Optional<T> render(ReadableResource resource, Writer writer) {
 
         JsonFactory f = new JsonFactory();
         f.enable(JsonGenerator.Feature.QUOTE_FIELD_NAMES);
@@ -29,20 +30,22 @@ public class JsonHalRenderer implements HalRenderer {
             JsonGenerator g = f.createJsonGenerator(writer);
             g.setPrettyPrinter(new DefaultPrettyPrinter());
             g.writeStartObject();
-            renderJson(resource.getHref(), g, resource);
+            renderJson(resource.getHref(), g, resource, false);
             g.writeEndObject();
             g.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
+        return Optional.absent();
     }
 
-    private void renderJson(String baseHref, JsonGenerator g, HalResource resource) throws IOException {
+    private void renderJson(String baseHref, JsonGenerator g, ReadableResource resource, boolean embedded) throws IOException {
 
         g.writeStringField(HREF, resolveRelativeHref(baseHref, resource.getHref()));
 
-        if (!resource.getNamespaces().isEmpty()) {
+
+        // Only include namespaces when not embedded
+        if (!embedded && !resource.getNamespaces().isEmpty()) {
             g.writeObjectFieldStart(CURIES);
             for (Map.Entry<String, String> entry : resource.getNamespaces().entrySet()) {
                 g.writeStringField(entry.getKey(), resolveRelativeHref(baseHref, entry.getValue()));
@@ -76,20 +79,20 @@ public class JsonHalRenderer implements HalRenderer {
 
         if (!resource.getResources().isEmpty()) {
             g.writeObjectFieldStart(EMBEDDED);
-            for (Map.Entry<String, Collection<HalResource>> resourceEntry : resource.getResources().asMap().entrySet()) {
+            for (Map.Entry<String, Collection<ReadableResource>> resourceEntry : resource.getResources().asMap().entrySet()) {
                 if (resourceEntry.getValue().size() == 1) {
                     g.writeObjectFieldStart(resourceEntry.getKey());
-                    HalResource subResource = resourceEntry.getValue().iterator().next();
+                    ReadableResource subResource = resourceEntry.getValue().iterator().next();
                     String subResourceBaseHref = resolveRelativeHref(baseHref, subResource.getHref());
-                    renderJson(subResourceBaseHref, g, subResource);
+                    renderJson(subResourceBaseHref, g, subResource, true);
                     g.writeEndObject();
                 } else {
                     g.writeArrayFieldStart(resourceEntry.getKey());
-                    for (HalResource halResource : resourceEntry.getValue()) {
+                    for (ReadableResource halResource : resourceEntry.getValue()) {
                         g.writeStartObject();
-                        HalResource subResource = resourceEntry.getValue().iterator().next();
+                        ReadableResource subResource = resourceEntry.getValue().iterator().next();
                         String subResourceBaseHref = resolveRelativeHref(baseHref, subResource.getHref());
-                        renderJson(subResourceBaseHref, g, subResource);
+                        renderJson(subResourceBaseHref, g, subResource, true);
                         g.writeEndObject();
                     }
                 }

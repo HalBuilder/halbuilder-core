@@ -9,7 +9,12 @@ import java.io.IOException;
 
 import static org.fest.assertions.Assertions.assertThat;
 
-public class HalRenderingTest {
+public class RenderingTest {
+
+    private ResourceFactory resourceFactory = new ResourceFactory()
+            .withBaseHref("https://example.com/api/")
+            .withNamespace("ns", "/apidocs/accounts")
+            .withNamespace("role", "/apidocs/roles");
 
     private String exampleXml;
     private String exampleJson;
@@ -18,22 +23,19 @@ public class HalRenderingTest {
 
     @BeforeMethod
     public void setup() throws IOException {
-        exampleXml = Resources.toString(HalRenderingTest.class.getResource("example.xml"), Charsets.UTF_8)
+        exampleXml = Resources.toString(RenderingTest.class.getResource("example.xml"), Charsets.UTF_8)
                 .trim().replaceAll("\n", "\r\n");
-        exampleJson = Resources.toString(HalRenderingTest.class.getResource("example.json"), Charsets.UTF_8)
+        exampleJson = Resources.toString(RenderingTest.class.getResource("example.json"), Charsets.UTF_8)
                 .trim();
-        exampleWithSubresourceXml = Resources.toString(HalRenderingTest.class.getResource("exampleWithSubresource.xml"), Charsets.UTF_8)
+        exampleWithSubresourceXml = Resources.toString(RenderingTest.class.getResource("exampleWithSubresource.xml"), Charsets.UTF_8)
                 .trim().replaceAll("\n", "\r\n");
-        exampleWithSubresourceJson = Resources.toString(HalRenderingTest.class.getResource("exampleWithSubresource.json"), Charsets.UTF_8)
+        exampleWithSubresourceJson = Resources.toString(RenderingTest.class.getResource("exampleWithSubresource.json"), Charsets.UTF_8)
                 .trim();
     }
 
 
-    private HalResource newBaseResource(final String href) {
-        return HalResource.newHalResource(href)
-                .withBaseHref("https://example.com/api/")
-                .withNamespace("ns", "/apidocs/accounts")
-                .withNamespace("role", "/apidocs/roles")
+    private Resource newBaseResource(final String href) {
+        return resourceFactory.newHalResource(href)
                 .withLink("ns:parent", "/api/customer/1234");
     }
 
@@ -41,11 +43,12 @@ public class HalRenderingTest {
     @Test
     public void testCustomerHal() {
 
-        HalResource party = newBaseResource("customer/123456")
+        ReadableResource party = newBaseResource("customer/123456")
                 .withLink("ns:users", "?users")
                 .withProperty("id", 123456)
                 .withProperty("age", 33)
                 .withProperty("name", "Example Resource")
+                .withProperty("optional", Boolean.TRUE)
                 .withProperty("expired", Boolean.FALSE);
 
         assertThat(party.renderXml()).isEqualTo(exampleXml);
@@ -57,7 +60,7 @@ public class HalRenderingTest {
     @Test
     public void testHalWithBean() {
 
-        HalResource party = newBaseResource("customer/123456")
+        ReadableResource party = newBaseResource("customer/123456")
                 .withLink("ns:users", "?users")
                 .withBean(new Customer(123456, "Example Resource", 33));
 
@@ -69,7 +72,7 @@ public class HalRenderingTest {
     @Test
     public void testHalWithFields() {
 
-        HalResource party = newBaseResource("customer/123456")
+        ReadableResource party = newBaseResource("customer/123456")
                 .withLink("ns:users", "?users")
                 .withFields(new OtherCustomer(123456, "Example Resource", 33));
 
@@ -81,14 +84,15 @@ public class HalRenderingTest {
     @Test
     public void testHalWithSubResources() {
 
-        HalResource party = newBaseResource("customer/123456")
+        ReadableResource party = newBaseResource("customer/123456")
                 .withLink("ns:users", "?users")
-                .withSubresource("ns:user role:admin", HalResource
+                .withSubresource("ns:user role:admin", resourceFactory
                         .newHalResource("/user/11")
                         .withProperty("id", 11)
                         .withProperty("name", "Example User")
                         .withProperty("expired", false)
-                        .withProperty("age", 32));
+                        .withProperty("age", 32)
+                        .withProperty("optional", true));
 
         assertThat(party.renderXml()).isEqualTo(exampleWithSubresourceXml);
         assertThat(party.renderJson()).isEqualTo(exampleWithSubresourceJson);
@@ -98,7 +102,7 @@ public class HalRenderingTest {
     @Test
     public void testHalWithBeanSubResources() {
 
-        HalResource party = newBaseResource("customer/123456")
+        ReadableResource party = newBaseResource("customer/123456")
                 .withLink("ns:users", "?users")
                 .withBeanBasedSubresource("ns:user role:admin", "/user/11", new Customer(11, "Example User", 32));
 
@@ -112,6 +116,7 @@ public class HalRenderingTest {
         public final String name;
         public final Integer age;
         public final Boolean expired = false;
+        public final Boolean optional = true;
 
         public OtherCustomer(Integer id, String name, Integer age) {
             this.id = id;
@@ -125,6 +130,7 @@ public class HalRenderingTest {
         private String name;
         private Integer age;
         private Boolean expired = false;
+        private Boolean optional = true;
 
         public Customer(Integer id, String name, Integer age) {
             this.id = id;
@@ -162,6 +168,14 @@ public class HalRenderingTest {
 
         public void setAge(Integer age) {
             this.age = age;
+        }
+
+        public Boolean getOptional() {
+            return optional;
+        }
+
+        public void setOptional(Boolean optional) {
+            this.optional = optional;
         }
     }
 

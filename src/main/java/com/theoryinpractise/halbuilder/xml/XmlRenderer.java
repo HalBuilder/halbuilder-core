@@ -1,7 +1,8 @@
-package com.theoryinpractise.halbuilder.renderer;
+package com.theoryinpractise.halbuilder.xml;
 
-import com.theoryinpractise.halbuilder.HalRenderer;
-import com.theoryinpractise.halbuilder.HalResource;
+import com.google.common.base.Optional;
+import com.theoryinpractise.halbuilder.Renderer;
+import com.theoryinpractise.halbuilder.ReadableResource;
 import org.jdom.Element;
 import org.jdom.Namespace;
 import org.jdom.Text;
@@ -13,12 +14,12 @@ import java.io.Writer;
 import java.util.Collection;
 import java.util.Map;
 
-import static com.theoryinpractise.halbuilder.HalResource.resolveRelativeHref;
+import static com.theoryinpractise.halbuilder.resources.MutableResource.resolveRelativeHref;
 
-public class XmlHalRenderer implements HalRenderer{
+public class XmlRenderer<T> implements Renderer<T> {
 
-    public void render(HalResource resource, Writer writer) {
-        Element element = renderElement(resource.getHref(), resource);
+    public Optional<T> render(ReadableResource resource, Writer writer) {
+        Element element = renderElement(resource.getHref(), resource, false);
         XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
         try {
             outputter.output(element, writer);
@@ -26,16 +27,23 @@ public class XmlHalRenderer implements HalRenderer{
             throw new RuntimeException(e);
         }
 
+        return Optional.absent();
     }
 
-    private Element renderElement(String baseHref, HalResource resource) {
+    private Element renderElement(String baseHref, ReadableResource resource, boolean embedded) {
 
         // Create the root element
         Element resourceElement = new Element("resource");
         //add an attribute to the root element
         resourceElement.setAttribute("href", baseHref);
-        for (Map.Entry<String, String> entry : resource.getNamespaces().entrySet()) {
-            resourceElement.addNamespaceDeclaration(Namespace.getNamespace(entry.getKey(), resolveRelativeHref(baseHref, entry.getValue())));
+
+
+        // Only add namespaces to non-embedded resources
+        if (!embedded) {
+            for (Map.Entry<String, String> entry : resource.getNamespaces().entrySet()) {
+                resourceElement.addNamespaceDeclaration(
+                        Namespace.getNamespace(entry.getKey(), resolveRelativeHref(baseHref, entry.getValue())));
+            }
         }
 
         //add a comment
@@ -59,10 +67,10 @@ public class XmlHalRenderer implements HalRenderer{
         }
 
         // add subresources
-        for (Map.Entry<String, Collection<HalResource>> resourceEntry : resource.getResources().asMap().entrySet()) {
-            for (HalResource halResource : resourceEntry.getValue()) {
+        for (Map.Entry<String, Collection<ReadableResource>> resourceEntry : resource.getResources().asMap().entrySet()) {
+            for (ReadableResource halResource : resourceEntry.getValue()) {
                 String subResourceBaseHref = resolveRelativeHref(baseHref, halResource.getHref());
-                Element subResourceElement = renderElement(subResourceBaseHref, halResource);
+                Element subResourceElement = renderElement(subResourceBaseHref, halResource, true);
                 subResourceElement.setAttribute("rel", resourceEntry.getKey());
                 resourceElement.addContent(subResourceElement);
             }

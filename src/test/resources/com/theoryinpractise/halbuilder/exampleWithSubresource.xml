@@ -6,5 +6,6 @@
     <expired>false</expired>
     <id>11</id>
     <name>Example User</name>
+    <optional>true</optional>
   </resource>
 </resource>
