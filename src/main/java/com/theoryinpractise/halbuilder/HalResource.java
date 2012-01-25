@@ -2,16 +2,16 @@ package com.theoryinpractise.halbuilder;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
 import com.google.common.io.CharStreams;
-import com.theoryinpractise.halbuilder.reader.XmlHalReader;
-import com.theoryinpractise.halbuilder.renderer.JsonHalRenderer;
-import com.theoryinpractise.halbuilder.renderer.XmlHalRenderer;
+import com.theoryinpractise.halbuilder.bytecode.InterfaceContract;
+import com.theoryinpractise.halbuilder.bytecode.InterfaceRenderer;
+import com.theoryinpractise.halbuilder.xml.XmlHalReader;
+import com.theoryinpractise.halbuilder.json.JsonHalRenderer;
+import com.theoryinpractise.halbuilder.xml.XmlHalRenderer;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -202,6 +202,20 @@ public class HalResource {
         }
     }
 
+    /**
+     * Renders the current HalResource as a proxy to the provider interface
+     *
+     * @param anInterface The interface we wish to proxy the resource as
+     * @return A Guava Optional of the rendered class, this will be absent if the interface doesn't satisfy the interface
+     */
+    public <T> Optional<T> renderClass(Class<T> anInterface) {
+        if (InterfaceContract.createInterfaceContract(anInterface).isSatisfiedBy(this)) {
+            return InterfaceRenderer.createInterfaceRenderer(anInterface).render(this, null);
+        } else {
+            return Optional.absent();
+        }
+    }
+
     public String renderJson() {
         return renderJson(new JsonHalRenderer());
     }
@@ -209,6 +223,7 @@ public class HalResource {
     public String renderXml() {
         return renderJson(new XmlHalRenderer());
     }
+
 
     private String renderJson(final HalRenderer renderer) {
         validateNamespaces(this);
@@ -218,65 +233,24 @@ public class HalResource {
         return sw.toString();
     }
 
-    private String derivePropertyNameFromMethod(Method method) {
-        return method.getName().startsWith("get")
-                ? method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4)
-                : method.getName();
-    }
-
     /**
      * Test whether the HalResource in its current state satisfies the provided interface.
      *
      * @param anInterface The interface we wish to check
      * @return Is that HalResource structurally like the interface?
      */
-    public <T> boolean isSatisfiedBy(Class<T> anInterface) {
-        Preconditions.checkArgument(anInterface.isInterface(), "Provided class MUST be an interface.");
+    public <T> boolean isSatisfiedBy(HalContract halContract) {
+        return halContract.isSatisfiedBy(this);
+    }
 
-        for (Method method : anInterface.getDeclaredMethods()) {
-            String propertyName = derivePropertyNameFromMethod(method);
-            if (!"class".equals(propertyName) && !properties.containsKey(propertyName)) {
-                return false;
+    public <T, V> Optional<V> ifSatisfiedBy(Class<T> anInterface, Function<T, V> function) {
+        if (InterfaceContract.createInterfaceContract(anInterface).isSatisfiedBy(this)) {
+            Optional<T> proxy = InterfaceRenderer.createInterfaceRenderer(anInterface).render(this, null);
+            if (proxy.isPresent()) {
+                return Optional.of(function.apply(proxy.get()));
             }
         }
-
-        return true;
-
-    }
-
-    public <T, V> Optional<V> ifSatisfiedBy(Class<T> aClass, Function<T, V> function) {
-        Optional<T> proxy = renderClass(aClass);
-        if (proxy.isPresent()) {
-            return Optional.of(function.apply(proxy.get()));
-        }
         return Optional.absent();
-    }
-
-    /**
-     * Renders the current HalResource as a proxy to the provider interface
-     *
-     * @param anInterface The interface we wish to proxy the resource as
-     * @return A Guava Optional of the rendered class, this will be absent if the interface doesn't satisfy the interface
-     */
-    public <T> Optional<T> renderClass(Class<T> anInterface) {
-        if (isSatisfiedBy(anInterface)) {
-            T proxy = (T) Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{anInterface}, new InvocationHandler() {
-                public Object invoke(Object o, Method method, Object[] objects) throws Throwable {
-
-                    String propertyName = derivePropertyNameFromMethod(method);
-
-                    Object propertyValue = HalResource.this.getProperties().get(propertyName);
-
-                    Class<?> returnType = method.getReturnType();
-                    Object returnValue = returnType.getConstructor(propertyValue.getClass()).newInstance(propertyValue);
-
-                    return returnValue;
-                }
-            });
-            return Optional.of(proxy);
-        } else {
-            return Optional.absent();
-        }
     }
 
 }

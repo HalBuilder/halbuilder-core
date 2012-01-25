@@ -1,5 +1,6 @@
-package com.theoryinpractise.halbuilder.renderer;
+package com.theoryinpractise.halbuilder.xml;
 
+import com.google.common.base.Optional;
 import com.theoryinpractise.halbuilder.HalRenderer;
 import com.theoryinpractise.halbuilder.HalResource;
 import org.jdom.Element;
@@ -15,9 +16,9 @@ import java.util.Map;
 
 import static com.theoryinpractise.halbuilder.HalResource.resolveRelativeHref;
 
-public class XmlHalRenderer implements HalRenderer{
+public class XmlHalRenderer<T> implements HalRenderer<T> {
 
-    public void render(HalResource resource, Writer writer) {
+    public Optional<T> render(HalResource resource, Writer writer) {
         Element element = renderElement(resource.getHref(), resource);
         XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
         try {
@@ -26,6 +27,7 @@ public class XmlHalRenderer implements HalRenderer{
             throw new RuntimeException(e);
         }
 
+        return Optional.absent();
     }
 
     private Element renderElement(String baseHref, HalResource resource) {

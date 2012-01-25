@@ -1,0 +1,55 @@
+package com.theoryinpractise.halbuilder.bytecode;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.theoryinpractise.halbuilder.HalRenderer;
+import com.theoryinpractise.halbuilder.HalResource;
+
+import java.io.Writer;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+
+import static com.theoryinpractise.halbuilder.bytecode.InterfaceSupport.derivePropertyNameFromMethod;
+
+/**
+ * Java Interface based "renderer", this will render the resource as a Proxy to a Java interface.
+ */
+public class InterfaceRenderer<T> implements HalRenderer<T> {
+
+    private Class<T> anInterface;
+
+    public static InterfaceRenderer createInterfaceRenderer(Class<?> anInterface) {
+        return new InterfaceRenderer(anInterface);
+    }
+
+    private InterfaceRenderer(Class<T> anInterface) {
+        Preconditions.checkArgument(anInterface.isInterface(), "Renderable class MUST be an interface.");
+        this.anInterface = anInterface;
+    }
+
+    public Optional<T> render(final HalResource resource, Writer writer) {
+        Preconditions.checkArgument(writer == null, "Writer argument should be null for " + InterfaceRenderer.class.getName());
+
+        if (resource.isSatisfiedBy(InterfaceContract.createInterfaceContract(anInterface))) {
+            T proxy = (T) Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{anInterface}, new InvocationHandler() {
+                public Object invoke(Object o, Method method, Object[] objects) throws Throwable {
+
+                    String propertyName = derivePropertyNameFromMethod(method);
+
+                    Object propertyValue = resource.getProperties().get(propertyName);
+
+                    Class<?> returnType = method.getReturnType();
+                    Object returnValue = returnType.getConstructor(propertyValue.getClass()).newInstance(propertyValue);
+
+                    return returnValue;
+                }
+            });
+            return Optional.of(proxy);
+        } else {
+            return Optional.absent();
+        }
+
+
+    }
+}

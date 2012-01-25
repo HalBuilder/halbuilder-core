@@ -1,5 +1,6 @@
-package com.theoryinpractise.halbuilder.renderer;
+package com.theoryinpractise.halbuilder.json;
 
+import com.google.common.base.Optional;
 import com.theoryinpractise.halbuilder.HalRenderer;
 import com.theoryinpractise.halbuilder.HalResource;
 import org.codehaus.jackson.JsonFactory;
@@ -13,14 +14,14 @@ import java.util.Map;
 
 import static com.theoryinpractise.halbuilder.HalResource.resolveRelativeHref;
 
-public class JsonHalRenderer implements HalRenderer {
+public class JsonHalRenderer<T> implements HalRenderer<T> {
 
     public static final String HREF = "_href";
     public static final String CURIES = "_curies";
     public static final String LINKS = "_links";
     public static final String EMBEDDED = "_embedded";
 
-    public void render(HalResource resource, Writer writer) {
+    public Optional<T> render(HalResource resource, Writer writer) {
 
         JsonFactory f = new JsonFactory();
         f.enable(JsonGenerator.Feature.QUOTE_FIELD_NAMES);
@@ -35,7 +36,7 @@ public class JsonHalRenderer implements HalRenderer {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
+        return Optional.absent();
     }
 
     private void renderJson(String baseHref, JsonGenerator g, HalResource resource) throws IOException {

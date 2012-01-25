@@ -1,4 +1,4 @@
-package com.theoryinpractise.halbuilder.reader;
+package com.theoryinpractise.halbuilder.xml;
 
 import com.theoryinpractise.halbuilder.HalReader;
 import com.theoryinpractise.halbuilder.HalResource;

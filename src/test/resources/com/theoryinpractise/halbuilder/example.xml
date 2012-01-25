@@ -5,4 +5,5 @@
   <expired>false</expired>
   <id>123456</id>
   <name>Example Resource</name>
+  <optional>true</optional>
 </resource>

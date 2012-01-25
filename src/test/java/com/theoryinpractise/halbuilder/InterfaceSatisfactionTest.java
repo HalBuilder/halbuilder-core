@@ -1,6 +1,8 @@
 package com.theoryinpractise.halbuilder;
 
 import com.google.common.base.Function;
+import com.theoryinpractise.halbuilder.bytecode.InterfaceContract;
+import com.theoryinpractise.halbuilder.bytecode.InterfaceRenderer;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -44,7 +46,36 @@ public class InterfaceSatisfactionTest {
     public void testSimpleInterfaceSatisfaction(Class<?> aClass, boolean shouldBeSatisfied) {
 
         HalResource halResource = HalResource.newHalResource(new InputStreamReader(HalReaderTest.class.getResourceAsStream("example.xml")));
-        assertThat(halResource.isSatisfiedBy(aClass)).isEqualTo(shouldBeSatisfied);
+        assertThat(halResource.isSatisfiedBy(InterfaceContract.createInterfaceContract(aClass))).isEqualTo(shouldBeSatisfied);
+
+    }
+
+    @Test
+    public void testAnonymousInnerContractSatisfaction() {
+
+        HalContract contractHasName = new HalContract() {
+            public boolean isSatisfiedBy(HalResource resource) {
+                return resource.getProperties().containsKey("name");
+            }
+        };
+
+        HalContract contractHasOptional = new HalContract() {
+            public boolean isSatisfiedBy(HalResource resource) {
+                return resource.getProperties().containsKey("optional");
+            }
+        };
+
+        HalContract contractHasOptionalFalse = new HalContract() {
+            public boolean isSatisfiedBy(HalResource resource) {
+                return resource.getProperties().containsKey("optional") && resource.getProperties().get("optional").equals("false");
+            }
+        };
+
+        HalResource halResource = HalResource.newHalResource(new InputStreamReader(HalReaderTest.class.getResourceAsStream("example.xml")));
+
+        assertThat(halResource.isSatisfiedBy(contractHasName)).isEqualTo(true);
+        assertThat(halResource.isSatisfiedBy(contractHasOptional)).isEqualTo(true);
+        assertThat(halResource.isSatisfiedBy(contractHasOptionalFalse)).isEqualTo(false);
 
     }
 

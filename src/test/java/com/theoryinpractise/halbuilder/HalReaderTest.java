@@ -1,6 +1,5 @@
 package com.theoryinpractise.halbuilder;
 
-import com.theoryinpractise.halbuilder.reader.XmlHalReader;
 import org.testng.annotations.Test;
 
 import java.io.InputStreamReader;
