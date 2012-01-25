@@ -1,4 +1,4 @@
-package com.theoryinpractise.halbuilder;
+package com.theoryinpractise.halbuilder.resources;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -8,6 +8,12 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
+import com.theoryinpractise.halbuilder.Contract;
+import com.theoryinpractise.halbuilder.ReadableResource;
+import com.theoryinpractise.halbuilder.Renderer;
+import com.theoryinpractise.halbuilder.Resource;
+import com.theoryinpractise.halbuilder.ResourceException;
+import com.theoryinpractise.halbuilder.ResourceFactory;
 import com.theoryinpractise.halbuilder.bytecode.InterfaceContract;
 import com.theoryinpractise.halbuilder.bytecode.InterfaceRenderer;
 import com.theoryinpractise.halbuilder.json.JsonRenderer;

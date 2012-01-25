@@ -1,6 +1,8 @@
-package com.theoryinpractise.halbuilder;
+package com.theoryinpractise.halbuilder.resources;
 
 import com.google.common.collect.Multimap;
+import com.theoryinpractise.halbuilder.ReadableResource;
+import com.theoryinpractise.halbuilder.Resource;
 
 import java.util.Map;
 

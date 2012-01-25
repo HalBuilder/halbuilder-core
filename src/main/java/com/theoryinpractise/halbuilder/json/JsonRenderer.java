@@ -12,7 +12,7 @@ import java.io.Writer;
 import java.util.Collection;
 import java.util.Map;
 
-import static com.theoryinpractise.halbuilder.MutableResource.resolveRelativeHref;
+import static com.theoryinpractise.halbuilder.resources.MutableResource.resolveRelativeHref;
 
 public class JsonRenderer<T> implements Renderer<T> {
 

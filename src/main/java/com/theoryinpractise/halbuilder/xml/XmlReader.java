@@ -1,7 +1,7 @@
 package com.theoryinpractise.halbuilder.xml;
 
 import com.theoryinpractise.halbuilder.Reader;
-import com.theoryinpractise.halbuilder.MutableResource;
+import com.theoryinpractise.halbuilder.resources.MutableResource;
 import com.theoryinpractise.halbuilder.ReadableResource;
 import com.theoryinpractise.halbuilder.Resource;
 import com.theoryinpractise.halbuilder.ResourceException;

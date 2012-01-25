@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
 import com.google.common.io.CharStreams;
+import com.theoryinpractise.halbuilder.resources.MutableResource;
 import com.theoryinpractise.halbuilder.xml.XmlReader;
 
 import java.io.IOException;
