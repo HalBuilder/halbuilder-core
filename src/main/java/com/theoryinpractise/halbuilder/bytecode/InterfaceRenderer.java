@@ -19,7 +19,7 @@ public class InterfaceRenderer<T> implements Renderer<T> {
 
     private Class<T> anInterface;
 
-    public static InterfaceRenderer createInterfaceRenderer(Class<?> anInterface) {
+    public static InterfaceRenderer newInterfaceRenderer(Class<?> anInterface) {
         return new InterfaceRenderer(anInterface);
     }
 

@@ -194,7 +194,7 @@ public class MutableResource implements Resource {
      */
     public <T> Optional<T> renderClass(Class<T> anInterface) {
         if (InterfaceContract.newInterfaceContract(anInterface).isSatisfiedBy(this)) {
-            return InterfaceRenderer.createInterfaceRenderer(anInterface).render(this, null);
+            return InterfaceRenderer.newInterfaceRenderer(anInterface).render(this, null);
         } else {
             return Optional.absent();
         }
@@ -229,7 +229,7 @@ public class MutableResource implements Resource {
 
     public <T, V> Optional<V> ifSatisfiedBy(Class<T> anInterface, Function<T, V> function) {
         if (InterfaceContract.newInterfaceContract(anInterface).isSatisfiedBy(this)) {
-            Optional<T> proxy = InterfaceRenderer.createInterfaceRenderer(anInterface).render(this, null);
+            Optional<T> proxy = InterfaceRenderer.newInterfaceRenderer(anInterface).render(this, null);
             if (proxy.isPresent()) {
                 return Optional.of(function.apply(proxy.get()));
             }
