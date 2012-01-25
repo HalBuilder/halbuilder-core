@@ -1,6 +1,6 @@
 package com.theoryinpractise.halbuilder.xml;
 
-import com.theoryinpractise.halbuilder.Reader;
+import com.theoryinpractise.halbuilder.ResourceReader;
 import com.theoryinpractise.halbuilder.resources.MutableResource;
 import com.theoryinpractise.halbuilder.ReadableResource;
 import com.theoryinpractise.halbuilder.Resource;
@@ -9,13 +9,13 @@ import org.jdom.*;
 import org.jdom.input.SAXBuilder;
 
 import java.io.IOException;
-import java.io.StringReader;
+import java.io.Reader;
 import java.util.List;
 
-public class XmlReader implements Reader {
-    public ReadableResource read(String source) {
+public class XmlResourceReader implements ResourceReader {
+    public ReadableResource read(Reader reader) {
         try {
-            Document d = new SAXBuilder().build(new StringReader(source));
+            Document d = new SAXBuilder().build(reader);
             Element root = d.getRootElement();
             return readResource(root).asImmutableResource();
         } catch (JDOMException e) {

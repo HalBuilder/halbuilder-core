@@ -46,7 +46,7 @@ public class InterfaceSatisfactionTest {
     @Test(dataProvider = "providerSatisfactionData")
     public void testSimpleInterfaceSatisfaction(Class<?> aClass, boolean shouldBeSatisfied) {
 
-        ReadableResource resource = resourceFactory.newHalResource(new InputStreamReader(ReaderTest.class.getResourceAsStream("example.xml")));
+        ReadableResource resource = resourceFactory.newHalResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("example.xml")));
         assertThat(resource.isSatisfiedBy(InterfaceContract.newInterfaceContract(aClass))).isEqualTo(shouldBeSatisfied);
 
     }
@@ -72,7 +72,7 @@ public class InterfaceSatisfactionTest {
             }
         };
 
-        ReadableResource resource = resourceFactory.newHalResource(new InputStreamReader(ReaderTest.class.getResourceAsStream("example.xml")));
+        ReadableResource resource = resourceFactory.newHalResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("example.xml")));
 
         assertThat(resource.isSatisfiedBy(contractHasName)).isEqualTo(true);
         assertThat(resource.isSatisfiedBy(contractHasOptional)).isEqualTo(true);
@@ -82,7 +82,7 @@ public class InterfaceSatisfactionTest {
 
     @Test
     public void testClassRendering() {
-        ReadableResource resource = resourceFactory.newHalResource(new InputStreamReader(ReaderTest.class.getResourceAsStream("example.xml")));
+        ReadableResource resource = resourceFactory.newHalResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("example.xml")));
 
         assertThat(resource.renderClass(INamed.class).get().name()).isEqualTo("Example Resource");
         assertThat(resource.renderClass(IPerson.class).get().getName()).isEqualTo("Example Resource");
@@ -93,7 +93,7 @@ public class InterfaceSatisfactionTest {
     @Test
     public void testFunctionalInterfaceSatisfaction() {
 
-        ReadableResource resource = resourceFactory.newHalResource(new InputStreamReader(ReaderTest.class.getResourceAsStream("example.xml")));
+        ReadableResource resource = resourceFactory.newHalResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("example.xml")));
 
         String name = resource.ifSatisfiedBy(IPerson.class, new Function<IPerson, String>() {
             public String apply(@Nullable IPerson iPerson) {

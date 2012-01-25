@@ -5,10 +5,11 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
-import com.google.common.io.CharStreams;
+import com.theoryinpractise.halbuilder.json.JsonResourceReader;
 import com.theoryinpractise.halbuilder.resources.MutableResource;
-import com.theoryinpractise.halbuilder.xml.XmlReader;
+import com.theoryinpractise.halbuilder.xml.XmlResourceReader;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Collection;
@@ -66,11 +67,16 @@ public class ResourceFactory {
 
 
     public ReadableResource newHalResource(Reader reader) {
-        String halSource = null;
         try {
-            halSource = CharStreams.toString(reader);
-            if (halSource.startsWith("<")) {
-                return new XmlReader().read(halSource);
+            BufferedReader bufferedReader = new BufferedReader(reader);
+            bufferedReader.mark(1);
+            String firstLine = bufferedReader.readLine();
+            bufferedReader.reset();
+
+            if (firstLine.startsWith("<")) {
+                return new XmlResourceReader().read(bufferedReader);
+            } else if (firstLine.startsWith("{")) {
+                return new JsonResourceReader().read(bufferedReader);
             }
 
             throw new IllegalArgumentException("Unknown resource format");
