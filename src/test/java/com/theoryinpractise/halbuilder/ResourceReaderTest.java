@@ -4,6 +4,8 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
 
 import static org.fest.assertions.Assertions.assertThat;
 
@@ -43,7 +45,16 @@ public class ResourceReaderTest {
         assertThat(resource.getLinks().asMap()).hasSize(2);
         assertThat(resource.getResources().asMap()).hasSize(1);
         assertThat(resource.getResources().values().iterator().next().getProperties().get("name")).isEqualTo("Example User");
+    }
 
+    @Test(expectedExceptions = ResourceException.class)
+    public void testUnknownFormat() {
+        resourceFactory.newHalResource(new StringReader("!!!"));
+    }
+
+    @Test(expectedExceptions = ResourceException.class)
+    public void testNullReader() {
+        resourceFactory.newHalResource((Reader) null);
     }
 
 }

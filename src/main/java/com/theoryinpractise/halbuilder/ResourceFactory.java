@@ -56,7 +56,7 @@ public class ResourceFactory {
         }
 
         // Add factory standard links
-        for (Map.Entry<String, Collection<String>> linkEntry : resource.getLinks().asMap().entrySet()) {
+        for (Map.Entry<String, Collection<String>> linkEntry : links.asMap().entrySet()) {
             for (String url : linkEntry.getValue()) {
                 resource.withLink(linkEntry.getKey(), url);
             }
@@ -70,17 +70,17 @@ public class ResourceFactory {
         try {
             BufferedReader bufferedReader = new BufferedReader(reader);
             bufferedReader.mark(1);
-            String firstLine = bufferedReader.readLine();
+            char firstChar = (char) bufferedReader.read();
             bufferedReader.reset();
 
-            if (firstLine.startsWith("<")) {
+            if (firstChar == '<') {
                 return new XmlResourceReader().read(bufferedReader);
-            } else if (firstLine.startsWith("{")) {
+            } else if (firstChar == '{') {
                 return new JsonResourceReader().read(bufferedReader);
+            } else {
+                throw new ResourceException("Unknown resource format");
             }
-
-            throw new IllegalArgumentException("Unknown resource format");
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new ResourceException(e);
         }
     }

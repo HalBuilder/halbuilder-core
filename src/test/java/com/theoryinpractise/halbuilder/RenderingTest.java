@@ -39,6 +39,28 @@ public class RenderingTest {
                 .withLink("ns:parent", "/api/customer/1234");
     }
 
+    @Test
+    public void testFactoryWithLinks() {
+
+        ResourceFactory resourceFactory = new ResourceFactory()
+                    .withBaseHref("https://example.com/api/")
+                    .withLink("home", "/home");
+
+        Resource resource = resourceFactory.newHalResource("/");
+
+        assertThat(resource.getLinks().values()).hasSize(1);
+        assertThat(resource.getLinks().get("home")).hasSize(1);
+        assertThat(resource.getLinks().get("home").iterator().next()).isEqualTo("/home");
+
+    }
+
+    @Test(expectedExceptions = ResourceException.class)
+    public void testFactoryWithDuplicateNamespaces() {
+        ResourceFactory resourceFactory = new ResourceFactory()
+                    .withNamespace("home", "https://example.com/api/")
+                    .withNamespace("home", "https://example.com/api/");
+    }
+
 
     @Test
     public void testCustomerHal() {
