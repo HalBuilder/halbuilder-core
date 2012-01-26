@@ -57,7 +57,9 @@ public class MutableResource implements Resource {
         if (properties.containsKey(name)) {
             throw new ResourceException(format("Duplicate property '%s' found for resource %s", name, href));
         }
-        properties.put(name, value);
+        if (value != null) {
+            properties.put(name, value);
+        }
         return this;
     }
 
