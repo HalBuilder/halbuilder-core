@@ -1,6 +1,5 @@
 package com.theoryinpractise.halbuilder;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -10,7 +9,6 @@ import com.theoryinpractise.halbuilder.resources.MutableResource;
 import com.theoryinpractise.halbuilder.xml.XmlResourceReader;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.Reader;
 import java.util.Collection;
 import java.util.Map;
@@ -22,7 +20,19 @@ public class ResourceFactory {
 
     private TreeMap<String, String> namespaces = Maps.newTreeMap(Ordering.usingToString());
     private Multimap<String, String> links = ArrayListMultimap.create();
-    private Optional<String> baseHref = Optional.absent();
+    private String baseHref;
+
+    public ResourceFactory() {
+        this.baseHref = "http://localhost";
+    }
+
+    public ResourceFactory(String baseHref) {
+        this.baseHref = baseHref;
+    }
+
+    public String getBaseHref() {
+        return baseHref;
+    }
 
     public ResourceFactory withNamespace(String namespace, String url) {
         if (namespaces.containsKey(namespace)) {
@@ -37,18 +47,8 @@ public class ResourceFactory {
         return this;
     }
 
-    public ResourceFactory withBaseHref(String baseHref) {
-        this.baseHref = Optional.of(baseHref);
-        return this;
-    }
-
     public Resource newHalResource(String href) {
         MutableResource resource = new MutableResource(this, href);
-
-        // Add optional base href
-        if (baseHref.isPresent()) {
-            resource.withBaseHref(baseHref.get());
-        }
 
         // Add factory standard namespaces
         for (Map.Entry<String, String> entry : namespaces.entrySet()) {
@@ -74,9 +74,9 @@ public class ResourceFactory {
             bufferedReader.reset();
 
             if (firstChar == '<') {
-                return new XmlResourceReader().read(bufferedReader);
+                return new XmlResourceReader(this).read(bufferedReader);
             } else if (firstChar == '{') {
-                return new JsonResourceReader().read(bufferedReader);
+                return new JsonResourceReader(this).read(bufferedReader);
             } else {
                 throw new ResourceException("Unknown resource format");
             }
@@ -84,4 +84,5 @@ public class ResourceFactory {
             throw new ResourceException(e);
         }
     }
+
 }

@@ -15,7 +15,7 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public interface ReadableResource {
-    String getHref();
+    Link getSelfLink();
 
     Map<String, String> getNamespaces();
 

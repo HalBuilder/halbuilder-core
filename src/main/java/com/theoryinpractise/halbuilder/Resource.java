@@ -1,10 +1,12 @@
 package com.theoryinpractise.halbuilder;
 
+import com.theoryinpractise.halbuilder.resources.MutableResource;
+
 public interface Resource extends ReadableResource {
 
-    Resource withBaseHref(String s);
+    Resource withLink(String url, String rel);
 
-    Resource withLink(String rel, String url);
+    Resource withLink(Link link);
 
     Resource withProperty(String name, Object value);
 
@@ -18,7 +20,7 @@ public interface Resource extends ReadableResource {
 
     Resource withNamespace(String namespace, String url);
 
-    Resource withSubresource(String rel, ReadableResource resource);
+    Resource withSubresource(String rel, Resource resource);
 
     ReadableResource asImmutableResource();
 }

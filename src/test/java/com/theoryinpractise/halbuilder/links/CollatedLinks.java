@@ -16,8 +16,8 @@ public class CollatedLinks {
     public void testCollatedLinks() {
 
         Resource resource = new ResourceFactory().newHalResource("/foo")
-                                                 .withLink("bar", "/bar")
-                                                 .withLink("foo", "/bar");
+                                                 .withLink("/bar", "bar")
+                                                 .withLink("/bar", "foo");
 
         List<Link> collatedLinks = resource.getLinks();
 
@@ -36,11 +36,11 @@ public class CollatedLinks {
     public void testSpacedRelsSeparateLinks() {
 
         Resource resource = new ResourceFactory().newHalResource("/foo")
-                                                 .withLink("bar foo", "/bar");
+                                                 .withLink("/bar", "bar foo");
 
         assertThat(resource.getCanonicalLinks())
                 .isNotEmpty()
-                .hasSize(2)
+                .hasSize(3)
                 .satisfies(new ContainsRelCondition("bar"))
                 .satisfies(new ContainsRelCondition("foo"));
 

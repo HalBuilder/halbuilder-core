@@ -39,15 +39,17 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLStreamHandlerFactory;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import static java.lang.String.format;
 
 public class MutableResource implements Resource {
 
-    protected String href;
     protected Map<String, String> namespaces = Maps.newTreeMap(Ordering.usingToString());
     protected List<Link> links = Lists.newArrayList();
     protected Map<String, Object> properties = Maps.newTreeMap(Ordering.usingToString());
@@ -56,13 +58,37 @@ public class MutableResource implements Resource {
 
     public MutableResource(ResourceFactory resourceFactory, String href) {
         this.resourceFactory = resourceFactory;
-        this.href = href;
+        this.links.add(new Link(resolveRelativeHref(resourceFactory.getBaseHref(), href), "self"));
     }
 
-    public MutableResource withLink(String rel, String href) {
-        for (String reltype : Splitter.on(" ").split(rel)) {
-            links.add(new Link(href, reltype));
+    public MutableResource(ResourceFactory resourceFactory) {
+        this.resourceFactory = resourceFactory;
+    }
 
+    public MutableResource(ResourceFactory resourceFactory, Link selfLink) {
+        this.resourceFactory = resourceFactory;
+        this.withLink(selfLink);
+    }
+
+    public Link getSelfLink() {
+        try {
+            return Iterables.find(getLinks(), new SelfLinkPredicate());
+        } catch (NoSuchElementException e) {
+            throw new IllegalStateException("Resources MUST have a self link.");
+        }
+    }
+
+    public MutableResource withLink(String href, String rel) {
+        for (String reltype : Splitter.on(" ").split(rel)) {
+            links.add(new Link(resolveRelativeHref(href), reltype));
+        }
+
+        return this;
+    }
+
+    public MutableResource withLink(Link link) {
+        for (String reltype : Splitter.on(" ").split(link.getRel())) {
+            links.add(new Link(link.getHref(), reltype));
         }
 
         return this;
@@ -70,7 +96,7 @@ public class MutableResource implements Resource {
 
     public Resource withProperty(String name, Object value) {
         if (properties.containsKey(name)) {
-            throw new ResourceException(format("Duplicate property '%s' found for resource %s", name, href));
+            throw new ResourceException(format("Duplicate property '%s' found for resource %s", name, getSelfLink()));
         }
         if (value != null) {
             properties.put(name, value);
@@ -119,21 +145,18 @@ public class MutableResource implements Resource {
         return withSubresource(rel, resourceFactory.newHalResource(href).withBean(o));
     }
 
-    public Resource withNamespace(String namespace, String url) {
+    public Resource withNamespace(String namespace, String href) {
         if (namespaces.containsKey(namespace)) {
-            throw new ResourceException(format("Duplicate namespace '%s' found for resource %s", namespace, href));
+            throw new ResourceException(format("Duplicate namespace '%s' found for resource %s", namespace, getSelfLink()));
         }
-        namespaces.put(namespace, url);
+        namespaces.put(namespace, resolveRelativeHref(href));
         return this;
     }
 
-    public MutableResource withSubresource(String rel, ReadableResource resource) {
+    public MutableResource withSubresource(String rel, Resource resource) {
+        resource.withLink(resource.getSelfLink().getHref(), rel);
         resources.put(rel, resource);
         return this;
-    }
-
-    public String getHref() {
-        return href;
     }
 
     public Map<String, String> getNamespaces() {
@@ -160,7 +183,13 @@ public class MutableResource implements Resource {
             collatedLinks.add(new Link(href, rels));
         }
 
-        return collatedLinks;
+        return Ordering.from(new Comparator<Link>() {
+            public int compare(Link l1, Link l2) {
+                if (l1.getRel().contains("self")) return -1;
+                if (l2.getRel().contains("self")) return 1;
+                return l1.getRel().compareTo(l2.getRel());
+            }
+        }).sortedCopy(collatedLinks);
 
     }
 
@@ -180,52 +209,24 @@ public class MutableResource implements Resource {
         return ImmutableMultimap.copyOf(resources);
     }
 
-    public static String resolveRelativeHref(String baseHref, String href) {
-        try {
-            if (href.startsWith("?")) {
-                return new URL(baseHref + href).toExternalForm();
-            } else if (href.startsWith("~/")) {
-                return new URL(baseHref + href.substring(1)).toExternalForm();
-            } else {
-                return new URL(new URL(baseHref), href).toExternalForm();
-            }
-        } catch (MalformedURLException e) {
-            throw new ResourceException(e.getMessage());
-        }
-    }
-
-    public Resource withHref(String href) {
-        this.href = href;
-        return this;
-    }
-
-    public Resource withBaseHref(String baseHref) {
-        try {
-            this.href = new URL(new URL(baseHref), this.href).toExternalForm();
-        } catch (MalformedURLException e) {
-            throw new ResourceException(e.getMessage());
-        }
-        return this;
-    }
-
     private void validateNamespaces(ReadableResource resource) {
         for (Link link : resource.getCanonicalLinks()) {
-            validateNamespaces(resource.getHref(), link.getRel());
+            validateNamespaces(link.getRel());
         }
         for (Map.Entry<String, Collection<ReadableResource>> entry : resource.getResources().asMap().entrySet()) {
             for (ReadableResource halResource : entry.getValue()) {
-                validateNamespaces(resource.getHref(), entry.getKey());
+                validateNamespaces(entry.getKey());
                 validateNamespaces(halResource);
             }
         }
     }
 
-    private void validateNamespaces(String href, String sourceRel) {
-        for (String rel : sourceRel.split(" ")) {
-            if (rel.contains(":")) {
+    private void validateNamespaces(String sourceRel) {
+        for (String rel : Splitter.on(" ").split(sourceRel)) {
+            if (!rel.contains("://") && rel.contains(":")) {
                 String[] relPart = rel.split(":");
                 if (!namespaces.keySet().contains(relPart[0])) {
-                    throw new ResourceException(format("Undeclared namespace in rel %s for resource %s", rel, href));
+                    throw new ResourceException(format("Undeclared namespace in rel %s for resource %s", rel, getSelfLink().getHref()));
                 }
             }
         }
@@ -282,7 +283,34 @@ public class MutableResource implements Resource {
         return Optional.absent();
     }
 
+    public String resolveRelativeHref(String href) {
+        return resolveRelativeHref(getSelfLink().getHref(), href);
+    }
+
+    private String resolveRelativeHref(final String baseHref, String href) {
+
+        try {
+            if (href.startsWith("?")) {
+                return new URL(baseHref + href).toExternalForm();
+            } else if (href.startsWith("~/")) {
+                return new URL(baseHref + href.substring(1)).toExternalForm();
+            } else {
+                return new URL(new URL(baseHref), href).toExternalForm();
+            }
+        } catch (MalformedURLException e) {
+            throw new ResourceException(e.getMessage());
+        }
+
+    }
+
+
     public ReadableResource asImmutableResource() {
-        return new ImmutableResource(getHref(), getNamespaces(), getCanonicalLinks(), getProperties(), getResources());
+        return new ImmutableResource(resourceFactory, getNamespaces(), getCanonicalLinks(), getProperties(), getResources());
+    }
+
+    private static class SelfLinkPredicate implements Predicate<Link> {
+        public boolean apply(@Nullable Link link) {
+            return link.getRel().contains("self");
+        }
     }
 }

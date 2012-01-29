@@ -4,14 +4,16 @@ import com.google.common.collect.Multimap;
 import com.theoryinpractise.halbuilder.Link;
 import com.theoryinpractise.halbuilder.ReadableResource;
 import com.theoryinpractise.halbuilder.Resource;
+import com.theoryinpractise.halbuilder.ResourceFactory;
 
 import java.util.List;
 import java.util.Map;
 
 public class ImmutableResource extends MutableResource {
 
-    public ImmutableResource(String href, Map<String, String> namespaces, List<Link> links, Map<String, Object> properties, Multimap<String, ReadableResource> resources) {
-        super(null, href);
+    public ImmutableResource(ResourceFactory resourceFactory,
+                             Map<String, String> namespaces, List<Link> links, Map<String, Object> properties, Multimap<String, ReadableResource> resources) {
+        super(resourceFactory);
         this.namespaces = namespaces;
         this.links = links;
         this.properties = properties;
@@ -19,7 +21,12 @@ public class ImmutableResource extends MutableResource {
     }
 
     @Override
-    public MutableResource withLink(String rel, String href) {
+    public MutableResource withLink(String href, String rel) {
+        throw new UnsupportedOperationException("ImmutableResources cannot be mutated.");
+    }
+
+    @Override
+    public MutableResource withLink(Link link) {
         throw new UnsupportedOperationException("ImmutableResources cannot be mutated.");
     }
 
@@ -49,12 +56,12 @@ public class ImmutableResource extends MutableResource {
     }
 
     @Override
-    public Resource withNamespace(String namespace, String url) {
+    public Resource withNamespace(String namespace, String href) {
         throw new UnsupportedOperationException("ImmutableResources cannot be mutated.");
     }
 
     @Override
-    public MutableResource withSubresource(String rel, ReadableResource resource) {
+    public MutableResource withSubresource(String rel, Resource resource) {
         throw new UnsupportedOperationException("ImmutableResources cannot be mutated.");
     }
 }

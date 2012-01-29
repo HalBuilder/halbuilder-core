@@ -1,8 +1,8 @@
 package com.theoryinpractise.halbuilder.json;
 
-import com.google.common.collect.ImmutableSet;
 import com.theoryinpractise.halbuilder.ReadableResource;
 import com.theoryinpractise.halbuilder.ResourceException;
+import com.theoryinpractise.halbuilder.ResourceFactory;
 import com.theoryinpractise.halbuilder.ResourceReader;
 import com.theoryinpractise.halbuilder.resources.MutableResource;
 import org.codehaus.jackson.JsonNode;
@@ -11,9 +11,14 @@ import org.codehaus.jackson.map.ObjectMapper;
 import java.io.Reader;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 public class JsonResourceReader implements ResourceReader {
+    private ResourceFactory resourceFactory;
+
+    public JsonResourceReader(ResourceFactory resourceFactory) {
+        this.resourceFactory = resourceFactory;
+    }
+
     public ReadableResource read(Reader reader) {
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -32,7 +37,7 @@ public class JsonResourceReader implements ResourceReader {
 
     private MutableResource readResource(JsonNode rootNode) {
         String href = rootNode.get("_href").asText();
-        MutableResource resource = new MutableResource(null, href);
+        MutableResource resource = new MutableResource(resourceFactory, href);
 
         readNamespaces(resource, rootNode);
         readLinks(resource, rootNode);
@@ -60,10 +65,10 @@ public class JsonResourceReader implements ResourceReader {
                     Iterator<JsonNode> values = keyNode.getValue().getElements();
                     while (values.hasNext()) {
                         JsonNode valueNode = values.next();
-                        resource.withLink(keyNode.getKey(), valueNode.get("_href").asText());
+                        resource.withLink(valueNode.get("_href").asText(), keyNode.getKey());
                     }
                 } else {
-                    resource.withLink(keyNode.getKey(), keyNode.getValue().get("_href").asText());
+                    resource.withLink(keyNode.getValue().get("_href").asText(), keyNode.getKey());
                 }
             }
         }

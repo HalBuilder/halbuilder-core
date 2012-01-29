@@ -1,5 +1,6 @@
 package com.theoryinpractise.halbuilder.xml;
 
+import com.theoryinpractise.halbuilder.ResourceFactory;
 import com.theoryinpractise.halbuilder.ResourceReader;
 import com.theoryinpractise.halbuilder.resources.MutableResource;
 import com.theoryinpractise.halbuilder.ReadableResource;
@@ -13,6 +14,12 @@ import java.io.Reader;
 import java.util.List;
 
 public class XmlResourceReader implements ResourceReader {
+    private ResourceFactory resourceFactory;
+
+    public XmlResourceReader(ResourceFactory resourceFactory) {
+        this.resourceFactory = resourceFactory;
+    }
+
     public ReadableResource read(Reader reader) {
         try {
             Document d = new SAXBuilder().build(reader);
@@ -27,7 +34,7 @@ public class XmlResourceReader implements ResourceReader {
 
     private Resource readResource(Element root) {
         String href = root.getAttributeValue("href");
-        MutableResource resource = new MutableResource(null, href);
+        MutableResource resource = new MutableResource(resourceFactory, href);
 
         readNamespaces(resource, root);
         readLinks(resource, root);
@@ -48,7 +55,7 @@ public class XmlResourceReader implements ResourceReader {
 
         List<Element> links = element.getChildren("link");
         for (Element link : links) {
-            resource.withLink(link.getAttributeValue("rel"), link.getAttributeValue("href"));
+            resource.withLink(link.getAttributeValue("href"), link.getAttributeValue("rel"));
         }
 
     }
@@ -66,7 +73,7 @@ public class XmlResourceReader implements ResourceReader {
         List<Element> resources = element.getChildren("resource");
         for (Element resource : resources) {
             String rel = resource.getAttributeValue("rel");
-            ReadableResource subResource = readResource(resource);
+            Resource subResource = readResource(resource);
             halResource.withSubresource(rel, subResource);
         }
     }

@@ -6,12 +6,12 @@ import static org.fest.assertions.Assertions.assertThat;
 
 public class ResourceTest {
 
-    private ResourceFactory resourceFactory = new ResourceFactory();
+    private ResourceFactory resourceFactory = new ResourceFactory("http://localhost/test");
 
     @Test(expectedExceptions = ResourceException.class)
     public void testUndeclaredLinkNamespace() {
-        resourceFactory.newHalResource("http://localhost/test")
-                .withLink("td:test", "http://localhost/test/2")
+        resourceFactory.newHalResource("/test")
+                .withLink("http://localhost/test/2", "td:test")
                 .renderXml();
     }
 
@@ -25,7 +25,7 @@ public class ResourceTest {
     @Test(expectedExceptions = ResourceException.class)
     public void testUndeclaredResourceLinkNamespace() {
         resourceFactory.newHalResource("http://localhost/test")
-                .withSubresource("test", resourceFactory.newHalResource("/").withLink("td:test", "/"))
+                .withSubresource("test", resourceFactory.newHalResource("/").withLink("/", "td:test"))
                 .renderXml();
     }
 
@@ -40,7 +40,6 @@ public class ResourceTest {
     @Test
     public void testHalResourceHrefShouldBeFullyQualified() {
         String xml = resourceFactory.newHalResource("/test")
-                .withBaseHref("http://localhost")
                 .renderXml();
 
         assertThat(xml).contains("http://localhost/test");
@@ -49,8 +48,7 @@ public class ResourceTest {
     @Test
     public void testRelativeLinksRenderFullyQualified() {
         String xml = resourceFactory.newHalResource("/")
-                .withLink("test", "/test")
-                .withBaseHref("http://localhost")
+                .withLink("/test", "test")
                 .renderXml();
 
         assertThat(xml).contains("http://localhost/test");
@@ -60,7 +58,6 @@ public class ResourceTest {
     public void testRelativeResourceRenderFullyQualified() {
         String xml = resourceFactory.newHalResource("/")
                 .withSubresource("test", resourceFactory.newHalResource("subresource"))
-                .withBaseHref("http://localhost")
                 .renderXml();
 
         assertThat(xml).contains("http://localhost/subresource");
@@ -71,9 +68,8 @@ public class ResourceTest {
         String xml = resourceFactory.newHalResource("/")
                 .withSubresource("test", resourceFactory
                         .newHalResource("subresource/")
-                        .withLink("sub", "/sublink1")
-                        .withLink("sub2", "sublink2"))
-                .withBaseHref("http://localhost")
+                        .withLink("/sublink1", "sub")
+                        .withLink("sublink2", "sub2"))
                 .renderXml();
 
         assertThat(xml).contains("http://localhost/sublink1");

@@ -18,8 +18,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import static com.theoryinpractise.halbuilder.resources.MutableResource.resolveRelativeHref;
-
 public class JsonRenderer<T> implements Renderer<T> {
 
     public static final String HREF = "_href";
@@ -36,7 +34,7 @@ public class JsonRenderer<T> implements Renderer<T> {
             JsonGenerator g = f.createJsonGenerator(writer);
             g.setPrettyPrinter(new DefaultPrettyPrinter());
             g.writeStartObject();
-            renderJson(resource.getHref(), g, resource, false);
+            renderJson(g, resource, false);
             g.writeEndObject();
             g.close();
         } catch (IOException e) {
@@ -45,23 +43,23 @@ public class JsonRenderer<T> implements Renderer<T> {
         return Optional.absent();
     }
 
-    private void renderJson(String baseHref, JsonGenerator g, ReadableResource resource, boolean embedded) throws IOException {
+    private void renderJson(JsonGenerator g, ReadableResource resource, boolean embedded) throws IOException {
 
-        g.writeStringField(HREF, resolveRelativeHref(baseHref, resource.getHref()));
-
+        final Link selfLink = resource.getSelfLink();
+        final String href = selfLink.getHref();
 
         // Only include namespaces when not embedded
         if (!embedded && !resource.getNamespaces().isEmpty()) {
             g.writeObjectFieldStart(CURIES);
             for (Map.Entry<String, String> entry : resource.getNamespaces().entrySet()) {
-                g.writeStringField(entry.getKey(), resolveRelativeHref(baseHref, entry.getValue()));
+                g.writeStringField(entry.getKey(), entry.getValue());
             }
             g.writeEndObject();
         }
 
         if (!resource.getCanonicalLinks().isEmpty()) {
             g.writeObjectFieldStart(LINKS);
-            List<Link> links = resource.getCanonicalLinks();
+            List<Link> links = resource.getLinks();
 
             Multimap<String, Link> linkMap = Multimaps.index(links, new Function<Link, String>() {
                 public String apply(@Nullable Link link) {
@@ -74,13 +72,13 @@ public class JsonRenderer<T> implements Renderer<T> {
 
                 if (linkEntry.getValue().size() == 1) {
                     g.writeObjectFieldStart(linkEntry.getKey());
-                    g.writeStringField(HREF, resolveRelativeHref(baseHref, linkEntry.getValue().iterator().next().getHref()));
+                    g.writeStringField(HREF, linkEntry.getValue().iterator().next().getHref());
                     g.writeEndObject();
                 } else {
                     g.writeArrayFieldStart(linkEntry.getKey());
                     for (Link link : linkEntry.getValue()) {
                         g.writeStartObject();
-                        g.writeStringField(HREF, resolveRelativeHref(baseHref, link.getHref()));
+                        g.writeStringField(HREF, link.getHref());
                         g.writeEndObject();
                     }
                     g.writeEndArray();
@@ -99,16 +97,14 @@ public class JsonRenderer<T> implements Renderer<T> {
                 if (resourceEntry.getValue().size() == 1) {
                     g.writeObjectFieldStart(resourceEntry.getKey());
                     ReadableResource subResource = resourceEntry.getValue().iterator().next();
-                    String subResourceBaseHref = resolveRelativeHref(baseHref, subResource.getHref());
-                    renderJson(subResourceBaseHref, g, subResource, true);
+                    renderJson( g, subResource, true);
                     g.writeEndObject();
                 } else {
                     g.writeArrayFieldStart(resourceEntry.getKey());
                     for (ReadableResource halResource : resourceEntry.getValue()) {
                         g.writeStartObject();
                         ReadableResource subResource = resourceEntry.getValue().iterator().next();
-                        String subResourceBaseHref = resolveRelativeHref(baseHref, subResource.getHref());
-                        renderJson(subResourceBaseHref, g, subResource, true);
+                        renderJson( g, subResource, true);
                         g.writeEndObject();
                     }
                 }

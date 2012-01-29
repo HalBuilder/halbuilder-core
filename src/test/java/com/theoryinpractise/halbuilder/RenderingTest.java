@@ -11,8 +11,7 @@ import static org.fest.assertions.Assertions.assertThat;
 
 public class RenderingTest {
 
-    private ResourceFactory resourceFactory = new ResourceFactory()
-            .withBaseHref("https://example.com/api/")
+    private ResourceFactory resourceFactory = new ResourceFactory("https://example.com/api/")
             .withNamespace("ns", "/apidocs/accounts")
             .withNamespace("role", "/apidocs/roles");
 
@@ -36,21 +35,20 @@ public class RenderingTest {
 
     private Resource newBaseResource(final String href) {
         return resourceFactory.newHalResource(href)
-                              .withLink("ns:parent", "/api/customer/1234");
+                              .withLink("/api/customer/1234", "ns:parent");
     }
 
     @Test
     public void testFactoryWithLinks() {
 
-        ResourceFactory resourceFactory = new ResourceFactory()
-                .withBaseHref("https://example.com/api/")
-                .withLink("home", "/home");
+        ResourceFactory resourceFactory = new ResourceFactory("https://example.com/api/")
+                .withLink("/home", "home");
 
         Resource resource = resourceFactory.newHalResource("/");
 
-        assertThat(resource.getCanonicalLinks()).hasSize(1);
+        assertThat(resource.getCanonicalLinks()).hasSize(2);
         assertThat(resource.getLinksByRel("home")).hasSize(1);
-        assertThat(resource.getLinksByRel("home").iterator().next().toString()).isEqualTo("<link rel=\"home\" href=\"/home\"/>");
+        assertThat(resource.getLinksByRel("home").iterator().next().toString()).isEqualTo("<link rel=\"home\" href=\"https://example.com/home\"/>");
 
     }
 
@@ -66,7 +64,7 @@ public class RenderingTest {
     public void testCustomerHal() {
 
         ReadableResource party = newBaseResource("customer/123456")
-                .withLink("ns:users", "?users")
+                .withLink("?users", "ns:users")
                 .withProperty("id", 123456)
                 .withProperty("age", 33)
                 .withProperty("name", "Example Resource")
@@ -83,7 +81,7 @@ public class RenderingTest {
     public void testHalWithBean() {
 
         ReadableResource party = newBaseResource("customer/123456")
-                .withLink("ns:users", "?users")
+                .withLink("?users", "ns:users")
                 .withBean(new Customer(123456, "Example Resource", 33));
 
         assertThat(party.renderXml()).isEqualTo(exampleXml);
@@ -95,7 +93,7 @@ public class RenderingTest {
     public void testHalWithFields() {
 
         ReadableResource party = newBaseResource("customer/123456")
-                .withLink("ns:users", "?users")
+                .withLink("?users", "ns:users")
                 .withFields(new OtherCustomer(123456, "Example Resource", 33));
 
         assertThat(party.renderXml()).isEqualTo(exampleXml);
@@ -107,7 +105,7 @@ public class RenderingTest {
     public void testHalWithSubResources() {
 
         ReadableResource party = newBaseResource("customer/123456")
-                .withLink("ns:users", "?users")
+                .withLink("?users", "ns:users")
                 .withSubresource("ns:user role:admin", resourceFactory
                         .newHalResource("/user/11")
                         .withProperty("id", 11)
@@ -125,7 +123,7 @@ public class RenderingTest {
     public void testHalWithBeanSubResources() {
 
         ReadableResource party = newBaseResource("customer/123456")
-                .withLink("ns:users", "?users")
+                .withLink("?users", "ns:users")
                 .withBeanBasedSubresource("ns:user role:admin", "/user/11", new Customer(11, "Example User", 32));
 
         assertThat(party.renderXml()).isEqualTo(exampleWithSubresourceXml);
