@@ -5,15 +5,12 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Table;
 import com.theoryinpractise.halbuilder.Contract;
@@ -40,7 +37,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -61,7 +57,7 @@ public class MutableResource implements Resource {
     protected Map<String, String> namespaces = Maps.newTreeMap(Ordering.usingToString());
     protected List<Link> links = Lists.newArrayList();
     protected Map<String, Object> properties = Maps.newTreeMap(Ordering.usingToString());
-    protected Multimap<String, ReadableResource> resources = ArrayListMultimap.create();
+    protected List<Resource> resources = Lists.newArrayList();
     private ResourceFactory resourceFactory;
 
     public MutableResource(ResourceFactory resourceFactory, String href) {
@@ -84,6 +80,14 @@ public class MutableResource implements Resource {
         } catch (NoSuchElementException e) {
             throw new IllegalStateException("Resources MUST have a self link.");
         }
+    }
+
+    public String getHref() {
+        return getSelfLink().getHref();
+    }
+
+    public String getRel() {
+        return getSelfLink().getRel();
     }
 
     public MutableResource withLink(String href, String rel) {
@@ -164,7 +168,7 @@ public class MutableResource implements Resource {
 
     public MutableResource withSubresource(String rel, Resource resource) {
         resource.withLink(resource.getSelfLink().getHref(), rel);
-        resources.put(rel, resource);
+        resources.add(resource);
         return this;
     }
 
@@ -207,19 +211,16 @@ public class MutableResource implements Resource {
         return ImmutableMap.copyOf(properties);
     }
 
-    public Multimap<String, ReadableResource> getResources() {
-        return ImmutableMultimap.copyOf(resources);
+    public List<Resource> getResources() {
+        return ImmutableList.copyOf(resources);
     }
 
     private void validateNamespaces(ReadableResource resource) {
         for (Relatable link : resource.getCanonicalLinks()) {
             validateNamespaces(link.getRel());
         }
-        for (Map.Entry<String, Collection<ReadableResource>> entry : resource.getResources().asMap().entrySet()) {
-            for (ReadableResource halResource : entry.getValue()) {
-                validateNamespaces(entry.getKey());
-                validateNamespaces(halResource);
-            }
+        for (Resource aResource : resource.getResources()) {
+            validateNamespaces(aResource);
         }
     }
 

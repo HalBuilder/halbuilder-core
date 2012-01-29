@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 import com.theoryinpractise.halbuilder.Link;
 import com.theoryinpractise.halbuilder.ReadableResource;
 import com.theoryinpractise.halbuilder.Renderer;
+import com.theoryinpractise.halbuilder.Resource;
 import org.jdom.Element;
 import org.jdom.Namespace;
 import org.jdom.Text;
@@ -12,7 +13,6 @@ import org.jdom.output.XMLOutputter;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -72,12 +72,9 @@ public class XmlRenderer<T> implements Renderer<T> {
         }
 
         // add subresources
-        for (Map.Entry<String, Collection<ReadableResource>> resourceEntry : resource.getResources().asMap().entrySet()) {
-            for (ReadableResource halResource : resourceEntry.getValue()) {
-                Element subResourceElement = renderElement(halResource, true);
-//                subResourceElement.setAttribute("rel", resourceEntry.getKey());
-                resourceElement.addContent(subResourceElement);
-            }
+        for (Resource halResource : resource.getResources()) {
+            Element subResourceElement = renderElement(halResource, true);
+            resourceElement.addContent(subResourceElement);
         }
 
         return resourceElement;

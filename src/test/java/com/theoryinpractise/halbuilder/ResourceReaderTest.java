@@ -35,7 +35,7 @@ public class ResourceReaderTest {
         assertThat(resource.getNamespaces()).hasSize(2);
         assertThat(resource.getProperties().get("name")).isEqualTo("Example Resource");
         assertThat(resource.getCanonicalLinks()).hasSize(2);
-        assertThat(resource.getResources().asMap()).hasSize(0);
+        assertThat(resource.getResources()).hasSize(0);
     }
 
     @Test(dataProvider = "provideSubResources")
@@ -43,8 +43,8 @@ public class ResourceReaderTest {
         assertThat(resource.getSelfLink()).isEqualTo("https://example.com/api/customer/123456");
         assertThat(resource.getNamespaces()).hasSize(2);
         assertThat(resource.getCanonicalLinks()).hasSize(2);
-        assertThat(resource.getResources().asMap()).hasSize(1);
-        assertThat(resource.getResources().values().iterator().next().getProperties().get("name")).isEqualTo("Example User");
+        assertThat(resource.getResources()).hasSize(1);
+        assertThat(resource.getResources().iterator().next().getProperties().get("name")).isEqualTo("Example User");
     }
 
     @Test(expectedExceptions = ResourceException.class)

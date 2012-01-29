@@ -1,12 +1,18 @@
 package com.theoryinpractise.halbuilder.json;
 
 import com.google.common.base.Function;
+import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.theoryinpractise.halbuilder.Link;
 import com.theoryinpractise.halbuilder.ReadableResource;
 import com.theoryinpractise.halbuilder.Renderer;
+import com.theoryinpractise.halbuilder.Resource;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.util.DefaultPrettyPrinter;
@@ -93,7 +99,22 @@ public class JsonRenderer<T> implements Renderer<T> {
 
         if (!resource.getResources().isEmpty()) {
             g.writeObjectFieldStart(EMBEDDED);
-            for (Map.Entry<String, Collection<ReadableResource>> resourceEntry : resource.getResources().asMap().entrySet()) {
+
+            Multimap<String, Resource> resourceMap = Multimaps.index(resource.getResources(), new Function<Resource, String>() {
+                public String apply(@Nullable Resource resource) {
+                    List<String> relTypes = Lists.newArrayList(Splitter.on(" ").split(resource.getRel()));
+
+                    Iterables.removeIf(relTypes, new Predicate<String>() {
+                        public boolean apply(@Nullable String s) {
+                            return "self".equals(s);
+                        }
+                    });
+
+                    return Joiner.on(" ").join(relTypes);
+                }
+            });
+
+            for (Map.Entry<String, Collection<Resource>> resourceEntry : resourceMap.asMap().entrySet()) {
                 if (resourceEntry.getValue().size() == 1) {
                     g.writeObjectFieldStart(resourceEntry.getKey());
                     ReadableResource subResource = resourceEntry.getValue().iterator().next();

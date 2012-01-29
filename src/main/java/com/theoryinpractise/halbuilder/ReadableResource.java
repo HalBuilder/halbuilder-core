@@ -2,19 +2,11 @@ package com.theoryinpractise.halbuilder;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.google.common.collect.Multimap;
 
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by IntelliJ IDEA.
- * User: amrk
- * Date: 25/01/12
- * Time: 10:43 PM
- * To change this template use File | Settings | File Templates.
- */
-public interface ReadableResource {
+public interface ReadableResource extends Relatable {
     Link getSelfLink();
 
     Map<String, String> getNamespaces();
@@ -27,7 +19,7 @@ public interface ReadableResource {
 
     Map<String, Object> getProperties();
 
-    Multimap<String, ReadableResource> getResources();
+    List<Resource> getResources();
 
     <T> Optional<T> renderClass(Class<T> anInterface);
 

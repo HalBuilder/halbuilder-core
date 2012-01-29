@@ -1,8 +1,6 @@
 package com.theoryinpractise.halbuilder.resources;
 
-import com.google.common.collect.Multimap;
 import com.theoryinpractise.halbuilder.Link;
-import com.theoryinpractise.halbuilder.ReadableResource;
 import com.theoryinpractise.halbuilder.Resource;
 import com.theoryinpractise.halbuilder.ResourceFactory;
 
@@ -12,7 +10,7 @@ import java.util.Map;
 public class ImmutableResource extends MutableResource {
 
     public ImmutableResource(ResourceFactory resourceFactory,
-                             Map<String, String> namespaces, List<Link> links, Map<String, Object> properties, Multimap<String, ReadableResource> resources) {
+                             Map<String, String> namespaces, List<Link> links, Map<String, Object> properties, List<Resource> resources) {
         super(resourceFactory);
         this.namespaces = namespaces;
         this.links = links;
