@@ -2,7 +2,7 @@ package com.theoryinpractise.halbuilder;
 
 import com.google.common.base.Optional;
 
-public class Link {
+public class Link implements Relatable {
     private String href;
     private String rel;
     private Optional<String> name = Optional.absent();

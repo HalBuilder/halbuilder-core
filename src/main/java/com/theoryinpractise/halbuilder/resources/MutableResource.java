@@ -19,6 +19,7 @@ import com.google.common.collect.Table;
 import com.theoryinpractise.halbuilder.Contract;
 import com.theoryinpractise.halbuilder.Link;
 import com.theoryinpractise.halbuilder.ReadableResource;
+import com.theoryinpractise.halbuilder.Relatable;
 import com.theoryinpractise.halbuilder.Renderer;
 import com.theoryinpractise.halbuilder.Resource;
 import com.theoryinpractise.halbuilder.ResourceException;
@@ -48,6 +49,14 @@ import java.util.NoSuchElementException;
 import static java.lang.String.format;
 
 public class MutableResource implements Resource {
+
+    public static final Ordering<Relatable> RELATABLE_ORDERING = Ordering.from(new Comparator<Relatable>() {
+        public int compare(Relatable l1, Relatable l2) {
+            if (l1.getRel().contains("self")) return -1;
+            if (l2.getRel().contains("self")) return 1;
+            return l1.getRel().compareTo(l2.getRel());
+        }
+    });
 
     protected Map<String, String> namespaces = Maps.newTreeMap(Ordering.usingToString());
     protected List<Link> links = Lists.newArrayList();
@@ -183,20 +192,13 @@ public class MutableResource implements Resource {
             collatedLinks.add(new Link(href, rels));
         }
 
-        return Ordering.from(new Comparator<Link>() {
-            public int compare(Link l1, Link l2) {
-                if (l1.getRel().contains("self")) return -1;
-                if (l2.getRel().contains("self")) return 1;
-                return l1.getRel().compareTo(l2.getRel());
-            }
-        }).sortedCopy(collatedLinks);
-
+        return RELATABLE_ORDERING.sortedCopy(collatedLinks);
     }
 
     public List<Link> getLinksByRel(final String rel) {
-        return ImmutableList.copyOf(Iterables.filter(getLinks(), new Predicate<Link>() {
-            public boolean apply(@Nullable Link link) {
-                return Iterables.contains(Splitter.on(" ").split(link.getRel()), rel);
+        return ImmutableList.copyOf(Iterables.filter(getLinks(), new Predicate<Relatable>() {
+            public boolean apply(@Nullable Relatable relatable) {
+                return Iterables.contains(Splitter.on(" ").split(relatable.getRel()), rel);
             }
         }));
     }
@@ -210,7 +212,7 @@ public class MutableResource implements Resource {
     }
 
     private void validateNamespaces(ReadableResource resource) {
-        for (Link link : resource.getCanonicalLinks()) {
+        for (Relatable link : resource.getCanonicalLinks()) {
             validateNamespaces(link.getRel());
         }
         for (Map.Entry<String, Collection<ReadableResource>> entry : resource.getResources().asMap().entrySet()) {
@@ -308,9 +310,9 @@ public class MutableResource implements Resource {
         return new ImmutableResource(resourceFactory, getNamespaces(), getCanonicalLinks(), getProperties(), getResources());
     }
 
-    private static class SelfLinkPredicate implements Predicate<Link> {
-        public boolean apply(@Nullable Link link) {
-            return link.getRel().contains("self");
+    private static class SelfLinkPredicate implements Predicate<Relatable> {
+        public boolean apply(@Nullable Relatable relatable) {
+            return relatable.getRel().contains("self");
         }
     }
 }
