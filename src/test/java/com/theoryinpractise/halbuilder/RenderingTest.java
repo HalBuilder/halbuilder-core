@@ -24,41 +24,41 @@ public class RenderingTest {
     @BeforeMethod
     public void setup() throws IOException {
         exampleXml = Resources.toString(RenderingTest.class.getResource("example.xml"), Charsets.UTF_8)
-                .trim().replaceAll("\n", "\r\n");
+                              .trim().replaceAll("\n", "\r\n");
         exampleJson = Resources.toString(RenderingTest.class.getResource("example.json"), Charsets.UTF_8)
-                .trim();
+                               .trim();
         exampleWithSubresourceXml = Resources.toString(RenderingTest.class.getResource("exampleWithSubresource.xml"), Charsets.UTF_8)
-                .trim().replaceAll("\n", "\r\n");
+                                             .trim().replaceAll("\n", "\r\n");
         exampleWithSubresourceJson = Resources.toString(RenderingTest.class.getResource("exampleWithSubresource.json"), Charsets.UTF_8)
-                .trim();
+                                              .trim();
     }
 
 
     private Resource newBaseResource(final String href) {
         return resourceFactory.newHalResource(href)
-                .withLink("ns:parent", "/api/customer/1234");
+                              .withLink("ns:parent", "/api/customer/1234");
     }
 
     @Test
     public void testFactoryWithLinks() {
 
         ResourceFactory resourceFactory = new ResourceFactory()
-                    .withBaseHref("https://example.com/api/")
-                    .withLink("home", "/home");
+                .withBaseHref("https://example.com/api/")
+                .withLink("home", "/home");
 
         Resource resource = resourceFactory.newHalResource("/");
 
-        assertThat(resource.getLinks().values()).hasSize(1);
-        assertThat(resource.getLinks().get("home")).hasSize(1);
-        assertThat(resource.getLinks().get("home").iterator().next()).isEqualTo("/home");
+        assertThat(resource.getCanonicalLinks()).hasSize(1);
+        assertThat(resource.getLinksByRel("home")).hasSize(1);
+        assertThat(resource.getLinksByRel("home").iterator().next().toString()).isEqualTo("<link rel=\"home\" href=\"/home\"/>");
 
     }
 
     @Test(expectedExceptions = ResourceException.class)
     public void testFactoryWithDuplicateNamespaces() {
         ResourceFactory resourceFactory = new ResourceFactory()
-                    .withNamespace("home", "https://example.com/api/")
-                    .withNamespace("home", "https://example.com/api/");
+                .withNamespace("home", "https://example.com/api/")
+                .withNamespace("home", "https://example.com/api/");
     }
 
 

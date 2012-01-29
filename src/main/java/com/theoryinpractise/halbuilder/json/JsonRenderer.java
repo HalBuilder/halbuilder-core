@@ -1,15 +1,21 @@
 package com.theoryinpractise.halbuilder.json;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.theoryinpractise.halbuilder.Renderer;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+import com.theoryinpractise.halbuilder.Link;
 import com.theoryinpractise.halbuilder.ReadableResource;
+import com.theoryinpractise.halbuilder.Renderer;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.util.DefaultPrettyPrinter;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import static com.theoryinpractise.halbuilder.resources.MutableResource.resolveRelativeHref;
@@ -53,18 +59,28 @@ public class JsonRenderer<T> implements Renderer<T> {
             g.writeEndObject();
         }
 
-        if (!resource.getLinks().isEmpty()) {
+        if (!resource.getCanonicalLinks().isEmpty()) {
             g.writeObjectFieldStart(LINKS);
-            for (Map.Entry<String, Collection<String>> linkEntry : resource.getLinks().asMap().entrySet()) {
+            List<Link> links = resource.getCanonicalLinks();
+
+            Multimap<String, Link> linkMap = Multimaps.index(links, new Function<Link, String>() {
+                public String apply(@Nullable Link link) {
+                    return link.getRel();
+                }
+            });
+
+            for (Map.Entry<String, Collection<Link>> linkEntry : linkMap.asMap().entrySet()) {
+
+
                 if (linkEntry.getValue().size() == 1) {
                     g.writeObjectFieldStart(linkEntry.getKey());
-                    g.writeStringField(HREF, resolveRelativeHref(baseHref, linkEntry.getValue().iterator().next()));
+                    g.writeStringField(HREF, resolveRelativeHref(baseHref, linkEntry.getValue().iterator().next().getHref()));
                     g.writeEndObject();
                 } else {
                     g.writeArrayFieldStart(linkEntry.getKey());
-                    for (String url : linkEntry.getValue()) {
+                    for (Link link : linkEntry.getValue()) {
                         g.writeStartObject();
-                        g.writeStringField(HREF, resolveRelativeHref(baseHref, url));
+                        g.writeStringField(HREF, resolveRelativeHref(baseHref, link.getHref()));
                         g.writeEndObject();
                     }
                     g.writeEndArray();

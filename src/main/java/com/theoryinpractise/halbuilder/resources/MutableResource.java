@@ -1,14 +1,23 @@
 package com.theoryinpractise.halbuilder.resources;
 
 import com.google.common.base.Function;
+import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.base.Splitter;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
+import com.google.common.collect.Table;
 import com.theoryinpractise.halbuilder.Contract;
+import com.theoryinpractise.halbuilder.Link;
 import com.theoryinpractise.halbuilder.ReadableResource;
 import com.theoryinpractise.halbuilder.Renderer;
 import com.theoryinpractise.halbuilder.Resource;
@@ -19,6 +28,7 @@ import com.theoryinpractise.halbuilder.bytecode.InterfaceRenderer;
 import com.theoryinpractise.halbuilder.json.JsonRenderer;
 import com.theoryinpractise.halbuilder.xml.XmlRenderer;
 
+import javax.annotation.Nullable;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -30,6 +40,7 @@ import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import static java.lang.String.format;
@@ -38,7 +49,7 @@ public class MutableResource implements Resource {
 
     protected String href;
     protected Map<String, String> namespaces = Maps.newTreeMap(Ordering.usingToString());
-    protected Multimap<String, String> links = ArrayListMultimap.create();
+    protected List<Link> links = Lists.newArrayList();
     protected Map<String, Object> properties = Maps.newTreeMap(Ordering.usingToString());
     protected Multimap<String, ReadableResource> resources = ArrayListMultimap.create();
     private ResourceFactory resourceFactory;
@@ -48,8 +59,8 @@ public class MutableResource implements Resource {
         this.href = href;
     }
 
-    public MutableResource withLink(String rel, String url) {
-        links.put(rel, url);
+    public MutableResource withLink(String rel, String href) {
+        links.add(new Link(href, rel));
         return this;
     }
 
@@ -125,8 +136,36 @@ public class MutableResource implements Resource {
         return ImmutableMap.copyOf(namespaces);
     }
 
-    public Multimap<String, String> getLinks() {
-        return ImmutableMultimap.copyOf(links);
+    public List<Link> getCanonicalLinks() {
+        return ImmutableList.copyOf(links);
+    }
+
+    public List<Link> getLinks() {
+        List<Link> collatedLinks = Lists.newArrayList();
+
+        // href, rel, link
+        Table<String, String, Link> linkTable = HashBasedTable.create();
+
+        for (Link link : links) {
+            linkTable.put(link.getHref(), link.getRel(), link);
+        }
+
+        for (String href : linkTable.rowKeySet()) {
+            Map<String, Link> linkRelMap = linkTable.row(href);
+            String rels = Joiner.on(" ").join(Ordering.usingToString().sortedCopy(linkRelMap.keySet()));
+            collatedLinks.add(new Link(href, rels));
+        }
+
+        return collatedLinks;
+
+    }
+
+    public List<Link> getLinksByRel(final String rel) {
+        return ImmutableList.copyOf(Iterables.filter(getLinks(), new Predicate<Link>() {
+            public boolean apply(@Nullable Link link) {
+                return Iterables.contains(Splitter.on(" ").split(link.getRel()), rel);
+            }
+        }));
     }
 
     public Map<String, Object> getProperties() {
@@ -166,8 +205,8 @@ public class MutableResource implements Resource {
     }
 
     private void validateNamespaces(ReadableResource resource) {
-        for (String rel : resource.getLinks().keySet()) {
-            validateNamespaces(resource.getHref(), rel);
+        for (Link link : resource.getCanonicalLinks()) {
+            validateNamespaces(resource.getHref(), link.getRel());
         }
         for (Map.Entry<String, Collection<ReadableResource>> entry : resource.getResources().asMap().entrySet()) {
             for (ReadableResource halResource : entry.getValue()) {
@@ -240,6 +279,6 @@ public class MutableResource implements Resource {
     }
 
     public ReadableResource asImmutableResource() {
-        return new ImmutableResource(getHref(), getNamespaces(), getLinks(), getProperties(), getResources());
+        return new ImmutableResource(getHref(), getNamespaces(), getCanonicalLinks(), getProperties(), getResources());
     }
 }

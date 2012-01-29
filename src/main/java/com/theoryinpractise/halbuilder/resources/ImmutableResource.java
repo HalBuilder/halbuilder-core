@@ -1,14 +1,16 @@
 package com.theoryinpractise.halbuilder.resources;
 
 import com.google.common.collect.Multimap;
+import com.theoryinpractise.halbuilder.Link;
 import com.theoryinpractise.halbuilder.ReadableResource;
 import com.theoryinpractise.halbuilder.Resource;
 
+import java.util.List;
 import java.util.Map;
 
 public class ImmutableResource extends MutableResource {
 
-    public ImmutableResource(String href, Map<String, String> namespaces, Multimap<String, String> links, Map<String, Object> properties, Multimap<String, ReadableResource> resources) {
+    public ImmutableResource(String href, Map<String, String> namespaces, List<Link> links, Map<String, Object> properties, Multimap<String, ReadableResource> resources) {
         super(null, href);
         this.namespaces = namespaces;
         this.links = links;
@@ -17,7 +19,7 @@ public class ImmutableResource extends MutableResource {
     }
 
     @Override
-    public MutableResource withLink(String rel, String url) {
+    public MutableResource withLink(String rel, String href) {
         throw new UnsupportedOperationException("ImmutableResources cannot be mutated.");
     }
 

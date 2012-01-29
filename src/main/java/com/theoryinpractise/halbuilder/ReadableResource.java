@@ -4,6 +4,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.Multimap;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -18,7 +19,11 @@ public interface ReadableResource {
 
     Map<String, String> getNamespaces();
 
-    Multimap<String, String> getLinks();
+    List<Link> getCanonicalLinks();
+
+    List<Link> getLinks();
+
+    List<Link> getLinksByRel(String rel);
 
     Map<String, Object> getProperties();
 

@@ -1,8 +1,9 @@
 package com.theoryinpractise.halbuilder.xml;
 
 import com.google.common.base.Optional;
-import com.theoryinpractise.halbuilder.Renderer;
+import com.theoryinpractise.halbuilder.Link;
 import com.theoryinpractise.halbuilder.ReadableResource;
+import com.theoryinpractise.halbuilder.Renderer;
 import org.jdom.Element;
 import org.jdom.Namespace;
 import org.jdom.Text;
@@ -50,13 +51,11 @@ public class XmlRenderer<T> implements Renderer<T> {
 //        resourceElement.addContent(new Comment("Description of a resource"));
 
         // add links
-        for (Map.Entry<String, Collection<String>> linkEntry : resource.getLinks().asMap().entrySet()) {
-            for (String url : linkEntry.getValue()) {
-                Element linkElement = new Element("link");
-                linkElement.setAttribute("rel", linkEntry.getKey());
-                linkElement.setAttribute("href", resolveRelativeHref(baseHref, url));
-                resourceElement.addContent(linkElement);
-            }
+        for (Link link : resource.getCanonicalLinks()) {
+            Element linkElement = new Element("link");
+            linkElement.setAttribute("rel", link.getRel());
+            linkElement.setAttribute("href", resolveRelativeHref(baseHref, link.getHref()));
+            resourceElement.addContent(linkElement);
         }
 
         // add properties
