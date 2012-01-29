@@ -26,9 +26,9 @@ public class XmlResourceReader implements ResourceReader {
     }
 
     private Resource readResource(Element root) {
-        MutableResource resource = new MutableResource(null, "/");
+        String href = root.getAttributeValue("href");
+        MutableResource resource = new MutableResource(null, href);
 
-        resource.withHref(root.getAttributeValue("href"));
         readNamespaces(resource, root);
         readLinks(resource, root);
         readProperties(resource, root);

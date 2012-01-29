@@ -31,8 +31,8 @@ public class JsonResourceReader implements ResourceReader {
     }
 
     private MutableResource readResource(JsonNode rootNode) {
-        MutableResource resource = new MutableResource(null, "/");
-        resource.withHref(rootNode.get("_href").asText());
+        String href = rootNode.get("_href").asText();
+        MutableResource resource = new MutableResource(null, href);
 
         readNamespaces(resource, rootNode);
         readLinks(resource, rootNode);
