@@ -250,17 +250,15 @@ public class MutableResource implements Resource {
     }
 
     public String renderJson() {
-        return renderJson(new JsonRenderer());
+        return renderAsString(new JsonRenderer());
     }
 
     public String renderXml() {
-        return renderJson(new XmlRenderer());
+        return renderAsString(new XmlRenderer());
     }
 
-
-    private String renderJson(final Renderer renderer) {
+    private String renderAsString(final Renderer renderer) {
         validateNamespaces(this);
-
         StringWriter sw = new StringWriter();
         renderer.render(this, sw);
         return sw.toString();
