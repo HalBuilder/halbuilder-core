@@ -23,20 +23,36 @@ public class CollatedLinks {
 
         assertThat(collatedLinks)
                 .isNotEmpty()
-                .satisfies(new CollatedRelCondition("bar foo"));
+                .satisfies(new ContainsRelCondition("bar foo"));
 
         assertThat(resource.getLinksByRel("bar"))
                 .isNotNull()
-                .satisfies(new CollatedRelCondition("bar foo"));
+                .satisfies(new ContainsRelCondition("bar foo"));
 
 
     }
 
-    private static class CollatedRelCondition extends Condition<List<?>> {
+    @Test
+    public void testSpacedRelsSeparateLinks() {
+
+        Resource resource = new ResourceFactory().newHalResource("/foo")
+                                                 .withLink("bar foo", "/bar");
+
+        assertThat(resource.getCanonicalLinks())
+                .isNotEmpty()
+                .hasSize(2)
+                .satisfies(new ContainsRelCondition("bar"))
+                .satisfies(new ContainsRelCondition("foo"));
+
+
+
+    }
+
+    private static class ContainsRelCondition extends Condition<List<?>> {
 
         private final String rel;
 
-        public CollatedRelCondition(final String rel) {
+        public ContainsRelCondition(final String rel) {
             this.rel = rel;
         }
 

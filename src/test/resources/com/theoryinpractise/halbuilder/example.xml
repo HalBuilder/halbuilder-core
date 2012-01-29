@@ -1,9 +1,9 @@
 <resource xmlns:ns="https://example.com/apidocs/accounts" href="https://example.com/api/customer/123456">
-    <link rel="ns:parent" href="https://example.com/api/customer/1234"/>
-    <link rel="ns:users" href="https://example.com/api/customer/123456?users"/>
-    <age>33</age>
-    <expired>false</expired>
-    <id>123456</id>
-    <name>Example Resource</name>
-    <optional>true</optional>
+  <link rel="ns:parent" href="https://example.com/api/customer/1234" />
+  <link rel="ns:users" href="https://example.com/api/customer/123456?users" />
+  <age>33</age>
+  <expired>false</expired>
+  <id>123456</id>
+  <name>Example Resource</name>
+  <optional>true</optional>
 </resource>

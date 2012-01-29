@@ -60,7 +60,11 @@ public class MutableResource implements Resource {
     }
 
     public MutableResource withLink(String rel, String href) {
-        links.add(new Link(href, rel));
+        for (String reltype : Splitter.on(" ").split(rel)) {
+            links.add(new Link(href, reltype));
+
+        }
+
         return this;
     }
 
