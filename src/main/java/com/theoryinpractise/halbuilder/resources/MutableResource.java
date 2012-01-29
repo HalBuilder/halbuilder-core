@@ -39,7 +39,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLStreamHandlerFactory;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -79,8 +78,9 @@ public class MutableResource implements Resource {
     }
 
     public MutableResource withLink(String href, String rel) {
+        String resolvedHref = resolveRelativeHref(href);
         for (String reltype : Splitter.on(" ").split(rel)) {
-            links.add(new Link(resolveRelativeHref(href), reltype));
+            links.add(new Link(resolvedHref, reltype));
         }
 
         return this;
@@ -96,7 +96,7 @@ public class MutableResource implements Resource {
 
     public Resource withProperty(String name, Object value) {
         if (properties.containsKey(name)) {
-            throw new ResourceException(format("Duplicate property '%s' found for resource %s", name, getSelfLink()));
+            throw new ResourceException(format("Duplicate property '%s' found for resource", name));
         }
         if (value != null) {
             properties.put(name, value);
@@ -147,7 +147,7 @@ public class MutableResource implements Resource {
 
     public Resource withNamespace(String namespace, String href) {
         if (namespaces.containsKey(namespace)) {
-            throw new ResourceException(format("Duplicate namespace '%s' found for resource %s", namespace, getSelfLink()));
+            throw new ResourceException(format("Duplicate namespace '%s' found for resource", namespace));
         }
         namespaces.put(namespace, resolveRelativeHref(href));
         return this;
@@ -226,7 +226,7 @@ public class MutableResource implements Resource {
             if (!rel.contains("://") && rel.contains(":")) {
                 String[] relPart = rel.split(":");
                 if (!namespaces.keySet().contains(relPart[0])) {
-                    throw new ResourceException(format("Undeclared namespace in rel %s for resource %s", rel, getSelfLink().getHref()));
+                    throw new ResourceException(format("Undeclared namespace in rel %s for resource", rel));
                 }
             }
         }
