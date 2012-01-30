@@ -1,12 +1,12 @@
-package com.theoryinpractise.halbuilder.bytecode;
+package com.theoryinpractise.halbuilder.impl.bytecode;
 
 import com.google.common.base.Preconditions;
-import com.theoryinpractise.halbuilder.Contract;
-import com.theoryinpractise.halbuilder.ReadableResource;
+import com.theoryinpractise.halbuilder.api.Contract;
+import com.theoryinpractise.halbuilder.api.ReadableResource;
 
 import java.lang.reflect.Method;
 
-import static com.theoryinpractise.halbuilder.bytecode.InterfaceSupport.derivePropertyNameFromMethod;
+import static com.theoryinpractise.halbuilder.impl.bytecode.InterfaceSupport.derivePropertyNameFromMethod;
 
 /**
  * A Java Interface matching contract

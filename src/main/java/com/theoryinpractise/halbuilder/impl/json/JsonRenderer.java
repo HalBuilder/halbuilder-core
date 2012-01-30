@@ -1,4 +1,4 @@
-package com.theoryinpractise.halbuilder.json;
+package com.theoryinpractise.halbuilder.impl.json;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
@@ -8,10 +8,10 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-import com.theoryinpractise.halbuilder.Link;
-import com.theoryinpractise.halbuilder.ReadableResource;
-import com.theoryinpractise.halbuilder.Renderer;
-import com.theoryinpractise.halbuilder.Resource;
+import com.theoryinpractise.halbuilder.api.Link;
+import com.theoryinpractise.halbuilder.api.ReadableResource;
+import com.theoryinpractise.halbuilder.api.Renderer;
+import com.theoryinpractise.halbuilder.api.Resource;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.util.DefaultPrettyPrinter;
@@ -23,15 +23,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import static com.theoryinpractise.halbuilder.Fields.CURIE;
-import static com.theoryinpractise.halbuilder.Fields.EMBEDDED;
-import static com.theoryinpractise.halbuilder.Fields.HREF;
-import static com.theoryinpractise.halbuilder.Fields.HREFLANG;
-import static com.theoryinpractise.halbuilder.Fields.LINKS;
-import static com.theoryinpractise.halbuilder.Fields.NAME;
-import static com.theoryinpractise.halbuilder.Fields.SELF;
-import static com.theoryinpractise.halbuilder.Fields.TITLE;
-import static com.theoryinpractise.halbuilder.ResourceFactory.WHITESPACE_SPLITTER;
+import static com.theoryinpractise.halbuilder.api.Fields.CURIE;
+import static com.theoryinpractise.halbuilder.api.Fields.EMBEDDED;
+import static com.theoryinpractise.halbuilder.api.Fields.HREF;
+import static com.theoryinpractise.halbuilder.api.Fields.HREFLANG;
+import static com.theoryinpractise.halbuilder.api.Fields.LINKS;
+import static com.theoryinpractise.halbuilder.api.Fields.NAME;
+import static com.theoryinpractise.halbuilder.api.Fields.SELF;
+import static com.theoryinpractise.halbuilder.api.Fields.TITLE;
+import static com.theoryinpractise.halbuilder.factory.ResourceFactory.WHITESPACE_SPLITTER;
 
 
 public class JsonRenderer<T> implements Renderer<T> {

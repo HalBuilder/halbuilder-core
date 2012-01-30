@@ -2,6 +2,10 @@ package com.theoryinpractise.halbuilder;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
+import com.theoryinpractise.halbuilder.api.RenderableResource;
+import com.theoryinpractise.halbuilder.api.Resource;
+import com.theoryinpractise.halbuilder.api.ResourceException;
+import com.theoryinpractise.halbuilder.factory.ResourceFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

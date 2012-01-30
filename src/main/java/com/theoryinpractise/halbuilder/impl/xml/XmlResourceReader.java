@@ -1,11 +1,11 @@
-package com.theoryinpractise.halbuilder.xml;
+package com.theoryinpractise.halbuilder.impl.xml;
 
-import com.theoryinpractise.halbuilder.ReadableResource;
-import com.theoryinpractise.halbuilder.Resource;
-import com.theoryinpractise.halbuilder.ResourceException;
-import com.theoryinpractise.halbuilder.ResourceFactory;
-import com.theoryinpractise.halbuilder.ResourceReader;
-import com.theoryinpractise.halbuilder.resources.MutableResource;
+import com.theoryinpractise.halbuilder.api.ReadableResource;
+import com.theoryinpractise.halbuilder.api.Resource;
+import com.theoryinpractise.halbuilder.api.ResourceException;
+import com.theoryinpractise.halbuilder.api.ResourceReader;
+import com.theoryinpractise.halbuilder.factory.ResourceFactory;
+import com.theoryinpractise.halbuilder.impl.resources.MutableResource;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;

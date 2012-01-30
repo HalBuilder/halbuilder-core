@@ -1,4 +1,4 @@
-package com.theoryinpractise.halbuilder;
+package com.theoryinpractise.halbuilder.api;
 
 public interface Resource extends ReadableResource {
 

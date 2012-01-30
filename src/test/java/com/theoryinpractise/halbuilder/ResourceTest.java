@@ -1,5 +1,7 @@
 package com.theoryinpractise.halbuilder;
 
+import com.theoryinpractise.halbuilder.api.ResourceException;
+import com.theoryinpractise.halbuilder.factory.ResourceFactory;
 import org.testng.annotations.Test;
 
 import static org.fest.assertions.Assertions.assertThat;

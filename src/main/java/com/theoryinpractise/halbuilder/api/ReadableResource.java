@@ -1,4 +1,4 @@
-package com.theoryinpractise.halbuilder;
+package com.theoryinpractise.halbuilder.api;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;

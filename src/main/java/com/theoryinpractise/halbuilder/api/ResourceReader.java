@@ -1,6 +1,5 @@
-package com.theoryinpractise.halbuilder;
+package com.theoryinpractise.halbuilder.api;
 
-import java.io.BufferedReader;
 import java.io.Reader;
 
 public interface ResourceReader {

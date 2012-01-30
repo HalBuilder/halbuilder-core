@@ -1,4 +1,4 @@
-package com.theoryinpractise.halbuilder.bytecode;
+package com.theoryinpractise.halbuilder.impl.bytecode;
 
 import java.lang.reflect.Method;
 

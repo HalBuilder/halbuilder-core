@@ -1,15 +1,15 @@
-package com.theoryinpractise.halbuilder.resources;
+package com.theoryinpractise.halbuilder.impl.resources;
 
 import com.google.common.base.Optional;
-import com.theoryinpractise.halbuilder.Link;
-import com.theoryinpractise.halbuilder.RenderableResource;
-import com.theoryinpractise.halbuilder.Renderer;
-import com.theoryinpractise.halbuilder.Resource;
-import com.theoryinpractise.halbuilder.ResourceFactory;
-import com.theoryinpractise.halbuilder.bytecode.InterfaceContract;
-import com.theoryinpractise.halbuilder.bytecode.InterfaceRenderer;
-import com.theoryinpractise.halbuilder.json.JsonRenderer;
-import com.theoryinpractise.halbuilder.xml.XmlRenderer;
+import com.theoryinpractise.halbuilder.api.Link;
+import com.theoryinpractise.halbuilder.api.RenderableResource;
+import com.theoryinpractise.halbuilder.api.Renderer;
+import com.theoryinpractise.halbuilder.api.Resource;
+import com.theoryinpractise.halbuilder.factory.ResourceFactory;
+import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceContract;
+import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceRenderer;
+import com.theoryinpractise.halbuilder.impl.json.JsonRenderer;
+import com.theoryinpractise.halbuilder.impl.xml.XmlRenderer;
 
 import java.io.StringWriter;
 import java.util.List;

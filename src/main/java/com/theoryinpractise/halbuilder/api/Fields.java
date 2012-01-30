@@ -1,4 +1,4 @@
-package com.theoryinpractise.halbuilder;
+package com.theoryinpractise.halbuilder.api;
 
 public class Fields {
     public static final String REL = "rel";

@@ -1,4 +1,4 @@
-package com.theoryinpractise.halbuilder.resources;
+package com.theoryinpractise.halbuilder.impl.resources;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
@@ -12,16 +12,16 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Table;
-import com.theoryinpractise.halbuilder.Contract;
-import com.theoryinpractise.halbuilder.Link;
-import com.theoryinpractise.halbuilder.ReadableResource;
-import com.theoryinpractise.halbuilder.Relatable;
-import com.theoryinpractise.halbuilder.RenderableResource;
-import com.theoryinpractise.halbuilder.Resource;
-import com.theoryinpractise.halbuilder.ResourceException;
-import com.theoryinpractise.halbuilder.ResourceFactory;
-import com.theoryinpractise.halbuilder.bytecode.InterfaceContract;
-import com.theoryinpractise.halbuilder.bytecode.InterfaceRenderer;
+import com.theoryinpractise.halbuilder.api.Contract;
+import com.theoryinpractise.halbuilder.api.Link;
+import com.theoryinpractise.halbuilder.api.ReadableResource;
+import com.theoryinpractise.halbuilder.api.Relatable;
+import com.theoryinpractise.halbuilder.api.RenderableResource;
+import com.theoryinpractise.halbuilder.api.Resource;
+import com.theoryinpractise.halbuilder.api.ResourceException;
+import com.theoryinpractise.halbuilder.factory.ResourceFactory;
+import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceContract;
+import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceRenderer;
 
 import javax.annotation.Nullable;
 import java.net.MalformedURLException;
@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
 
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Ordering.usingToString;
-import static com.theoryinpractise.halbuilder.ResourceFactory.WHITESPACE_SPLITTER;
+import static com.theoryinpractise.halbuilder.factory.ResourceFactory.WHITESPACE_SPLITTER;
 import static java.lang.String.format;
 
 

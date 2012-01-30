@@ -1,13 +1,16 @@
-package com.theoryinpractise.halbuilder;
+package com.theoryinpractise.halbuilder.factory;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
-import com.theoryinpractise.halbuilder.json.JsonResourceReader;
-import com.theoryinpractise.halbuilder.resources.MutableResource;
-import com.theoryinpractise.halbuilder.xml.XmlResourceReader;
+import com.theoryinpractise.halbuilder.api.ReadableResource;
+import com.theoryinpractise.halbuilder.api.Resource;
+import com.theoryinpractise.halbuilder.api.ResourceException;
+import com.theoryinpractise.halbuilder.impl.json.JsonResourceReader;
+import com.theoryinpractise.halbuilder.impl.resources.MutableResource;
+import com.theoryinpractise.halbuilder.impl.xml.XmlResourceReader;
 
 import java.io.BufferedReader;
 import java.io.Reader;

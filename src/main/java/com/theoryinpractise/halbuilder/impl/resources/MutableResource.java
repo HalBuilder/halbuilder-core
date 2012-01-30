@@ -1,9 +1,9 @@
-package com.theoryinpractise.halbuilder.resources;
+package com.theoryinpractise.halbuilder.impl.resources;
 
-import com.theoryinpractise.halbuilder.Link;
-import com.theoryinpractise.halbuilder.Resource;
-import com.theoryinpractise.halbuilder.ResourceException;
-import com.theoryinpractise.halbuilder.ResourceFactory;
+import com.theoryinpractise.halbuilder.api.Link;
+import com.theoryinpractise.halbuilder.api.Resource;
+import com.theoryinpractise.halbuilder.api.ResourceException;
+import com.theoryinpractise.halbuilder.factory.ResourceFactory;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -13,7 +13,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 
-import static com.theoryinpractise.halbuilder.ResourceFactory.WHITESPACE_SPLITTER;
+import static com.theoryinpractise.halbuilder.factory.ResourceFactory.WHITESPACE_SPLITTER;
 import static java.lang.String.format;
 
 public class MutableResource extends BaseResource implements Resource {

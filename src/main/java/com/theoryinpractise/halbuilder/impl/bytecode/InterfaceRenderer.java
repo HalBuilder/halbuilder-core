@@ -1,16 +1,16 @@
-package com.theoryinpractise.halbuilder.bytecode;
+package com.theoryinpractise.halbuilder.impl.bytecode;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.theoryinpractise.halbuilder.Renderer;
-import com.theoryinpractise.halbuilder.ReadableResource;
+import com.theoryinpractise.halbuilder.api.ReadableResource;
+import com.theoryinpractise.halbuilder.api.Renderer;
 
 import java.io.Writer;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
-import static com.theoryinpractise.halbuilder.bytecode.InterfaceSupport.derivePropertyNameFromMethod;
+import static com.theoryinpractise.halbuilder.impl.bytecode.InterfaceSupport.derivePropertyNameFromMethod;
 
 /**
  * Java Interface based "renderer", this will render the resource as a Proxy to a Java interface.
