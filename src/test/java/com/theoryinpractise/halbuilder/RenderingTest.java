@@ -63,13 +63,14 @@ public class RenderingTest {
     @Test
     public void testCustomerHal() {
 
-        ReadableResource party = newBaseResource("customer/123456")
+        RenderableResource party = newBaseResource("customer/123456")
                 .withLink("?users", "ns:users")
                 .withProperty("id", 123456)
                 .withProperty("age", 33)
                 .withProperty("name", "Example Resource")
                 .withProperty("optional", Boolean.TRUE)
-                .withProperty("expired", Boolean.FALSE);
+                .withProperty("expired", Boolean.FALSE)
+                .asRenderableResource();
 
         assertThat(party.renderXml()).isEqualTo(exampleXml);
         assertThat(party.renderJson()).isEqualTo(exampleJson);
@@ -80,9 +81,10 @@ public class RenderingTest {
     @Test
     public void testHalWithBean() {
 
-        ReadableResource party = newBaseResource("customer/123456")
+        RenderableResource party = newBaseResource("customer/123456")
                 .withLink("?users", "ns:users")
-                .withBean(new Customer(123456, "Example Resource", 33));
+                .withBean(new Customer(123456, "Example Resource", 33))
+                .asRenderableResource();
 
         assertThat(party.renderXml()).isEqualTo(exampleXml);
         assertThat(party.renderJson()).isEqualTo(exampleJson);
@@ -92,9 +94,10 @@ public class RenderingTest {
     @Test
     public void testHalWithFields() {
 
-        ReadableResource party = newBaseResource("customer/123456")
+        RenderableResource party = newBaseResource("customer/123456")
                 .withLink("?users", "ns:users")
-                .withFields(new OtherCustomer(123456, "Example Resource", 33));
+                .withFields(new OtherCustomer(123456, "Example Resource", 33))
+                .asRenderableResource();
 
         assertThat(party.renderXml()).isEqualTo(exampleXml);
         assertThat(party.renderJson()).isEqualTo(exampleJson);
@@ -104,7 +107,7 @@ public class RenderingTest {
     @Test
     public void testHalWithSubResources() {
 
-        ReadableResource party = newBaseResource("customer/123456")
+        RenderableResource party = newBaseResource("customer/123456")
                 .withLink("?users", "ns:users")
                 .withSubresource("ns:user role:admin", resourceFactory
                         .newHalResource("/user/11")
@@ -112,7 +115,8 @@ public class RenderingTest {
                         .withProperty("name", "Example User")
                         .withProperty("expired", false)
                         .withProperty("age", 32)
-                        .withProperty("optional", true));
+                        .withProperty("optional", true))
+                .asRenderableResource();
 
         assertThat(party.renderXml()).isEqualTo(exampleWithSubresourceXml);
         assertThat(party.renderJson()).isEqualTo(exampleWithSubresourceJson);
@@ -122,9 +126,10 @@ public class RenderingTest {
     @Test
     public void testHalWithBeanSubResources() {
 
-        ReadableResource party = newBaseResource("customer/123456")
+        RenderableResource party = newBaseResource("customer/123456")
                 .withLink("?users", "ns:users")
-                .withBeanBasedSubresource("ns:user role:admin", "/user/11", new Customer(11, "Example User", 32));
+                .withBeanBasedSubresource("ns:user role:admin", "/user/11", new Customer(11, "Example User", 32))
+                .asRenderableResource();
 
         assertThat(party.renderXml()).isEqualTo(exampleWithSubresourceXml);
         assertThat(party.renderJson()).isEqualTo(exampleWithSubresourceJson);

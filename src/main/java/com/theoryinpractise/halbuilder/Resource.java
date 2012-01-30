@@ -1,7 +1,5 @@
 package com.theoryinpractise.halbuilder;
 
-import com.theoryinpractise.halbuilder.resources.MutableResource;
-
 public interface Resource extends ReadableResource {
 
     Resource withLink(String url, String rel);
@@ -22,5 +20,4 @@ public interface Resource extends ReadableResource {
 
     Resource withSubresource(String rel, Resource resource);
 
-    ReadableResource asImmutableResource();
 }

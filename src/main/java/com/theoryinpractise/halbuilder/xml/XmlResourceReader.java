@@ -1,12 +1,15 @@
 package com.theoryinpractise.halbuilder.xml;
 
-import com.theoryinpractise.halbuilder.ResourceFactory;
-import com.theoryinpractise.halbuilder.ResourceReader;
-import com.theoryinpractise.halbuilder.resources.MutableResource;
 import com.theoryinpractise.halbuilder.ReadableResource;
 import com.theoryinpractise.halbuilder.Resource;
 import com.theoryinpractise.halbuilder.ResourceException;
-import org.jdom.*;
+import com.theoryinpractise.halbuilder.ResourceFactory;
+import com.theoryinpractise.halbuilder.ResourceReader;
+import com.theoryinpractise.halbuilder.resources.MutableResource;
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.Namespace;
 import org.jdom.input.SAXBuilder;
 
 import java.io.IOException;
@@ -24,7 +27,7 @@ public class XmlResourceReader implements ResourceReader {
         try {
             Document d = new SAXBuilder().build(reader);
             Element root = d.getRootElement();
-            return readResource(root).asImmutableResource();
+            return readResource(root).asRenderableResource();
         } catch (JDOMException e) {
             throw new ResourceException(e);
         } catch (IOException e) {

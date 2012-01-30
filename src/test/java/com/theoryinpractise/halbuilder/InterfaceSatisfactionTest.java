@@ -16,8 +16,11 @@ public class InterfaceSatisfactionTest {
 
     public static interface IPerson {
         Integer getAge();
+
         Boolean getExpired();
+
         Integer getId();
+
         String getName();
     }
 
@@ -35,7 +38,7 @@ public class InterfaceSatisfactionTest {
 
     @DataProvider
     public Object[][] providerSatisfactionData() {
-        return new Object[][] {
+        return new Object[][]{
                 {IPerson.class, true},
                 {INamed.class, true},
                 {IJob.class, false},
@@ -82,7 +85,8 @@ public class InterfaceSatisfactionTest {
 
     @Test
     public void testClassRendering() {
-        ReadableResource resource = resourceFactory.newHalResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("example.xml")));
+        RenderableResource resource = resourceFactory.newHalResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("example.xml")))
+                                                     .asRenderableResource();
 
         assertThat(resource.renderClass(INamed.class).get().name()).isEqualTo("Example Resource");
         assertThat(resource.renderClass(IPerson.class).get().getName()).isEqualTo("Example Resource");

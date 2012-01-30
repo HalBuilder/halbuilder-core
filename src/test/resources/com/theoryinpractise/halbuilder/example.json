@@ -1,17 +1,20 @@
 {
-  "_curies" : {
-    "ns" : "https://example.com/apidocs/accounts",
-    "role" : "https://example.com/apidocs/roles"
-  },
   "_links" : {
+    "curie" : [ {
+      "href" : "https://example.com/apidocs/accounts",
+      "name" : "ns"
+    }, {
+      "href" : "https://example.com/apidocs/roles",
+      "name" : "role"
+    } ],
     "self" : {
-      "_href" : "https://example.com/api/customer/123456"
+      "href" : "https://example.com/api/customer/123456"
     },
     "ns:parent" : {
-      "_href" : "https://example.com/api/customer/1234"
+      "href" : "https://example.com/api/customer/1234"
     },
     "ns:users" : {
-      "_href" : "https://example.com/api/customer/123456?users"
+      "href" : "https://example.com/api/customer/123456?users"
     }
   },
   "age" : 33,

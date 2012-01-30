@@ -1,13 +1,23 @@
 package com.theoryinpractise.halbuilder.resources;
 
+import com.google.common.base.Optional;
 import com.theoryinpractise.halbuilder.Link;
+import com.theoryinpractise.halbuilder.RenderableResource;
+import com.theoryinpractise.halbuilder.Renderer;
 import com.theoryinpractise.halbuilder.Resource;
 import com.theoryinpractise.halbuilder.ResourceFactory;
+import com.theoryinpractise.halbuilder.bytecode.InterfaceContract;
+import com.theoryinpractise.halbuilder.bytecode.InterfaceRenderer;
+import com.theoryinpractise.halbuilder.json.JsonRenderer;
+import com.theoryinpractise.halbuilder.xml.XmlRenderer;
 
+import java.io.StringWriter;
 import java.util.List;
 import java.util.Map;
 
-public class ImmutableResource extends MutableResource {
+public class ImmutableResource extends BaseResource implements RenderableResource {
+
+    private final Link selfLink;
 
     public ImmutableResource(ResourceFactory resourceFactory,
                              Map<String, String> namespaces, List<Link> links, Map<String, Object> properties, List<Resource> resources) {
@@ -16,50 +26,41 @@ public class ImmutableResource extends MutableResource {
         this.links = links;
         this.properties = properties;
         this.resources = resources;
+
+        this.selfLink = super.getSelfLink();
     }
 
-    @Override
-    public MutableResource withLink(String href, String rel) {
-        throw new UnsupportedOperationException("ImmutableResources cannot be mutated.");
+    public Link getSelfLink() {
+        return selfLink;
     }
 
-    @Override
-    public MutableResource withLink(Link link) {
-        throw new UnsupportedOperationException("ImmutableResources cannot be mutated.");
+    /**
+     * Renders the current Resource as a proxy to the provider interface
+     *
+     * @param anInterface The interface we wish to proxy the resource as
+     * @return A Guava Optional of the rendered class, this will be absent if the interface doesn't satisfy the interface
+     */
+    public <T> Optional<T> renderClass(Class<T> anInterface) {
+        if (InterfaceContract.newInterfaceContract(anInterface).isSatisfiedBy(this)) {
+            return InterfaceRenderer.newInterfaceRenderer(anInterface).render(this, null);
+        } else {
+            return Optional.absent();
+        }
     }
 
-    @Override
-    public Resource withProperty(String name, Object value) {
-        throw new UnsupportedOperationException("ImmutableResources cannot be mutated.");
+    public String renderJson() {
+        return renderAsString(new JsonRenderer());
     }
 
-    @Override
-    public Resource withBean(Object value) {
-        throw new UnsupportedOperationException("ImmutableResources cannot be mutated.");
+    public String renderXml() {
+        return renderAsString(new XmlRenderer());
     }
 
-    @Override
-    public Resource withFields(Object value) {
-        throw new UnsupportedOperationException("ImmutableResources cannot be mutated.");
+    private String renderAsString(final Renderer renderer) {
+        validateNamespaces(this);
+        StringWriter sw = new StringWriter();
+        renderer.render(this, sw);
+        return sw.toString();
     }
 
-    @Override
-    public Resource withFieldBasedSubresource(String rel, String href, Object o) {
-        throw new UnsupportedOperationException("ImmutableResources cannot be mutated.");
-    }
-
-    @Override
-    public Resource withBeanBasedSubresource(String rel, String href, Object o) {
-        throw new UnsupportedOperationException("ImmutableResources cannot be mutated.");
-    }
-
-    @Override
-    public Resource withNamespace(String namespace, String href) {
-        throw new UnsupportedOperationException("ImmutableResources cannot be mutated.");
-    }
-
-    @Override
-    public MutableResource withSubresource(String rel, Resource resource) {
-        throw new UnsupportedOperationException("ImmutableResources cannot be mutated.");
-    }
 }

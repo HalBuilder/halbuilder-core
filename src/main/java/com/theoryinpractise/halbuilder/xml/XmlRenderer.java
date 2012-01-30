@@ -56,10 +56,19 @@ public class XmlRenderer<T> implements Renderer<T> {
         // add links
         List<Link> links = resource.getLinks();
         for (Link link : links) {
-            Element linkElement = new Element("link");
-            if (!link.getRel().contains("self")) {
-                linkElement.setAttribute("rel", link.getRel());
-                linkElement.setAttribute("href", link.getHref());
+            Element linkElement = new Element(LINK);
+            if (!link.getRel().contains(SELF)) {
+                linkElement.setAttribute(REL, link.getRel());
+                linkElement.setAttribute(HREF, link.getHref());
+                if (link.getName().isPresent()) {
+                    linkElement.setAttribute(NAME, link.getName().get());
+                }
+                if (link.getTitle().isPresent()) {
+                    linkElement.setAttribute(TITLE, link.getTitle().get());
+                }
+                if (link.getHreflang().isPresent()) {
+                    linkElement.setAttribute(HREFLANG, link.getHreflang().get());
+                }
                 resourceElement.addContent(linkElement);
             }
         }

@@ -26,11 +26,6 @@ import java.util.Map;
 
 public class JsonRenderer<T> implements Renderer<T> {
 
-    public static final String HREF = "_href";
-    public static final String CURIES = "_curies";
-    public static final String LINKS = "_links";
-    public static final String EMBEDDED = "_embedded";
-
     public Optional<T> render(ReadableResource resource, Writer writer) {
 
         JsonFactory f = new JsonFactory();
@@ -54,19 +49,22 @@ public class JsonRenderer<T> implements Renderer<T> {
         final Link selfLink = resource.getSelfLink();
         final String href = selfLink.getHref();
 
-        // Only include namespaces when not embedded
-        if (!embedded && !resource.getNamespaces().isEmpty()) {
-            g.writeObjectFieldStart(CURIES);
-            for (Map.Entry<String, String> entry : resource.getNamespaces().entrySet()) {
-                g.writeStringField(entry.getKey(), entry.getValue());
-            }
-            g.writeEndObject();
-        }
-
-        if (!resource.getCanonicalLinks().isEmpty()) {
+        if (!resource.getCanonicalLinks().isEmpty() || (!embedded && !resource.getNamespaces().isEmpty())) {
             g.writeObjectFieldStart(LINKS);
-            List<Link> links = resource.getLinks();
 
+            List<Link> links = Lists.newArrayList();
+
+            // Include namespaces as links when not embedded
+            if (!embedded) {
+                for (Map.Entry<String, String> entry : resource.getNamespaces().entrySet()) {
+                    links.add(new Link(entry.getValue(), CURIE, Optional.of(entry.getKey()), Optional.<String>absent(), Optional.<String>absent()));
+                }
+            }
+
+            // Add resource links
+            links.addAll(resource.getLinks());
+
+            // Partition resource links by rel
             Multimap<String, Link> linkMap = Multimaps.index(links, new Function<Link, String>() {
                 public String apply(@Nullable Link link) {
                     return link.getRel();
@@ -74,8 +72,6 @@ public class JsonRenderer<T> implements Renderer<T> {
             });
 
             for (Map.Entry<String, Collection<Link>> linkEntry : linkMap.asMap().entrySet()) {
-
-
                 if (linkEntry.getValue().size() == 1) {
                     g.writeObjectFieldStart(linkEntry.getKey());
                     g.writeStringField(HREF, linkEntry.getValue().iterator().next().getHref());
@@ -85,6 +81,15 @@ public class JsonRenderer<T> implements Renderer<T> {
                     for (Link link : linkEntry.getValue()) {
                         g.writeStartObject();
                         g.writeStringField(HREF, link.getHref());
+                        if (link.getName().isPresent()) {
+                            g.writeStringField(NAME, link.getName().get());
+                        }
+                        if (link.getTitle().isPresent()) {
+                            g.writeStringField(TITLE, link.getTitle().get());
+                        }
+                        if (link.getHreflang().isPresent()) {
+                            g.writeStringField(HREFLANG, link.getHreflang().get());
+                        }
                         g.writeEndObject();
                     }
                     g.writeEndArray();
@@ -118,14 +123,14 @@ public class JsonRenderer<T> implements Renderer<T> {
                 if (resourceEntry.getValue().size() == 1) {
                     g.writeObjectFieldStart(resourceEntry.getKey());
                     ReadableResource subResource = resourceEntry.getValue().iterator().next();
-                    renderJson( g, subResource, true);
+                    renderJson(g, subResource, true);
                     g.writeEndObject();
                 } else {
                     g.writeArrayFieldStart(resourceEntry.getKey());
                     for (ReadableResource halResource : resourceEntry.getValue()) {
                         g.writeStartObject();
                         ReadableResource subResource = resourceEntry.getValue().iterator().next();
-                        renderJson( g, subResource, true);
+                        renderJson(g, subResource, true);
                         g.writeEndObject();
                     }
                 }

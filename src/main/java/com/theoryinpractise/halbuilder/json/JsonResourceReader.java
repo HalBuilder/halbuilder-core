@@ -27,7 +27,6 @@ public class JsonResourceReader implements ResourceReader {
 
             MutableResource resource = readResource(rootNode);
 
-
             return resource.asImmutableResource();
         } catch (Exception e) {
             throw new ResourceException(e);
@@ -36,8 +35,7 @@ public class JsonResourceReader implements ResourceReader {
     }
 
     private MutableResource readResource(JsonNode rootNode) {
-        String href = rootNode.get("_href").asText();
-        MutableResource resource = new MutableResource(resourceFactory, href);
+        MutableResource resource = new MutableResource(resourceFactory);
 
         readNamespaces(resource, rootNode);
         readLinks(resource, rootNode);

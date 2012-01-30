@@ -10,7 +10,7 @@ import java.util.List;
 
 import static org.fest.assertions.Assertions.assertThat;
 
-public class CollatedLinks {
+public class CollatedLinksTest {
 
     @Test
     public void testCollatedLinks() {

@@ -21,13 +21,11 @@ public interface ReadableResource extends Relatable {
 
     List<Resource> getResources();
 
-    <T> Optional<T> renderClass(Class<T> anInterface);
-
-    String renderJson();
-
-    String renderXml();
-
     <T> boolean isSatisfiedBy(Contract contract);
 
     <T, V> Optional<V> ifSatisfiedBy(Class<T> anInterface, Function<T, V> function);
+
+    RenderableResource asRenderableResource();
+
+    ReadableResource asImmutableResource();
 }
