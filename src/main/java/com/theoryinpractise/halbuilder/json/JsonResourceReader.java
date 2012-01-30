@@ -55,7 +55,7 @@ public class JsonResourceReader implements ResourceReader {
         if (rootNode.has(LINKS)) {
             JsonNode linksNode = rootNode.get(LINKS);
             if (linksNode.has(CURIE)) {
-                JsonNode curieNode = rootNode.get(CURIE);
+                JsonNode curieNode = linksNode.get(CURIE);
 
                 if (curieNode.isArray()) {
                     Iterator<JsonNode> values = curieNode.getElements();
