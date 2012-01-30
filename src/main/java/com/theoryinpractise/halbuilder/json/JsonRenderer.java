@@ -4,7 +4,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -23,6 +22,17 @@ import java.io.Writer;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
+import static com.theoryinpractise.halbuilder.Fields.CURIE;
+import static com.theoryinpractise.halbuilder.Fields.EMBEDDED;
+import static com.theoryinpractise.halbuilder.Fields.HREF;
+import static com.theoryinpractise.halbuilder.Fields.HREFLANG;
+import static com.theoryinpractise.halbuilder.Fields.LINKS;
+import static com.theoryinpractise.halbuilder.Fields.NAME;
+import static com.theoryinpractise.halbuilder.Fields.SELF;
+import static com.theoryinpractise.halbuilder.Fields.TITLE;
+import static com.theoryinpractise.halbuilder.ResourceFactory.WHITESPACE_SPLITTER;
+
 
 public class JsonRenderer<T> implements Renderer<T> {
 
@@ -107,11 +117,11 @@ public class JsonRenderer<T> implements Renderer<T> {
 
             Multimap<String, Resource> resourceMap = Multimaps.index(resource.getResources(), new Function<Resource, String>() {
                 public String apply(@Nullable Resource resource) {
-                    List<String> relTypes = Lists.newArrayList(Splitter.on(" ").split(resource.getRel()));
+                    List<String> relTypes = Lists.newArrayList(WHITESPACE_SPLITTER.split(resource.getRel()));
 
                     Iterables.removeIf(relTypes, new Predicate<String>() {
                         public boolean apply(@Nullable String s) {
-                            return "self".equals(s);
+                            return SELF.equals(s);
                         }
                     });
 

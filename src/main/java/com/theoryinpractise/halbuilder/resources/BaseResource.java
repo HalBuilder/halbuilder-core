@@ -4,7 +4,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.google.common.base.Splitter;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -36,7 +35,9 @@ import java.util.regex.Pattern;
 
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Ordering.usingToString;
+import static com.theoryinpractise.halbuilder.ResourceFactory.WHITESPACE_SPLITTER;
 import static java.lang.String.format;
+
 
 public abstract class BaseResource implements ReadableResource {
 
@@ -88,7 +89,7 @@ public abstract class BaseResource implements ReadableResource {
         final String curiedRel = currieHref(resolvedRelType);
         return ImmutableList.copyOf(Iterables.filter(getLinks(), new Predicate<Relatable>() {
             public boolean apply(@Nullable Relatable relatable) {
-                return Iterables.contains(Splitter.on(" ").split(relatable.getRel()), curiedRel);
+                return Iterables.contains(WHITESPACE_SPLITTER.split(relatable.getRel()), curiedRel);
             }
         }));
     }
@@ -148,7 +149,7 @@ public abstract class BaseResource implements ReadableResource {
     }
 
     private void validateNamespaces(String sourceRel) {
-        for (String rel : Splitter.on(" ").split(sourceRel)) {
+        for (String rel : WHITESPACE_SPLITTER.split(sourceRel)) {
             if (!rel.contains("://") && rel.contains(":")) {
                 String[] relPart = rel.split(":");
                 if (!namespaces.keySet().contains(relPart[0])) {

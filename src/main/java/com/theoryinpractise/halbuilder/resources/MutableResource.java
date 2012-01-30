@@ -1,6 +1,5 @@
 package com.theoryinpractise.halbuilder.resources;
 
-import com.google.common.base.Splitter;
 import com.theoryinpractise.halbuilder.Link;
 import com.theoryinpractise.halbuilder.Resource;
 import com.theoryinpractise.halbuilder.ResourceException;
@@ -14,6 +13,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 
+import static com.theoryinpractise.halbuilder.ResourceFactory.WHITESPACE_SPLITTER;
 import static java.lang.String.format;
 
 public class MutableResource extends BaseResource implements Resource {
@@ -30,7 +30,7 @@ public class MutableResource extends BaseResource implements Resource {
     // TODO Should split on ANY whitespace, so rel="foo     bar" should work.
     public MutableResource withLink(String href, String rel) {
         String resolvedHref = resolvableUri.matcher(href).matches() ? resolveRelativeHref(href) : href;
-        for (String reltype : Splitter.on(" ").split(rel)) {
+        for (String reltype : WHITESPACE_SPLITTER.split(rel)) {
             String resolvedRelType = resolvableUri.matcher(reltype).matches() ? resolveRelativeHref(reltype) : reltype;
             links.add(new Link(resolvedHref, resolvedRelType));
         }
@@ -39,7 +39,7 @@ public class MutableResource extends BaseResource implements Resource {
     }
 
     public MutableResource withLink(Link link) {
-        for (String reltype : Splitter.on(" ").split(link.getRel())) {
+        for (String reltype : WHITESPACE_SPLITTER.split(link.getRel())) {
             links.add(new Link(link.getHref(), reltype));
         }
 

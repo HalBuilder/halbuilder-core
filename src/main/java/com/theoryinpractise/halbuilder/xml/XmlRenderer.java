@@ -16,6 +16,15 @@ import java.io.Writer;
 import java.util.List;
 import java.util.Map;
 
+import static com.theoryinpractise.halbuilder.Fields.HREF;
+import static com.theoryinpractise.halbuilder.Fields.HREFLANG;
+import static com.theoryinpractise.halbuilder.Fields.LINK;
+import static com.theoryinpractise.halbuilder.Fields.NAME;
+import static com.theoryinpractise.halbuilder.Fields.REL;
+import static com.theoryinpractise.halbuilder.Fields.SELF;
+import static com.theoryinpractise.halbuilder.Fields.TITLE;
+
+
 public class XmlRenderer<T> implements Renderer<T> {
 
     public Optional<T> render(ReadableResource resource, Writer writer) {

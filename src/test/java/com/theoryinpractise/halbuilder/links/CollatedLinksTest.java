@@ -44,7 +44,19 @@ public class CollatedLinksTest {
                 .satisfies(new ContainsRelCondition("bar"))
                 .satisfies(new ContainsRelCondition("foo"));
 
+    }
 
+    @Test
+    public void testMultiSpacedRelsSeparateLinks() {
+
+        Resource resource = new ResourceFactory().newHalResource("/foo")
+                                                 .withLink("/bar", "bar                  foo");
+
+        assertThat(resource.getCanonicalLinks())
+                .isNotEmpty()
+                .hasSize(3)
+                .satisfies(new ContainsRelCondition("bar"))
+                .satisfies(new ContainsRelCondition("foo"));
 
     }
 

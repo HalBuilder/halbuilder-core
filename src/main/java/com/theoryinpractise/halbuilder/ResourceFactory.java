@@ -1,5 +1,6 @@
 package com.theoryinpractise.halbuilder;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -17,6 +18,9 @@ import java.util.TreeMap;
 import static java.lang.String.format;
 
 public class ResourceFactory {
+
+    public static final Splitter WHITESPACE_SPLITTER = Splitter.onPattern("\\s")
+                                                               .omitEmptyStrings();
 
     private TreeMap<String, String> namespaces = Maps.newTreeMap(Ordering.usingToString());
     private Multimap<String, String> links = ArrayListMultimap.create();

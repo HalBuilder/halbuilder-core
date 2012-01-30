@@ -12,6 +12,13 @@ import java.io.Reader;
 import java.util.Iterator;
 import java.util.Map;
 
+import static com.theoryinpractise.halbuilder.Fields.CURIE;
+import static com.theoryinpractise.halbuilder.Fields.EMBEDDED;
+import static com.theoryinpractise.halbuilder.Fields.HREF;
+import static com.theoryinpractise.halbuilder.Fields.LINKS;
+import static com.theoryinpractise.halbuilder.Fields.NAME;
+
+
 public class JsonResourceReader implements ResourceReader {
     private ResourceFactory resourceFactory;
 
@@ -45,28 +52,39 @@ public class JsonResourceReader implements ResourceReader {
     }
 
     private void readNamespaces(MutableResource resource, JsonNode rootNode) {
-        if (rootNode.has("_curies")) {
-            Iterator<Map.Entry<String, JsonNode>> fields = rootNode.get("_curies").getFields();
-            while (fields.hasNext()) {
-                Map.Entry<String, JsonNode> next = fields.next();
-                resource.withNamespace(next.getKey(), next.getValue().asText());
+        if (rootNode.has(LINKS)) {
+            JsonNode linksNode = rootNode.get(LINKS);
+            if (linksNode.has(CURIE)) {
+                JsonNode curieNode = rootNode.get(CURIE);
+
+                if (curieNode.isArray()) {
+                    Iterator<JsonNode> values = curieNode.getElements();
+                    while (values.hasNext()) {
+                        JsonNode valueNode = values.next();
+                        resource.withNamespace(valueNode.get(NAME).asText(), valueNode.get(HREF).asText());
+                    }
+                } else {
+                    resource.withNamespace(curieNode.get(NAME).asText(), curieNode.get(HREF).asText());
+                }
             }
         }
     }
 
     private void readLinks(MutableResource resource, JsonNode rootNode) {
-        if (rootNode.has("_links")) {
-            Iterator<Map.Entry<String, JsonNode>> fields = rootNode.get("_links").getFields();
+        if (rootNode.has(LINKS)) {
+            Iterator<Map.Entry<String, JsonNode>> fields = rootNode.get(LINKS).getFields();
             while (fields.hasNext()) {
                 Map.Entry<String, JsonNode> keyNode = fields.next();
-                if (keyNode.getValue().isArray()) {
-                    Iterator<JsonNode> values = keyNode.getValue().getElements();
-                    while (values.hasNext()) {
-                        JsonNode valueNode = values.next();
-                        resource.withLink(valueNode.get("_href").asText(), keyNode.getKey());
+                if (!CURIE.equals((keyNode.getKey()))) {
+                    if (keyNode.getValue().isArray()) {
+                        Iterator<JsonNode> values = keyNode.getValue().getElements();
+                        while (values.hasNext()) {
+                            JsonNode valueNode = values.next();
+                            resource.withLink(valueNode.get(HREF).asText(), keyNode.getKey());
+                        }
+                    } else {
+                        resource.withLink(keyNode.getValue().get(HREF).asText(), keyNode.getKey());
                     }
-                } else {
-                    resource.withLink(keyNode.getValue().get("_href").asText(), keyNode.getKey());
                 }
             }
         }
@@ -86,8 +104,8 @@ public class JsonResourceReader implements ResourceReader {
     }
 
     private void readResources(MutableResource resource, JsonNode rootNode) {
-        if (rootNode.has("_embedded")) {
-            Iterator<Map.Entry<String, JsonNode>> fields = rootNode.get("_embedded").getFields();
+        if (rootNode.has(EMBEDDED)) {
+            Iterator<Map.Entry<String, JsonNode>> fields = rootNode.get(EMBEDDED).getFields();
             while (fields.hasNext()) {
                 Map.Entry<String, JsonNode> keyNode = fields.next();
                 if (keyNode.getValue().isArray()) {
