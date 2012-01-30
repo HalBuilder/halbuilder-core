@@ -27,7 +27,12 @@ public class MutableResource extends BaseResource implements Resource {
         super(resourceFactory);
     }
 
-    // TODO Should split on ANY whitespace, so rel="foo     bar" should work.
+    /**
+     * Add a link to this resource
+     * @param href The target href for the link, relative to the href of this resource.
+     * @param rel
+     * @return
+     */
     public MutableResource withLink(String href, String rel) {
         String resolvedHref = resolvableUri.matcher(href).matches() ? resolveRelativeHref(href) : href;
         for (String reltype : WHITESPACE_SPLITTER.split(rel)) {
@@ -97,11 +102,17 @@ public class MutableResource extends BaseResource implements Resource {
         return withSubresource(rel, resourceFactory.newHalResource(href).withBean(o));
     }
 
+    /**
+     * Adds a new namespace
+     * @param namespace
+     * @param href The target href of the namespace being added. This may be relative to the resourceFactories baseref
+     * @return
+     */
     public Resource withNamespace(String namespace, String href) {
         if (namespaces.containsKey(namespace)) {
             throw new ResourceException(format("Duplicate namespace '%s' found for resource", namespace));
         }
-        namespaces.put(namespace, resolveRelativeHref(href));
+        namespaces.put(namespace, resolveRelativeHref(resourceFactory.getBaseHref(), href));
         return this;
     }
 
