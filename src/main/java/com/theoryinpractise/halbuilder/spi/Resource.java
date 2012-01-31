@@ -1,8 +1,12 @@
-package com.theoryinpractise.halbuilder.api;
+package com.theoryinpractise.halbuilder.spi;
+
+import com.google.common.base.Optional;
 
 public interface Resource extends ReadableResource {
 
     Resource withLink(String url, String rel);
+
+    Resource withLink(String href, String rel, Optional<String> name, Optional<String> title, Optional<String> hreflang);
 
     Resource withLink(Link link);
 

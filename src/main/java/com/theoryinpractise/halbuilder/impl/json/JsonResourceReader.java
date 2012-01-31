@@ -1,10 +1,10 @@
 package com.theoryinpractise.halbuilder.impl.json;
 
-import com.theoryinpractise.halbuilder.api.ReadableResource;
-import com.theoryinpractise.halbuilder.api.ResourceException;
-import com.theoryinpractise.halbuilder.api.ResourceReader;
-import com.theoryinpractise.halbuilder.factory.ResourceFactory;
+import com.theoryinpractise.halbuilder.ResourceFactory;
+import com.theoryinpractise.halbuilder.impl.api.ResourceReader;
 import com.theoryinpractise.halbuilder.impl.resources.MutableResource;
+import com.theoryinpractise.halbuilder.spi.ReadableResource;
+import com.theoryinpractise.halbuilder.spi.ResourceException;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 
@@ -12,11 +12,11 @@ import java.io.Reader;
 import java.util.Iterator;
 import java.util.Map;
 
-import static com.theoryinpractise.halbuilder.api.Fields.CURIE;
-import static com.theoryinpractise.halbuilder.api.Fields.EMBEDDED;
-import static com.theoryinpractise.halbuilder.api.Fields.HREF;
-import static com.theoryinpractise.halbuilder.api.Fields.LINKS;
-import static com.theoryinpractise.halbuilder.api.Fields.NAME;
+import static com.theoryinpractise.halbuilder.impl.api.Fields.CURIE;
+import static com.theoryinpractise.halbuilder.impl.api.Fields.EMBEDDED;
+import static com.theoryinpractise.halbuilder.impl.api.Fields.HREF;
+import static com.theoryinpractise.halbuilder.impl.api.Fields.LINKS;
+import static com.theoryinpractise.halbuilder.impl.api.Fields.NAME;
 
 
 public class JsonResourceReader implements ResourceReader {

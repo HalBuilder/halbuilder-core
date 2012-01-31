@@ -1,8 +1,7 @@
-package com.theoryinpractise.halbuilder.curries;
+package com.theoryinpractise.halbuilder;
 
-import com.theoryinpractise.halbuilder.api.Link;
-import com.theoryinpractise.halbuilder.api.Resource;
-import com.theoryinpractise.halbuilder.factory.ResourceFactory;
+import com.theoryinpractise.halbuilder.spi.Link;
+import com.theoryinpractise.halbuilder.spi.Resource;
 import org.testng.annotations.Test;
 
 import static org.fest.assertions.Assertions.assertThat;

@@ -1,20 +1,20 @@
-package com.theoryinpractise.halbuilder.factory;
+package com.theoryinpractise.halbuilder;
 
 import com.google.common.base.Splitter;
-import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
-import com.theoryinpractise.halbuilder.api.ReadableResource;
-import com.theoryinpractise.halbuilder.api.Resource;
-import com.theoryinpractise.halbuilder.api.ResourceException;
 import com.theoryinpractise.halbuilder.impl.json.JsonResourceReader;
 import com.theoryinpractise.halbuilder.impl.resources.MutableResource;
 import com.theoryinpractise.halbuilder.impl.xml.XmlResourceReader;
+import com.theoryinpractise.halbuilder.spi.Link;
+import com.theoryinpractise.halbuilder.spi.ReadableResource;
+import com.theoryinpractise.halbuilder.spi.Resource;
+import com.theoryinpractise.halbuilder.spi.ResourceException;
 
 import java.io.BufferedReader;
 import java.io.Reader;
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -26,7 +26,7 @@ public class ResourceFactory {
                                                                .omitEmptyStrings();
 
     private TreeMap<String, String> namespaces = Maps.newTreeMap(Ordering.usingToString());
-    private Multimap<String, String> links = ArrayListMultimap.create();
+    private List<Link> links = Lists.newArrayList();
     private String baseHref;
 
     public ResourceFactory() {
@@ -49,8 +49,8 @@ public class ResourceFactory {
         return this;
     }
 
-    public ResourceFactory withLink(String rel, String url) {
-        links.put(rel, url);
+    public ResourceFactory withLink(String url, String rel) {
+        links.add(new Link(url, rel));
         return this;
     }
 
@@ -63,10 +63,8 @@ public class ResourceFactory {
         }
 
         // Add factory standard links
-        for (Map.Entry<String, Collection<String>> linkEntry : links.asMap().entrySet()) {
-            for (String url : linkEntry.getValue()) {
-                resource.withLink(linkEntry.getKey(), url);
-            }
+        for (Link link : links) {
+            resource.withLink(link.getHref(), link.getRel(), link.getName(), link.getTitle(), link.getHreflang());
         }
 
         return resource;

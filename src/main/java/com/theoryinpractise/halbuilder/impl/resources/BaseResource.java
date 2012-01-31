@@ -12,16 +12,15 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Table;
-import com.theoryinpractise.halbuilder.api.Contract;
-import com.theoryinpractise.halbuilder.api.Link;
-import com.theoryinpractise.halbuilder.api.ReadableResource;
-import com.theoryinpractise.halbuilder.api.Relatable;
-import com.theoryinpractise.halbuilder.api.RenderableResource;
-import com.theoryinpractise.halbuilder.api.Resource;
-import com.theoryinpractise.halbuilder.api.ResourceException;
-import com.theoryinpractise.halbuilder.factory.ResourceFactory;
+import com.theoryinpractise.halbuilder.ResourceFactory;
 import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceContract;
 import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceRenderer;
+import com.theoryinpractise.halbuilder.spi.Contract;
+import com.theoryinpractise.halbuilder.spi.Link;
+import com.theoryinpractise.halbuilder.spi.ReadableResource;
+import com.theoryinpractise.halbuilder.spi.RenderableResource;
+import com.theoryinpractise.halbuilder.spi.Resource;
+import com.theoryinpractise.halbuilder.spi.ResourceException;
 
 import javax.annotation.Nullable;
 import java.net.MalformedURLException;
@@ -35,14 +34,14 @@ import java.util.regex.Pattern;
 
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Ordering.usingToString;
-import static com.theoryinpractise.halbuilder.factory.ResourceFactory.WHITESPACE_SPLITTER;
+import static com.theoryinpractise.halbuilder.ResourceFactory.WHITESPACE_SPLITTER;
 import static java.lang.String.format;
 
 
 public abstract class BaseResource implements ReadableResource {
 
-    public static final Ordering<Relatable> RELATABLE_ORDERING = Ordering.from(new Comparator<Relatable>() {
-        public int compare(Relatable l1, Relatable l2) {
+    public static final Ordering<Link> RELATABLE_ORDERING = Ordering.from(new Comparator<Link>() {
+        public int compare(Link l1, Link l2) {
             if (l1.getRel().contains("self")) return -1;
             if (l2.getRel().contains("self")) return 1;
             return l1.getRel().compareTo(l2.getRel());
@@ -68,14 +67,6 @@ public abstract class BaseResource implements ReadableResource {
         }
     }
 
-    public String getHref() {
-        return getSelfLink().getHref();
-    }
-
-    public String getRel() {
-        return getSelfLink().getRel();
-    }
-
     public Map<String, String> getNamespaces() {
         return ImmutableMap.copyOf(namespaces);
     }
@@ -87,8 +78,8 @@ public abstract class BaseResource implements ReadableResource {
     public List<Link> getLinksByRel(final String rel) {
         final String resolvedRelType = resolvableUri.matcher(rel).matches() ? resolveRelativeHref(rel) : rel;
         final String curiedRel = currieHref(resolvedRelType);
-        return ImmutableList.copyOf(Iterables.filter(getLinks(), new Predicate<Relatable>() {
-            public boolean apply(@Nullable Relatable relatable) {
+        return ImmutableList.copyOf(Iterables.filter(getLinks(), new Predicate<Link>() {
+            public boolean apply(@Nullable Link relatable) {
                 return Iterables.contains(WHITESPACE_SPLITTER.split(relatable.getRel()), curiedRel);
             }
         }));
@@ -140,7 +131,7 @@ public abstract class BaseResource implements ReadableResource {
     }
 
     protected  void validateNamespaces(ReadableResource resource) {
-        for (Relatable link : resource.getCanonicalLinks()) {
+        for (Link link : resource.getCanonicalLinks()) {
             validateNamespaces(link.getRel());
         }
         for (Resource aResource : resource.getResources()) {
@@ -212,9 +203,4 @@ public abstract class BaseResource implements ReadableResource {
     }
 
 
-    private static class SelfLinkPredicate implements Predicate<Relatable> {
-        public boolean apply(@Nullable Relatable relatable) {
-            return relatable.getRel().contains("self");
-        }
-    }
 }

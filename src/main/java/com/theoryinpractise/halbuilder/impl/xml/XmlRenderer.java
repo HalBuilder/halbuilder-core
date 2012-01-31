@@ -1,10 +1,10 @@
 package com.theoryinpractise.halbuilder.impl.xml;
 
 import com.google.common.base.Optional;
-import com.theoryinpractise.halbuilder.api.Link;
-import com.theoryinpractise.halbuilder.api.ReadableResource;
-import com.theoryinpractise.halbuilder.api.Renderer;
-import com.theoryinpractise.halbuilder.api.Resource;
+import com.theoryinpractise.halbuilder.impl.api.Renderer;
+import com.theoryinpractise.halbuilder.spi.Link;
+import com.theoryinpractise.halbuilder.spi.ReadableResource;
+import com.theoryinpractise.halbuilder.spi.Resource;
 import org.jdom.Element;
 import org.jdom.Namespace;
 import org.jdom.Text;
@@ -16,13 +16,13 @@ import java.io.Writer;
 import java.util.List;
 import java.util.Map;
 
-import static com.theoryinpractise.halbuilder.api.Fields.HREF;
-import static com.theoryinpractise.halbuilder.api.Fields.HREFLANG;
-import static com.theoryinpractise.halbuilder.api.Fields.LINK;
-import static com.theoryinpractise.halbuilder.api.Fields.NAME;
-import static com.theoryinpractise.halbuilder.api.Fields.REL;
-import static com.theoryinpractise.halbuilder.api.Fields.SELF;
-import static com.theoryinpractise.halbuilder.api.Fields.TITLE;
+import static com.theoryinpractise.halbuilder.impl.api.Fields.HREF;
+import static com.theoryinpractise.halbuilder.impl.api.Fields.HREFLANG;
+import static com.theoryinpractise.halbuilder.impl.api.Fields.LINK;
+import static com.theoryinpractise.halbuilder.impl.api.Fields.NAME;
+import static com.theoryinpractise.halbuilder.impl.api.Fields.REL;
+import static com.theoryinpractise.halbuilder.impl.api.Fields.SELF;
+import static com.theoryinpractise.halbuilder.impl.api.Fields.TITLE;
 
 
 public class XmlRenderer<T> implements Renderer<T> {

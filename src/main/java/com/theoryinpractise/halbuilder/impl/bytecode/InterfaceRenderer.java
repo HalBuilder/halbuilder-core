@@ -2,8 +2,8 @@ package com.theoryinpractise.halbuilder.impl.bytecode;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.theoryinpractise.halbuilder.api.ReadableResource;
-import com.theoryinpractise.halbuilder.api.Renderer;
+import com.theoryinpractise.halbuilder.impl.api.Renderer;
+import com.theoryinpractise.halbuilder.spi.ReadableResource;
 
 import java.io.Writer;
 import java.lang.reflect.InvocationHandler;

@@ -1,8 +1,8 @@
-package com.theoryinpractise.halbuilder.api;
+package com.theoryinpractise.halbuilder.spi;
 
 import com.google.common.base.Optional;
 
-public class Link implements Relatable {
+public class Link  {
     private String href;
     private String rel;
     private Optional<String> name = Optional.absent();

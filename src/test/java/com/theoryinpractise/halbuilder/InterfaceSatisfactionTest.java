@@ -1,11 +1,10 @@
 package com.theoryinpractise.halbuilder;
 
 import com.google.common.base.Function;
-import com.theoryinpractise.halbuilder.api.Contract;
-import com.theoryinpractise.halbuilder.api.ReadableResource;
-import com.theoryinpractise.halbuilder.api.RenderableResource;
-import com.theoryinpractise.halbuilder.factory.ResourceFactory;
 import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceContract;
+import com.theoryinpractise.halbuilder.spi.Contract;
+import com.theoryinpractise.halbuilder.spi.ReadableResource;
+import com.theoryinpractise.halbuilder.spi.RenderableResource;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 

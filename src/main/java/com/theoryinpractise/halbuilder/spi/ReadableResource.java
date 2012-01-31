@@ -1,4 +1,4 @@
-package com.theoryinpractise.halbuilder.api;
+package com.theoryinpractise.halbuilder.spi;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -6,7 +6,7 @@ import com.google.common.base.Optional;
 import java.util.List;
 import java.util.Map;
 
-public interface ReadableResource extends Relatable {
+public interface ReadableResource {
     Link getSelfLink();
 
     Map<String, String> getNamespaces();

@@ -8,10 +8,10 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-import com.theoryinpractise.halbuilder.api.Link;
-import com.theoryinpractise.halbuilder.api.ReadableResource;
-import com.theoryinpractise.halbuilder.api.Renderer;
-import com.theoryinpractise.halbuilder.api.Resource;
+import com.theoryinpractise.halbuilder.impl.api.Renderer;
+import com.theoryinpractise.halbuilder.spi.Link;
+import com.theoryinpractise.halbuilder.spi.ReadableResource;
+import com.theoryinpractise.halbuilder.spi.Resource;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.util.DefaultPrettyPrinter;
@@ -23,15 +23,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import static com.theoryinpractise.halbuilder.api.Fields.CURIE;
-import static com.theoryinpractise.halbuilder.api.Fields.EMBEDDED;
-import static com.theoryinpractise.halbuilder.api.Fields.HREF;
-import static com.theoryinpractise.halbuilder.api.Fields.HREFLANG;
-import static com.theoryinpractise.halbuilder.api.Fields.LINKS;
-import static com.theoryinpractise.halbuilder.api.Fields.NAME;
-import static com.theoryinpractise.halbuilder.api.Fields.SELF;
-import static com.theoryinpractise.halbuilder.api.Fields.TITLE;
-import static com.theoryinpractise.halbuilder.factory.ResourceFactory.WHITESPACE_SPLITTER;
+import static com.theoryinpractise.halbuilder.ResourceFactory.WHITESPACE_SPLITTER;
+import static com.theoryinpractise.halbuilder.impl.api.Fields.CURIE;
+import static com.theoryinpractise.halbuilder.impl.api.Fields.EMBEDDED;
+import static com.theoryinpractise.halbuilder.impl.api.Fields.HREF;
+import static com.theoryinpractise.halbuilder.impl.api.Fields.HREFLANG;
+import static com.theoryinpractise.halbuilder.impl.api.Fields.LINKS;
+import static com.theoryinpractise.halbuilder.impl.api.Fields.NAME;
+import static com.theoryinpractise.halbuilder.impl.api.Fields.SELF;
+import static com.theoryinpractise.halbuilder.impl.api.Fields.TITLE;
 
 
 public class JsonRenderer<T> implements Renderer<T> {
@@ -117,7 +117,7 @@ public class JsonRenderer<T> implements Renderer<T> {
 
             Multimap<String, Resource> resourceMap = Multimaps.index(resource.getResources(), new Function<Resource, String>() {
                 public String apply(@Nullable Resource resource) {
-                    List<String> relTypes = Lists.newArrayList(WHITESPACE_SPLITTER.split(resource.getRel()));
+                    List<String> relTypes = Lists.newArrayList(WHITESPACE_SPLITTER.split(resource.getSelfLink().getRel()));
 
                     Iterables.removeIf(relTypes, new Predicate<String>() {
                         public boolean apply(@Nullable String s) {

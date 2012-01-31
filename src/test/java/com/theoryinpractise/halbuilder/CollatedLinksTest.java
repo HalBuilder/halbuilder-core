@@ -1,8 +1,7 @@
-package com.theoryinpractise.halbuilder.links;
+package com.theoryinpractise.halbuilder;
 
-import com.theoryinpractise.halbuilder.api.Link;
-import com.theoryinpractise.halbuilder.api.Resource;
-import com.theoryinpractise.halbuilder.factory.ResourceFactory;
+import com.theoryinpractise.halbuilder.spi.Link;
+import com.theoryinpractise.halbuilder.spi.Resource;
 import org.fest.assertions.Condition;
 import org.testng.annotations.Test;
 

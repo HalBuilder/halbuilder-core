@@ -1,6 +1,7 @@
-package com.theoryinpractise.halbuilder.api;
+package com.theoryinpractise.halbuilder.impl.api;
 
 import com.google.common.base.Optional;
+import com.theoryinpractise.halbuilder.spi.ReadableResource;
 
 import java.io.Writer;
 
