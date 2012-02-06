@@ -6,4 +6,4 @@
           resource (doto (.newHalResource resource-factory "/foo")
                          (.withProperty "name" "Mark")
                          (.withLink "/home" "home"))]
-         (println (.renderXml (.asRenderableResource resource)))) )
+         (println (.renderContent (.asRenderableResource resource) "application/hal+xml"))) )
