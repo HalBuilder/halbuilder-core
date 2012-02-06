@@ -1,8 +1,11 @@
 package com.theoryinpractise.halbuilder.impl.resources;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.theoryinpractise.halbuilder.ResourceFactory;
 import com.theoryinpractise.halbuilder.spi.Link;
+import com.theoryinpractise.halbuilder.spi.ReadableResource;
 import com.theoryinpractise.halbuilder.spi.Resource;
 import com.theoryinpractise.halbuilder.spi.ResourceException;
 
@@ -35,12 +38,11 @@ public class MutableResource extends BaseResource implements Resource {
      * @return
      */
     public MutableResource withLink(String href, String rel) {
-        String resolvedHref = resolvableUri.matcher(href).matches() ? resolveRelativeHref(href) : href;
-        for (String reltype : WHITESPACE_SPLITTER.split(rel)) {
-            String resolvedRelType = resolvableUri.matcher(reltype).matches() ? resolveRelativeHref(reltype) : reltype;
-            links.add(new Link(resolvedHref, resolvedRelType));
-        }
-
+        withLink(href, rel,
+                Optional.of(Predicates.<ReadableResource>alwaysTrue()),
+                Optional.<String>absent(),
+                Optional.<String>absent(),
+                Optional.<String>absent());
         return this;
     }
 
@@ -50,19 +52,28 @@ public class MutableResource extends BaseResource implements Resource {
      * @param rel
      * @return
      */
-    public MutableResource withLink(String href, String rel, Optional<String> name, Optional<String> title, Optional<String> hreflang) {
-        String resolvedHref = resolvableUri.matcher(href).matches() ? resolveRelativeHref(href) : href;
-        for (String reltype : WHITESPACE_SPLITTER.split(rel)) {
-            String resolvedRelType = resolvableUri.matcher(reltype).matches() ? resolveRelativeHref(reltype) : reltype;
-            links.add(new Link(resolvedHref, resolvedRelType, name, title, hreflang));
-        }
-
+    public MutableResource withLink(String href, String rel, Predicate<ReadableResource> predicate) {
+        withLink(href, rel,
+                Optional.of(predicate),
+                Optional.<String>absent(),
+                Optional.<String>absent(),
+                Optional.<String>absent());
         return this;
     }
 
-    public MutableResource withLink(Link link) {
-        for (String reltype : WHITESPACE_SPLITTER.split(link.getRel())) {
-            links.add(new Link(link.getHref(), reltype, link.getName(), link.getTitle(), link.getHreflang()));
+    /**
+     * Add a link to this resource
+     * @param href The target href for the link, relative to the href of this resource.
+     * @param rel
+     * @return
+     */
+    public MutableResource withLink(String href, String rel, Optional<Predicate<ReadableResource>> predicate, Optional<String> name, Optional<String> title, Optional<String> hreflang) {
+        if (predicate.or(Predicates.<ReadableResource>alwaysTrue()).apply(this)) {
+            String resolvedHref = resolvableUri.matcher(href).matches() ? resolveRelativeHref(href) : href;
+            for (String reltype : WHITESPACE_SPLITTER.split(rel)) {
+                String resolvedRelType = resolvableUri.matcher(reltype).matches() ? resolveRelativeHref(reltype) : reltype;
+                links.add(new Link(resolvedHref, resolvedRelType, name, title, hreflang));
+            }
         }
 
         return this;

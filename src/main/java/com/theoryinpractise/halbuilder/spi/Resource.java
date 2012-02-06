@@ -1,14 +1,15 @@
 package com.theoryinpractise.halbuilder.spi;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 
 public interface Resource extends ReadableResource {
 
     Resource withLink(String url, String rel);
 
-    Resource withLink(String href, String rel, Optional<String> name, Optional<String> title, Optional<String> hreflang);
+    Resource withLink(String url, String rel, Predicate<ReadableResource> predicate);
 
-    Resource withLink(Link link);
+    Resource withLink(String href, String rel, Optional<Predicate<ReadableResource>> predicate, Optional<String> name, Optional<String> title, Optional<String> hreflang);
 
     Resource withProperty(String name, Object value);
 
