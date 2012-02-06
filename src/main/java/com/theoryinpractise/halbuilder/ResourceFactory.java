@@ -1,11 +1,16 @@
 package com.theoryinpractise.halbuilder;
 
-import com.google.common.base.Splitter;
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
+import com.theoryinpractise.halbuilder.impl.ContentType;
+import com.theoryinpractise.halbuilder.impl.api.Renderer;
+import com.theoryinpractise.halbuilder.impl.json.JsonRenderer;
 import com.theoryinpractise.halbuilder.impl.json.JsonResourceReader;
 import com.theoryinpractise.halbuilder.impl.resources.MutableResource;
+import com.theoryinpractise.halbuilder.impl.xml.XmlRenderer;
 import com.theoryinpractise.halbuilder.impl.xml.XmlResourceReader;
 import com.theoryinpractise.halbuilder.spi.Link;
 import com.theoryinpractise.halbuilder.spi.ReadableResource;
@@ -22,23 +27,31 @@ import static java.lang.String.format;
 
 public class ResourceFactory {
 
-    public static final Splitter WHITESPACE_SPLITTER = Splitter.onPattern("\\s")
-                                                               .omitEmptyStrings();
+    public static String HALXML = "application/hal+xml";
+    public static String HALJSON = "application/hal+json";
 
+    private Map<ContentType, Class<? extends Renderer>> contentRenderers = Maps.newHashMap();
     private TreeMap<String, String> namespaces = Maps.newTreeMap(Ordering.usingToString());
     private List<Link> links = Lists.newArrayList();
     private String baseHref;
 
     public ResourceFactory() {
-        this.baseHref = "http://localhost";
+        this("http://localhost");
     }
 
     public ResourceFactory(String baseHref) {
         this.baseHref = baseHref;
+        this.contentRenderers.put(new ContentType(HALXML), XmlRenderer.class);
+        this.contentRenderers.put(new ContentType(HALJSON), JsonRenderer.class);
     }
 
     public String getBaseHref() {
         return baseHref;
+    }
+
+    public ResourceFactory withRenderer(String contentType, Class<? extends Renderer<String>> rendererClass) {
+        contentRenderers.put(new ContentType(contentType), rendererClass);
+        return this;
     }
 
     public ResourceFactory withNamespace(String namespace, String url) {
@@ -64,7 +77,8 @@ public class ResourceFactory {
 
         // Add factory standard links
         for (Link link : links) {
-            resource.withLink(link.getHref(), link.getRel(), link.getName(), link.getTitle(), link.getHreflang());
+            resource.withLink(link.getHref(), link.getRel(),
+                    Optional.<Predicate<ReadableResource>>absent(), link.getName(), link.getTitle(), link.getHreflang());
         }
 
         return resource;
@@ -89,5 +103,25 @@ public class ResourceFactory {
             throw new ResourceException(e);
         }
     }
+
+    public Renderer<String> lookupRenderer(String contentType) {
+
+        for (Map.Entry<ContentType, Class<? extends Renderer>> entry : contentRenderers.entrySet()) {
+            if (entry.getKey().matches(contentType)) {
+                try {
+                    return entry.getValue().newInstance();
+                } catch (InstantiationException e) {
+                    throw new ResourceException(e);
+                } catch (IllegalAccessException e) {
+                    throw new ResourceException(e);
+                }
+            }
+
+        }
+
+        throw new IllegalArgumentException("Unsupported contentType: " + contentType);
+
+    }
+
 
 }

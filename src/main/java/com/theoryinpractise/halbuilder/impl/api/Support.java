@@ -1,6 +1,13 @@
 package com.theoryinpractise.halbuilder.impl.api;
 
-public class Fields {
+import com.google.common.base.Splitter;
+
+public class Support {
+
+    public static final Splitter WHITESPACE_SPLITTER = Splitter.onPattern("\\s")
+                                                               .omitEmptyStrings();
+
+
     public static final String REL = "rel";
     public static final String SELF = "self";
     public static final String LINK = "link";

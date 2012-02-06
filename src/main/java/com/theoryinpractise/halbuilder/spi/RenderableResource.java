@@ -6,8 +6,10 @@ public interface RenderableResource extends ReadableResource {
 
     <T> Optional<T> renderClass(Class<T> anInterface);
 
-    String renderJson();
+    String renderContent(String contentType);
 
-    String renderXml();
+//    String renderContent(ResourceFactory.HALJSON);
+
+//    String renderContent(ResourceFactory.HALXML);
 
 }

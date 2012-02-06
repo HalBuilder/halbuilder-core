@@ -12,11 +12,11 @@ import java.io.Reader;
 import java.util.Iterator;
 import java.util.Map;
 
-import static com.theoryinpractise.halbuilder.impl.api.Fields.CURIE;
-import static com.theoryinpractise.halbuilder.impl.api.Fields.EMBEDDED;
-import static com.theoryinpractise.halbuilder.impl.api.Fields.HREF;
-import static com.theoryinpractise.halbuilder.impl.api.Fields.LINKS;
-import static com.theoryinpractise.halbuilder.impl.api.Fields.NAME;
+import static com.theoryinpractise.halbuilder.impl.api.Support.CURIE;
+import static com.theoryinpractise.halbuilder.impl.api.Support.EMBEDDED;
+import static com.theoryinpractise.halbuilder.impl.api.Support.HREF;
+import static com.theoryinpractise.halbuilder.impl.api.Support.LINKS;
+import static com.theoryinpractise.halbuilder.impl.api.Support.NAME;
 
 
 public class JsonResourceReader implements ResourceReader {

@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
 
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Ordering.usingToString;
-import static com.theoryinpractise.halbuilder.ResourceFactory.WHITESPACE_SPLITTER;
+import static com.theoryinpractise.halbuilder.impl.api.Support.WHITESPACE_SPLITTER;
 import static java.lang.String.format;
 
 

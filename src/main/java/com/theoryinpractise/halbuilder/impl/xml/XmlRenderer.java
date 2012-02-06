@@ -16,13 +16,13 @@ import java.io.Writer;
 import java.util.List;
 import java.util.Map;
 
-import static com.theoryinpractise.halbuilder.impl.api.Fields.HREF;
-import static com.theoryinpractise.halbuilder.impl.api.Fields.HREFLANG;
-import static com.theoryinpractise.halbuilder.impl.api.Fields.LINK;
-import static com.theoryinpractise.halbuilder.impl.api.Fields.NAME;
-import static com.theoryinpractise.halbuilder.impl.api.Fields.REL;
-import static com.theoryinpractise.halbuilder.impl.api.Fields.SELF;
-import static com.theoryinpractise.halbuilder.impl.api.Fields.TITLE;
+import static com.theoryinpractise.halbuilder.impl.api.Support.HREF;
+import static com.theoryinpractise.halbuilder.impl.api.Support.HREFLANG;
+import static com.theoryinpractise.halbuilder.impl.api.Support.LINK;
+import static com.theoryinpractise.halbuilder.impl.api.Support.NAME;
+import static com.theoryinpractise.halbuilder.impl.api.Support.REL;
+import static com.theoryinpractise.halbuilder.impl.api.Support.SELF;
+import static com.theoryinpractise.halbuilder.impl.api.Support.TITLE;
 
 
 public class XmlRenderer<T> implements Renderer<T> {

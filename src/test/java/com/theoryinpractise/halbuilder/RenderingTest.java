@@ -75,8 +75,8 @@ public class RenderingTest {
                 .withProperty("expired", Boolean.FALSE)
                 .asRenderableResource();
 
-        assertThat(party.renderXml()).isEqualTo(exampleXml);
-        assertThat(party.renderJson()).isEqualTo(exampleJson);
+        assertThat(party.renderContent(ResourceFactory.HALXML)).isEqualTo(exampleXml);
+        assertThat(party.renderContent(ResourceFactory.HALJSON)).isEqualTo(exampleJson);
 
     }
 
@@ -89,8 +89,8 @@ public class RenderingTest {
                 .withBean(new Customer(123456, "Example Resource", 33))
                 .asRenderableResource();
 
-        assertThat(party.renderXml()).isEqualTo(exampleXml);
-        assertThat(party.renderJson()).isEqualTo(exampleJson);
+        assertThat(party.renderContent(ResourceFactory.HALXML)).isEqualTo(exampleXml);
+        assertThat(party.renderContent(ResourceFactory.HALJSON)).isEqualTo(exampleJson);
 
     }
 
@@ -102,8 +102,8 @@ public class RenderingTest {
                 .withFields(new OtherCustomer(123456, "Example Resource", 33))
                 .asRenderableResource();
 
-        assertThat(party.renderXml()).isEqualTo(exampleXml);
-        assertThat(party.renderJson()).isEqualTo(exampleJson);
+        assertThat(party.renderContent(ResourceFactory.HALXML)).isEqualTo(exampleXml);
+        assertThat(party.renderContent(ResourceFactory.HALJSON)).isEqualTo(exampleJson);
 
     }
 
@@ -121,8 +121,8 @@ public class RenderingTest {
                         .withProperty("optional", true))
                 .asRenderableResource();
 
-        assertThat(party.renderXml()).isEqualTo(exampleWithSubresourceXml);
-        assertThat(party.renderJson()).isEqualTo(exampleWithSubresourceJson);
+        assertThat(party.renderContent(ResourceFactory.HALXML)).isEqualTo(exampleWithSubresourceXml);
+        assertThat(party.renderContent(ResourceFactory.HALJSON)).isEqualTo(exampleWithSubresourceJson);
 
     }
 
@@ -134,8 +134,8 @@ public class RenderingTest {
                 .withBeanBasedSubresource("ns:user role:admin", "/user/11", new Customer(11, "Example User", 32))
                 .asRenderableResource();
 
-        assertThat(party.renderXml()).isEqualTo(exampleWithSubresourceXml);
-        assertThat(party.renderJson()).isEqualTo(exampleWithSubresourceJson);
+        assertThat(party.renderContent(ResourceFactory.HALXML)).isEqualTo(exampleWithSubresourceXml);
+        assertThat(party.renderContent(ResourceFactory.HALJSON)).isEqualTo(exampleWithSubresourceJson);
 
     }
 

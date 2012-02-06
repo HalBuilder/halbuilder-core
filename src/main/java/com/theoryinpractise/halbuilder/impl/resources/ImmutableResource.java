@@ -5,8 +5,6 @@ import com.theoryinpractise.halbuilder.ResourceFactory;
 import com.theoryinpractise.halbuilder.impl.api.Renderer;
 import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceContract;
 import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceRenderer;
-import com.theoryinpractise.halbuilder.impl.json.JsonRenderer;
-import com.theoryinpractise.halbuilder.impl.xml.XmlRenderer;
 import com.theoryinpractise.halbuilder.spi.Link;
 import com.theoryinpractise.halbuilder.spi.RenderableResource;
 import com.theoryinpractise.halbuilder.spi.Resource;
@@ -48,12 +46,11 @@ public class ImmutableResource extends BaseResource implements RenderableResourc
         }
     }
 
-    public String renderJson() {
-        return renderAsString(new JsonRenderer());
-    }
+    public String renderContent(String contentType) {
 
-    public String renderXml() {
-        return renderAsString(new XmlRenderer());
+        Renderer<String> renderer = resourceFactory.lookupRenderer(contentType);
+        return renderAsString(renderer);
+
     }
 
     private String renderAsString(final Renderer renderer) {

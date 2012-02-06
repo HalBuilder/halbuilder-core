@@ -23,15 +23,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import static com.theoryinpractise.halbuilder.ResourceFactory.WHITESPACE_SPLITTER;
-import static com.theoryinpractise.halbuilder.impl.api.Fields.CURIE;
-import static com.theoryinpractise.halbuilder.impl.api.Fields.EMBEDDED;
-import static com.theoryinpractise.halbuilder.impl.api.Fields.HREF;
-import static com.theoryinpractise.halbuilder.impl.api.Fields.HREFLANG;
-import static com.theoryinpractise.halbuilder.impl.api.Fields.LINKS;
-import static com.theoryinpractise.halbuilder.impl.api.Fields.NAME;
-import static com.theoryinpractise.halbuilder.impl.api.Fields.SELF;
-import static com.theoryinpractise.halbuilder.impl.api.Fields.TITLE;
+import static com.theoryinpractise.halbuilder.impl.api.Support.CURIE;
+import static com.theoryinpractise.halbuilder.impl.api.Support.EMBEDDED;
+import static com.theoryinpractise.halbuilder.impl.api.Support.HREF;
+import static com.theoryinpractise.halbuilder.impl.api.Support.HREFLANG;
+import static com.theoryinpractise.halbuilder.impl.api.Support.LINKS;
+import static com.theoryinpractise.halbuilder.impl.api.Support.NAME;
+import static com.theoryinpractise.halbuilder.impl.api.Support.SELF;
+import static com.theoryinpractise.halbuilder.impl.api.Support.TITLE;
+import static com.theoryinpractise.halbuilder.impl.api.Support.WHITESPACE_SPLITTER;
 
 
 public class JsonRenderer<T> implements Renderer<T> {

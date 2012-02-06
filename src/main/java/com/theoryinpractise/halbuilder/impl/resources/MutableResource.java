@@ -17,7 +17,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 
-import static com.theoryinpractise.halbuilder.ResourceFactory.WHITESPACE_SPLITTER;
+import static com.theoryinpractise.halbuilder.impl.api.Support.WHITESPACE_SPLITTER;
 import static java.lang.String.format;
 
 public class MutableResource extends BaseResource implements Resource {
