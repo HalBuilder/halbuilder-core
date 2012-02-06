@@ -137,12 +137,12 @@ public class JsonRenderer<T> implements Renderer<T> {
                     g.writeEndObject();
                 } else {
                     g.writeArrayFieldStart(resourceEntry.getKey());
-                    for (ReadableResource halResource : resourceEntry.getValue()) {
+                    for (ReadableResource subResource : resourceEntry.getValue()) {
                         g.writeStartObject();
-                        ReadableResource subResource = resourceEntry.getValue().iterator().next();
                         renderJson(g, subResource, true);
                         g.writeEndObject();
                     }
+                    g.writeEndArray();
                 }
             }
         }

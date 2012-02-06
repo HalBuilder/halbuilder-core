@@ -22,6 +22,8 @@ public class RenderingTest {
     private String exampleJson;
     private String exampleWithSubresourceXml;
     private String exampleWithSubresourceJson;
+    private String exampleWithMultipleSubresourcesXml;
+    private String exampleWithMultipleSubresourcesJson;
 
     @BeforeMethod
     public void setup() throws IOException {
@@ -32,6 +34,10 @@ public class RenderingTest {
         exampleWithSubresourceXml = Resources.toString(RenderingTest.class.getResource("exampleWithSubresource.xml"), Charsets.UTF_8)
                                              .trim().replaceAll("\n", "\r\n");
         exampleWithSubresourceJson = Resources.toString(RenderingTest.class.getResource("exampleWithSubresource.json"), Charsets.UTF_8)
+                                              .trim();
+        exampleWithMultipleSubresourcesXml = Resources.toString(RenderingTest.class.getResource("exampleWithMultipleSubresources.xml"), Charsets.UTF_8)
+                                             .trim().replaceAll("\n", "\r\n");
+        exampleWithMultipleSubresourcesJson = Resources.toString(RenderingTest.class.getResource("exampleWithMultipleSubresources.json"), Charsets.UTF_8)
                                               .trim();
     }
 
@@ -127,7 +133,7 @@ public class RenderingTest {
     }
 
     @Test
-    public void testHalWithBeanSubResources() {
+    public void testHalWithBeanSubResource() {
 
         RenderableResource party = newBaseResource("customer/123456")
                 .withLink("?users", "ns:users")
@@ -136,6 +142,20 @@ public class RenderingTest {
 
         assertThat(party.renderContent(ResourceFactory.HALXML)).isEqualTo(exampleWithSubresourceXml);
         assertThat(party.renderContent(ResourceFactory.HALJSON)).isEqualTo(exampleWithSubresourceJson);
+
+    }
+
+    @Test
+    public void testHalWithBeanMultipleSubResources() {
+
+        RenderableResource party = newBaseResource("customer/123456")
+                .withLink("?users", "ns:users")
+                .withBeanBasedSubresource("ns:user role:admin", "/user/11", new Customer(11, "Example User", 32))
+                .withBeanBasedSubresource("ns:user role:admin", "/user/12", new Customer(12, "Example User", 32))
+                .asRenderableResource();
+
+        assertThat(party.renderContent(ResourceFactory.HALXML)).isEqualTo(exampleWithMultipleSubresourcesXml);
+        assertThat(party.renderContent(ResourceFactory.HALJSON)).isEqualTo(exampleWithMultipleSubresourcesJson);
 
     }
 
