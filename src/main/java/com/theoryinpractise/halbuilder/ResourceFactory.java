@@ -87,7 +87,7 @@ public class ResourceFactory {
 
     public ReadableResource newHalResource(Reader reader) {
         try {
-            BufferedReader bufferedReader = new BufferedReader(reader);
+            Reader bufferedReader = reader.markSupported() ? reader : new BufferedReader(reader);
             bufferedReader.mark(1);
             char firstChar = (char) bufferedReader.read();
             bufferedReader.reset();
