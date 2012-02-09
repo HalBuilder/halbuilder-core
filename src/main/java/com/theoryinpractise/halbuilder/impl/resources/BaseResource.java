@@ -77,6 +77,14 @@ public abstract class BaseResource implements ReadableResource {
         return ImmutableList.copyOf(links);
     }
 
+    public Optional<Link> getLinkByRel(String rel) {
+        try {
+            return Optional.of(Iterables.getOnlyElement(getLinksByRel(rel)));
+        } catch (NoSuchElementException e) {
+            return Optional.absent();
+        }
+    }
+
     public List<Link> getLinksByRel(final String rel) {
         final String resolvedRelType = resolvableUri.matcher(rel).matches() ? resolveRelativeHref(rel) : rel;
         final String curiedRel = currieHref(resolvedRelType);

@@ -15,6 +15,8 @@ public interface ReadableResource {
 
     List<Link> getLinks();
 
+    Optional<Link> getLinkByRel(String rel);
+
     List<Link> getLinksByRel(String rel);
 
     Map<String, Object> getProperties();
