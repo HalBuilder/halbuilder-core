@@ -1,6 +1,8 @@
 Halbuilder is a simple Java API for generating and consuming HAL documents conforming to the
 [HAL Specification](http://stateless.co/hal_specification.html).
 
+### Generating Local Resources
+
     ResourceFactory resourceFactory = new ResourceFactory();
 
     Resource owner = resourceFactory.newHalResource("http://example.com/mike")
@@ -19,3 +21,9 @@ Halbuilder is a simple Java API for generating and consuming HAL documents confo
 
     String xml = halResource.renderContent(ResourceFactory.HALXML);
     String json = halResource.renderContent(ResourceFactory.HALJSON);
+
+### Reading Remote Resources
+
+    ResourceFactory resourceFactory = new ResourceFactory();
+
+    Future<Resource> resource = resourceFactory.newHalResource(new URL("http://example.com/mike");
