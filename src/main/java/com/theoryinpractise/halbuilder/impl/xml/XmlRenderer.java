@@ -41,14 +41,14 @@ public class XmlRenderer<T> implements Renderer<T> {
 
     private Element renderElement(ReadableResource resource, boolean embedded) {
 
-        final Link selfLink = resource.getSelfLink();
-        final String href = selfLink.getHref();
+        final Link resourceLink = resource.getResourceLink();
+        final String href = resourceLink.getHref();
 
         // Create the root element
         final Element resourceElement = new Element("resource");
         resourceElement.setAttribute("href", href);
-        if (!selfLink.getRel().equals("self")) {
-            resourceElement.setAttribute("rel", selfLink.getRel());
+        if (!resourceLink.getRel().equals("self")) {
+            resourceElement.setAttribute("rel", resourceLink.getRel());
         }
 
         // Only add namespaces to non-embedded resources

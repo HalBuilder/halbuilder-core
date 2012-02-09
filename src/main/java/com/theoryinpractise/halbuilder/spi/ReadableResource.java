@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface ReadableResource {
-    Link getSelfLink();
+    Link getResourceLink();
 
     Map<String, String> getNamespaces();
 
@@ -27,5 +27,4 @@ public interface ReadableResource {
 
     RenderableResource asRenderableResource();
 
-    ReadableResource asImmutableResource();
 }

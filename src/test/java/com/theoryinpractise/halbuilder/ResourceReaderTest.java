@@ -33,7 +33,7 @@ public class ResourceReaderTest {
 
     @Test(dataProvider = "provideResources")
     public void testReader(ReadableResource resource) {
-        assertThat(resource.getSelfLink().getHref()).isEqualTo("https://example.com/api/customer/123456");
+        assertThat(resource.getResourceLink().getHref()).isEqualTo("https://example.com/api/customer/123456");
         assertThat(resource.getNamespaces()).hasSize(2);
         assertThat(resource.getProperties().get("name")).isEqualTo("Example Resource");
         assertThat(resource.getCanonicalLinks()).hasSize(3);
@@ -42,7 +42,7 @@ public class ResourceReaderTest {
 
     @Test(dataProvider = "provideSubResources")
     public void testSubReader(ReadableResource resource) {
-        assertThat(resource.getSelfLink().getHref()).isEqualTo("https://example.com/api/customer/123456");
+        assertThat(resource.getResourceLink().getHref()).isEqualTo("https://example.com/api/customer/123456");
         assertThat(resource.getNamespaces()).hasSize(2);
         assertThat(resource.getCanonicalLinks()).hasSize(3);
         assertThat(resource.getResources()).hasSize(1);

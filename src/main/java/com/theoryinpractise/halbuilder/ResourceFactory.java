@@ -5,6 +5,9 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
+import com.ning.http.client.AsyncCompletionHandler;
+import com.ning.http.client.AsyncHttpClient;
+import com.ning.http.client.Response;
 import com.theoryinpractise.halbuilder.impl.ContentType;
 import com.theoryinpractise.halbuilder.impl.api.Renderer;
 import com.theoryinpractise.halbuilder.impl.json.JsonRenderer;
@@ -18,10 +21,13 @@ import com.theoryinpractise.halbuilder.spi.Resource;
 import com.theoryinpractise.halbuilder.spi.ResourceException;
 
 import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.Future;
 
 import static java.lang.String.format;
 
@@ -34,6 +40,7 @@ public class ResourceFactory {
     private TreeMap<String, String> namespaces = Maps.newTreeMap(Ordering.usingToString());
     private List<Link> links = Lists.newArrayList();
     private String baseHref;
+    private AsyncHttpClient httpClient;
 
     public ResourceFactory() {
         this("http://localhost");
@@ -43,6 +50,7 @@ public class ResourceFactory {
         this.baseHref = baseHref;
         this.contentRenderers.put(new ContentType(HALXML), XmlRenderer.class);
         this.contentRenderers.put(new ContentType(HALJSON), JsonRenderer.class);
+        this.httpClient = new AsyncHttpClient();
     }
 
     public String getBaseHref() {
@@ -99,6 +107,19 @@ public class ResourceFactory {
             } else {
                 throw new ResourceException("Unknown resource format");
             }
+        } catch (Exception e) {
+            throw new ResourceException(e);
+        }
+    }
+
+    public Future<ReadableResource> newHalResource(URL url) {
+        try {
+            return httpClient.prepareGet(url.toExternalForm()).execute(new AsyncCompletionHandler<ReadableResource>() {
+                @Override
+                public ReadableResource onCompleted(Response response) throws Exception {
+                    return newHalResource(new InputStreamReader(response.getResponseBodyAsStream()));
+                }
+            });
         } catch (Exception e) {
             throw new ResourceException(e);
         }

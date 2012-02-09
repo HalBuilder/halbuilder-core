@@ -56,8 +56,8 @@ public class JsonRenderer<T> implements Renderer<T> {
 
     private void renderJson(JsonGenerator g, ReadableResource resource, boolean embedded) throws IOException {
 
-        final Link selfLink = resource.getSelfLink();
-        final String href = selfLink.getHref();
+        final Link resourceLink = resource.getResourceLink();
+        final String href = resourceLink.getHref();
 
         if (!resource.getCanonicalLinks().isEmpty() || (!embedded && !resource.getNamespaces().isEmpty())) {
             g.writeObjectFieldStart(LINKS);
@@ -117,7 +117,7 @@ public class JsonRenderer<T> implements Renderer<T> {
 
             Multimap<String, Resource> resourceMap = Multimaps.index(resource.getResources(), new Function<Resource, String>() {
                 public String apply(@Nullable Resource resource) {
-                    List<String> relTypes = Lists.newArrayList(WHITESPACE_SPLITTER.split(resource.getSelfLink().getRel()));
+                    List<String> relTypes = Lists.newArrayList(WHITESPACE_SPLITTER.split(resource.getResourceLink().getRel()));
 
                     Iterables.removeIf(relTypes, new Predicate<String>() {
                         public boolean apply(@Nullable String s) {

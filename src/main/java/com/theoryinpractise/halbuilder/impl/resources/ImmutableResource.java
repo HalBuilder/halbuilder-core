@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class ImmutableResource extends BaseResource implements RenderableResource {
 
-    private final Link selfLink;
+    private final Link resourceLink;
 
     public ImmutableResource(ResourceFactory resourceFactory,
                              Map<String, String> namespaces, List<Link> links, Map<String, Object> properties, List<Resource> resources) {
@@ -25,11 +25,11 @@ public class ImmutableResource extends BaseResource implements RenderableResourc
         this.properties = properties;
         this.resources = resources;
 
-        this.selfLink = super.getSelfLink();
+        this.resourceLink = super.getResourceLink();
     }
 
-    public Link getSelfLink() {
-        return selfLink;
+    public Link getResourceLink() {
+        return resourceLink;
     }
 
     /**

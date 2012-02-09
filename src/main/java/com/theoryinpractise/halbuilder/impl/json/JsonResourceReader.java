@@ -4,6 +4,7 @@ import com.theoryinpractise.halbuilder.ResourceFactory;
 import com.theoryinpractise.halbuilder.impl.api.ResourceReader;
 import com.theoryinpractise.halbuilder.impl.resources.MutableResource;
 import com.theoryinpractise.halbuilder.spi.ReadableResource;
+import com.theoryinpractise.halbuilder.spi.RenderableResource;
 import com.theoryinpractise.halbuilder.spi.ResourceException;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -26,7 +27,7 @@ public class JsonResourceReader implements ResourceReader {
         this.resourceFactory = resourceFactory;
     }
 
-    public ReadableResource read(Reader reader) {
+    public RenderableResource read(Reader reader) {
         try {
             ObjectMapper mapper = new ObjectMapper();
 
@@ -34,7 +35,7 @@ public class JsonResourceReader implements ResourceReader {
 
             MutableResource resource = readResource(rootNode);
 
-            return resource.asImmutableResource();
+            return resource.asRenderableResource();
         } catch (Exception e) {
             throw new ResourceException(e);
         }

@@ -4,6 +4,7 @@ import com.theoryinpractise.halbuilder.ResourceFactory;
 import com.theoryinpractise.halbuilder.impl.api.ResourceReader;
 import com.theoryinpractise.halbuilder.impl.resources.MutableResource;
 import com.theoryinpractise.halbuilder.spi.ReadableResource;
+import com.theoryinpractise.halbuilder.spi.RenderableResource;
 import com.theoryinpractise.halbuilder.spi.Resource;
 import com.theoryinpractise.halbuilder.spi.ResourceException;
 import org.jdom.Document;
@@ -23,7 +24,7 @@ public class XmlResourceReader implements ResourceReader {
         this.resourceFactory = resourceFactory;
     }
 
-    public ReadableResource read(Reader reader) {
+    public RenderableResource read(Reader reader) {
         try {
             Document d = new SAXBuilder().build(reader);
             Element root = d.getRootElement();

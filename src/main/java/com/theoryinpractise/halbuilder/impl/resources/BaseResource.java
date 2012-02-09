@@ -13,6 +13,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Table;
 import com.theoryinpractise.halbuilder.ResourceFactory;
+import com.theoryinpractise.halbuilder.impl.api.Support;
 import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceContract;
 import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceRenderer;
 import com.theoryinpractise.halbuilder.spi.Contract;
@@ -35,6 +36,7 @@ import java.util.regex.Pattern;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Ordering.usingToString;
 import static com.theoryinpractise.halbuilder.impl.api.Support.WHITESPACE_SPLITTER;
+import static com.theoryinpractise.halbuilder.impl.resources.LinkPredicate.newLinkPredicate;
 import static java.lang.String.format;
 
 
@@ -59,9 +61,9 @@ public abstract class BaseResource implements ReadableResource {
         this.resourceFactory = resourceFactory;
     }
 
-    public Link getSelfLink() {
+    public Link getResourceLink() {
         try {
-            return Iterables.find(getLinks(), new SelfLinkPredicate());
+            return Iterables.find(getLinks(), newLinkPredicate(Support.SELF));
         } catch (NoSuchElementException e) {
             throw new IllegalStateException("Resources MUST have a self link.");
         }
@@ -171,7 +173,7 @@ public abstract class BaseResource implements ReadableResource {
     }
 
     public String resolveRelativeHref(String href) {
-        return resolveRelativeHref(getSelfLink().getHref(), href);
+        return resolveRelativeHref(getResourceLink().getHref(), href);
     }
 
     protected String resolveRelativeHref(final String baseHref, String href) {
@@ -197,10 +199,5 @@ public abstract class BaseResource implements ReadableResource {
     public RenderableResource asRenderableResource() {
         return new ImmutableResource(resourceFactory, getNamespaces(), getCanonicalLinks(), getProperties(), getResources());
     }
-
-    public ReadableResource asImmutableResource() {
-        return new ImmutableResource(resourceFactory, getNamespaces(), getCanonicalLinks(), getProperties(), getResources());
-    }
-
 
 }

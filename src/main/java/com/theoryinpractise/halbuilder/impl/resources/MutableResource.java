@@ -145,7 +145,7 @@ public class MutableResource extends BaseResource implements Resource {
     }
 
     public MutableResource withSubresource(String rel, Resource resource) {
-        resource.withLink(resource.getSelfLink().getHref(), rel);
+        resource.withLink(resource.getResourceLink().getHref(), rel);
         resources.add(resource);
         return this;
     }
