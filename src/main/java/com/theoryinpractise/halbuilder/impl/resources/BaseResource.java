@@ -107,7 +107,7 @@ public abstract class BaseResource implements ReadableResource {
 
             String curiedHref = currieHref(href);
 
-            collatedLinks.add(new Link(curiedHref, rels));
+            collatedLinks.add(new Link(resourceFactory, curiedHref, rels));
         }
 
         return RELATABLE_ORDERING.sortedCopy(collatedLinks);

@@ -67,7 +67,7 @@ public class JsonRenderer<T> implements Renderer<T> {
             // Include namespaces as links when not embedded
             if (!embedded) {
                 for (Map.Entry<String, String> entry : resource.getNamespaces().entrySet()) {
-                    links.add(new Link(entry.getValue(), CURIE, Optional.of(entry.getKey()), Optional.<String>absent(), Optional.<String>absent()));
+                    links.add(new Link(null, entry.getValue(), CURIE, Optional.of(entry.getKey()), Optional.<String>absent(), Optional.<String>absent()));
                 }
             }
 

@@ -11,7 +11,7 @@ public class ResourceTest {
 
     @Test(expectedExceptions = ResourceException.class)
     public void testUndeclaredLinkNamespace() {
-        resourceFactory.newHalResource("/test")
+        resourceFactory.newResource("/test")
                        .withLink("http://localhost/test/2", "td:test")
                        .asRenderableResource()
                        .renderContent(ResourceFactory.HALXML);
@@ -19,23 +19,23 @@ public class ResourceTest {
 
     @Test(expectedExceptions = ResourceException.class)
     public void testUndeclaredResourceNamespace() {
-        resourceFactory.newHalResource("http://localhost/test")
-                       .withSubresource("td:test", resourceFactory.newHalResource("/"))
+        resourceFactory.newResource("http://localhost/test")
+                       .withSubresource("td:test", resourceFactory.newResource("/"))
                        .asRenderableResource()
                        .renderContent(ResourceFactory.HALXML);
     }
 
     @Test(expectedExceptions = ResourceException.class)
     public void testUndeclaredResourceLinkNamespace() {
-        resourceFactory.newHalResource("http://localhost/test")
-                       .withSubresource("test", resourceFactory.newHalResource("/").withLink("/", "td:test"))
+        resourceFactory.newResource("http://localhost/test")
+                       .withSubresource("test", resourceFactory.newResource("/").withLink("/", "td:test"))
                        .asRenderableResource()
                        .renderContent(ResourceFactory.HALXML);
     }
 
     @Test(expectedExceptions = ResourceException.class)
     public void testDuplicatePropertyDefinitions() {
-        resourceFactory.newHalResource("http://localhost/test")
+        resourceFactory.newResource("http://localhost/test")
                        .withProperty("name", "Example User")
                        .withProperty("name", "Example User")
                        .asRenderableResource()
@@ -44,7 +44,7 @@ public class ResourceTest {
 
     @Test
     public void testHalResourceHrefShouldBeFullyQualified() {
-        String xml = resourceFactory.newHalResource("/test")
+        String xml = resourceFactory.newResource("/test")
                                     .asRenderableResource()
                                     .renderContent(ResourceFactory.HALXML);
 
@@ -53,7 +53,7 @@ public class ResourceTest {
 
     @Test
     public void testRelativeLinksRenderFullyQualified() {
-        String xml = resourceFactory.newHalResource("/")
+        String xml = resourceFactory.newResource("/")
                                     .withLink("/test", "test")
                                     .asRenderableResource()
                                     .renderContent(ResourceFactory.HALXML);
@@ -63,8 +63,8 @@ public class ResourceTest {
 
     @Test
     public void testRelativeResourceRenderFullyQualified() {
-        String xml = resourceFactory.newHalResource("/")
-                                    .withSubresource("test", resourceFactory.newHalResource("subresource"))
+        String xml = resourceFactory.newResource("/")
+                                    .withSubresource("test", resourceFactory.newResource("subresource"))
                                     .asRenderableResource()
                                     .renderContent(ResourceFactory.HALXML);
 
@@ -73,9 +73,9 @@ public class ResourceTest {
 
     @Test
     public void testRelativeResourceLinksRenderFullyQualified() {
-        String xml = resourceFactory.newHalResource("/")
+        String xml = resourceFactory.newResource("/")
                                     .withSubresource("test", resourceFactory
-                                            .newHalResource("subresource/")
+                                            .newResource("subresource/")
                                             .withLink("/sublink1", "sub")
                                             .withLink("~/sublink2", "sub2"))
                                     .asRenderableResource()

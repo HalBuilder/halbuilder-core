@@ -5,12 +5,12 @@ Halbuilder is a simple Java API for generating and consuming HAL documents confo
 
     ResourceFactory resourceFactory = new ResourceFactory();
 
-    Resource owner = resourceFactory.newHalResource("http://example.com/mike")
+    Resource owner = resourceFactory.newResource("http://example.com/mike")
       .withLink("td:friend", "http://example.com/mamund")
       .withProperty("name", "Mike")
       .withProperty("age", "36");
 
-    Resource halResource = resourceFactory.newHalResource("http://example.com/todo-list")
+    Resource halResource = resourceFactory.newResource("http://example.com/todo-list")
       .withNamespace("td", "http://example.com/todoapp/rels/")
       .withLink("td:search", "/todo-list/search;{searchterm}")
       .withLink("td:description", "/todo-list/description")
@@ -26,10 +26,10 @@ Halbuilder is a simple Java API for generating and consuming HAL documents confo
 
     ResourceFactory resourceFactory = new ResourceFactory();
 
-    Resource resource = resourceFactory.newHalResource(new InputStreamReader(Some.class.getResourceAsStream("/test.xml")));
+    Resource resource = resourceFactory.newResource(new InputStreamReader(Some.class.getResourceAsStream("/test.xml")));
 
 ### Reading Remote Resources
 
     ResourceFactory resourceFactory = new ResourceFactory();
 
-    Future<Resource> resource = resourceFactory.newHalResource(new URL("http://example.com/mike");
+    Future<Resource> resource = resourceFactory.openResource("http://example.com/mike");

@@ -143,7 +143,6 @@
             <groupId>com.ning</groupId>
             <artifactId>async-http-client</artifactId>
             <version>1.7.0</version>
-            <optional>true</optional>
         </dependency>
 
 

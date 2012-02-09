@@ -11,7 +11,7 @@ public class CurrieOptimizationTest {
     ResourceFactory resourceFactory = new ResourceFactory().withNamespace("app", "/api/applications/")
                                                            .withNamespace("rel", "/api/rels/");
 
-    Resource resource = resourceFactory.newHalResource("/api/1")
+    Resource resource = resourceFactory.newResource("/api/1")
                                        .withLink("/api/applications/app/1", "/api/rels/foo");
 
 

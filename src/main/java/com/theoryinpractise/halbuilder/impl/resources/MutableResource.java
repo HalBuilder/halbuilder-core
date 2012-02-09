@@ -24,7 +24,7 @@ public class MutableResource extends BaseResource implements Resource {
 
     public MutableResource(ResourceFactory resourceFactory, String href) {
         super(resourceFactory);
-        this.links.add(new Link(resolveRelativeHref(resourceFactory.getBaseHref(), href), "self"));
+        this.links.add(new Link(resourceFactory, resolveRelativeHref(resourceFactory.getBaseHref(), href), "self"));
     }
 
     public MutableResource(ResourceFactory resourceFactory) {
@@ -72,7 +72,7 @@ public class MutableResource extends BaseResource implements Resource {
             String resolvedHref = resolvableUri.matcher(href).matches() ? resolveRelativeHref(href) : href;
             for (String reltype : WHITESPACE_SPLITTER.split(rel)) {
                 String resolvedRelType = resolvableUri.matcher(reltype).matches() ? resolveRelativeHref(reltype) : reltype;
-                links.add(new Link(resolvedHref, resolvedRelType, name, title, hreflang));
+                links.add(new Link(resourceFactory, resolvedHref, resolvedRelType, name, title, hreflang));
             }
         }
 
@@ -123,11 +123,11 @@ public class MutableResource extends BaseResource implements Resource {
     }
 
     public Resource withFieldBasedSubresource(String rel, String href, Object o) {
-        return withSubresource(rel, resourceFactory.newHalResource(href).withFields(o));
+        return withSubresource(rel, resourceFactory.newResource(href).withFields(o));
     }
 
     public Resource withBeanBasedSubresource(String rel, String href, Object o) {
-        return withSubresource(rel, resourceFactory.newHalResource(href).withBean(o));
+        return withSubresource(rel, resourceFactory.newResource(href).withBean(o));
     }
 
     /**

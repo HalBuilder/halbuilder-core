@@ -23,7 +23,6 @@ import com.theoryinpractise.halbuilder.spi.ResourceException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -71,11 +70,11 @@ public class ResourceFactory {
     }
 
     public ResourceFactory withLink(String url, String rel) {
-        links.add(new Link(url, rel));
+        links.add(new Link(this, url, rel));
         return this;
     }
 
-    public Resource newHalResource(String href) {
+    public Resource newResource(String href) {
         MutableResource resource = new MutableResource(this, href);
 
         // Add factory standard namespaces
@@ -93,7 +92,7 @@ public class ResourceFactory {
     }
 
 
-    public ReadableResource newHalResource(Reader reader) {
+    public ReadableResource newResource(Reader reader) {
         try {
             Reader bufferedReader = reader.markSupported() ? reader : new BufferedReader(reader);
             bufferedReader.mark(1);
@@ -112,12 +111,12 @@ public class ResourceFactory {
         }
     }
 
-    public Future<ReadableResource> newHalResource(URL url) {
+    public Future<ReadableResource> openResource(String href) {
         try {
-            return httpClient.prepareGet(url.toExternalForm()).execute(new AsyncCompletionHandler<ReadableResource>() {
+            return httpClient.prepareGet(href).execute(new AsyncCompletionHandler<ReadableResource>() {
                 @Override
                 public ReadableResource onCompleted(Response response) throws Exception {
-                    return newHalResource(new InputStreamReader(response.getResponseBodyAsStream()));
+                    return newResource(new InputStreamReader(response.getResponseBodyAsStream()));
                 }
             });
         } catch (Exception e) {

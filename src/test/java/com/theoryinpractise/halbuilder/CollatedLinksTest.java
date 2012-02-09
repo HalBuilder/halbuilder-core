@@ -14,7 +14,7 @@ public class CollatedLinksTest {
     @Test
     public void testCollatedLinks() {
 
-        Resource resource = new ResourceFactory().newHalResource("/foo")
+        Resource resource = new ResourceFactory().newResource("/foo")
                                                  .withLink("/bar", "bar")
                                                  .withLink("/bar", "foo");
 
@@ -34,7 +34,7 @@ public class CollatedLinksTest {
     @Test
     public void testSpacedRelsSeparateLinks() {
 
-        Resource resource = new ResourceFactory().newHalResource("/foo")
+        Resource resource = new ResourceFactory().newResource("/foo")
                                                  .withLink("/bar", "bar foo");
 
         assertThat(resource.getCanonicalLinks())
@@ -48,7 +48,7 @@ public class CollatedLinksTest {
     @Test
     public void testMultiSpacedRelsSeparateLinks() {
 
-        Resource resource = new ResourceFactory().newHalResource("/foo")
+        Resource resource = new ResourceFactory().newResource("/foo")
                                                  .withLink("/bar", "bar                  foo");
 
         assertThat(resource.getCanonicalLinks())

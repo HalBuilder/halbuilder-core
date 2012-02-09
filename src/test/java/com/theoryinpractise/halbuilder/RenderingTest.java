@@ -43,7 +43,7 @@ public class RenderingTest {
 
 
     private Resource newBaseResource(final String href) {
-        return resourceFactory.newHalResource(href)
+        return resourceFactory.newResource(href)
                               .withLink("/api/customer/1234", "ns:parent");
     }
 
@@ -53,7 +53,7 @@ public class RenderingTest {
         ResourceFactory resourceFactory = new ResourceFactory("https://example.com/api/")
                 .withLink("/home", "home");
 
-        Resource resource = resourceFactory.newHalResource("/");
+        Resource resource = resourceFactory.newResource("/");
 
         assertThat(resource.getCanonicalLinks()).hasSize(2);
         assertThat(resource.getLinksByRel("home")).hasSize(1);
@@ -119,7 +119,7 @@ public class RenderingTest {
         RenderableResource party = newBaseResource("customer/123456")
                 .withLink("?users", "ns:users")
                 .withSubresource("ns:user role:admin", resourceFactory
-                        .newHalResource("/user/11")
+                        .newResource("/user/11")
                         .withProperty("id", 11)
                         .withProperty("name", "Example User")
                         .withProperty("expired", false)

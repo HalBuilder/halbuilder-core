@@ -1,20 +1,27 @@
 package com.theoryinpractise.halbuilder.spi;
 
 import com.google.common.base.Optional;
+import com.theoryinpractise.halbuilder.ResourceFactory;
 
-public class Link  {
+import java.util.concurrent.Future;
+
+public class Link {
+    private ResourceFactory resourceFactory;
+
     private String href;
     private String rel;
     private Optional<String> name = Optional.absent();
     private Optional<String> title = Optional.absent();
     private Optional<String> hreflang = Optional.absent();
 
-    public Link(String href, String rel) {
+    public Link(ResourceFactory resourceFactory, String href, String rel) {
+        this.resourceFactory = resourceFactory;
         this.href = href;
         this.rel = rel;
     }
 
-    public Link(String href, String rel, Optional<String> name, Optional<String> title, Optional<String> hreflang) {
+    public Link(ResourceFactory resourceFactory, String href, String rel, Optional<String> name, Optional<String> title, Optional<String> hreflang) {
+        this.resourceFactory = resourceFactory;
         this.href = href;
         this.rel = rel;
         this.name = name;
@@ -40,6 +47,10 @@ public class Link  {
 
     public Optional<String> getHreflang() {
         return hreflang;
+    }
+
+    public Future<ReadableResource> openResource() {
+        return resourceFactory.openResource(getHref());
     }
 
     @Override
