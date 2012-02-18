@@ -14,7 +14,7 @@ public class ResourceTest {
         resourceFactory.newResource("/test")
                        .withLink("http://localhost/test/2", "td:test")
                        .asRenderableResource()
-                       .renderContent(ResourceFactory.HALXML);
+                       .renderContent(ResourceFactory.HAL_XML);
     }
 
     @Test(expectedExceptions = ResourceException.class)
@@ -22,7 +22,7 @@ public class ResourceTest {
         resourceFactory.newResource("http://localhost/test")
                        .withSubresource("td:test", resourceFactory.newResource("/"))
                        .asRenderableResource()
-                       .renderContent(ResourceFactory.HALXML);
+                       .renderContent(ResourceFactory.HAL_XML);
     }
 
     @Test(expectedExceptions = ResourceException.class)
@@ -30,7 +30,7 @@ public class ResourceTest {
         resourceFactory.newResource("http://localhost/test")
                        .withSubresource("test", resourceFactory.newResource("/").withLink("/", "td:test"))
                        .asRenderableResource()
-                       .renderContent(ResourceFactory.HALXML);
+                       .renderContent(ResourceFactory.HAL_XML);
     }
 
     @Test(expectedExceptions = ResourceException.class)
@@ -39,14 +39,14 @@ public class ResourceTest {
                        .withProperty("name", "Example User")
                        .withProperty("name", "Example User")
                        .asRenderableResource()
-                       .renderContent(ResourceFactory.HALXML);
+                       .renderContent(ResourceFactory.HAL_XML);
     }
 
     @Test
     public void testHalResourceHrefShouldBeFullyQualified() {
         String xml = resourceFactory.newResource("/test")
                                     .asRenderableResource()
-                                    .renderContent(ResourceFactory.HALXML);
+                                    .renderContent(ResourceFactory.HAL_XML);
 
         assertThat(xml).contains("http://localhost/test");
     }
@@ -56,7 +56,7 @@ public class ResourceTest {
         String xml = resourceFactory.newResource("/")
                                     .withLink("/test", "test")
                                     .asRenderableResource()
-                                    .renderContent(ResourceFactory.HALXML);
+                                    .renderContent(ResourceFactory.HAL_XML);
 
         assertThat(xml).contains("http://localhost/test");
     }
@@ -66,7 +66,7 @@ public class ResourceTest {
         String xml = resourceFactory.newResource("/")
                                     .withSubresource("test", resourceFactory.newResource("subresource"))
                                     .asRenderableResource()
-                                    .renderContent(ResourceFactory.HALXML);
+                                    .renderContent(ResourceFactory.HAL_XML);
 
         assertThat(xml).contains("http://localhost/subresource");
     }
@@ -79,7 +79,7 @@ public class ResourceTest {
                                             .withLink("/sublink1", "sub")
                                             .withLink("~/sublink2", "sub2"))
                                     .asRenderableResource()
-                                    .renderContent(ResourceFactory.HALXML);
+                                    .renderContent(ResourceFactory.HAL_XML);
 
         assertThat(xml).contains("http://localhost/sublink1");
         assertThat(xml).contains("http://localhost/subresource/sublink2");

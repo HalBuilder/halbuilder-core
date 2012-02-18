@@ -49,10 +49,6 @@ public class Link {
         return hreflang;
     }
 
-    public Future<ReadableResource> openResource() {
-        return resourceFactory.openResource(getHref());
-    }
-
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -69,6 +65,5 @@ public class Link {
         sb.append("/>");
 
         return sb.toString();
-
     }
 }

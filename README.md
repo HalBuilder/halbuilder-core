@@ -27,9 +27,3 @@ Halbuilder is a simple Java API for generating and consuming HAL documents confo
     ResourceFactory resourceFactory = new ResourceFactory();
 
     Resource resource = resourceFactory.newResource(new InputStreamReader(Some.class.getResourceAsStream("/test.xml")));
-
-### Reading Remote Resources
-
-    ResourceFactory resourceFactory = new ResourceFactory();
-
-    Future<Resource> resource = resourceFactory.openResource("http://example.com/mike");

@@ -78,17 +78,24 @@ public abstract class BaseResource implements ReadableResource {
     }
 
     public Optional<Link> getLinkByRel(String rel) {
-        try {
-            return Optional.of(Iterables.getOnlyElement(getLinksByRel(rel)));
-        } catch (NoSuchElementException e) {
-            return Optional.absent();
-        }
+        return Optional.fromNullable(Iterables.getFirst(getLinksByRel(rel), null));
     }
 
     public List<Link> getLinksByRel(final String rel) {
         final String resolvedRelType = resolvableUri.matcher(rel).matches() ? resolveRelativeHref(rel) : rel;
         final String curiedRel = currieHref(resolvedRelType);
-        return ImmutableList.copyOf(Iterables.filter(getLinks(), new Predicate<Link>() {
+        final ImmutableList.Builder<Link> linkBuilder = ImmutableList.builder();
+
+        linkBuilder.addAll(getLinksByRel(this, curiedRel));
+        for (Resource resource : resources) {
+            linkBuilder.addAll(getLinksByRel(resource, curiedRel));
+        }
+
+        return linkBuilder.build();
+    }
+
+    private List<Link> getLinksByRel(ReadableResource resource, final String curiedRel) {
+        return ImmutableList.copyOf(Iterables.filter(resource.getLinks(), new Predicate<Link>() {
             public boolean apply(@Nullable Link relatable) {
                 return Iterables.contains(WHITESPACE_SPLITTER.split(relatable.getRel()), curiedRel);
             }

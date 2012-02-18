@@ -47,10 +47,8 @@ public class ImmutableResource extends BaseResource implements RenderableResourc
     }
 
     public String renderContent(String contentType) {
-
         Renderer<String> renderer = resourceFactory.lookupRenderer(contentType);
         return renderAsString(renderer);
-
     }
 
     private String renderAsString(final Renderer renderer) {

@@ -5,9 +5,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
-import com.ning.http.client.AsyncCompletionHandler;
-import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.Response;
 import com.theoryinpractise.halbuilder.impl.ContentType;
 import com.theoryinpractise.halbuilder.impl.api.Renderer;
 import com.theoryinpractise.halbuilder.impl.json.JsonRenderer;
@@ -21,25 +18,22 @@ import com.theoryinpractise.halbuilder.spi.Resource;
 import com.theoryinpractise.halbuilder.spi.ResourceException;
 
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.Future;
 
 import static java.lang.String.format;
 
 public class ResourceFactory {
 
-    public static String HALXML = "application/hal+xml";
-    public static String HALJSON = "application/hal+json";
+    public static String HAL_XML = "application/hal+xml";
+    public static String HAL_JSON = "application/hal+json";
 
     private Map<ContentType, Class<? extends Renderer>> contentRenderers = Maps.newHashMap();
     private TreeMap<String, String> namespaces = Maps.newTreeMap(Ordering.usingToString());
     private List<Link> links = Lists.newArrayList();
     private String baseHref;
-    private AsyncHttpClient httpClient;
 
     public ResourceFactory() {
         this("http://localhost");
@@ -47,9 +41,8 @@ public class ResourceFactory {
 
     public ResourceFactory(String baseHref) {
         this.baseHref = baseHref;
-        this.contentRenderers.put(new ContentType(HALXML), XmlRenderer.class);
-        this.contentRenderers.put(new ContentType(HALJSON), JsonRenderer.class);
-        this.httpClient = new AsyncHttpClient();
+        this.contentRenderers.put(new ContentType(HAL_XML), XmlRenderer.class);
+        this.contentRenderers.put(new ContentType(HAL_JSON), JsonRenderer.class);
     }
 
     public String getBaseHref() {
@@ -91,10 +84,9 @@ public class ResourceFactory {
         return resource;
     }
 
-
     public ReadableResource newResource(Reader reader) {
         try {
-            Reader bufferedReader = reader.markSupported() ? reader : new BufferedReader(reader);
+            Reader bufferedReader =  new BufferedReader(reader);
             bufferedReader.mark(1);
             char firstChar = (char) bufferedReader.read();
             bufferedReader.reset();
@@ -106,19 +98,6 @@ public class ResourceFactory {
             } else {
                 throw new ResourceException("Unknown resource format");
             }
-        } catch (Exception e) {
-            throw new ResourceException(e);
-        }
-    }
-
-    public Future<ReadableResource> openResource(String href) {
-        try {
-            return httpClient.prepareGet(href).execute(new AsyncCompletionHandler<ReadableResource>() {
-                @Override
-                public ReadableResource onCompleted(Response response) throws Exception {
-                    return newResource(new InputStreamReader(response.getResponseBodyAsStream()));
-                }
-            });
         } catch (Exception e) {
             throw new ResourceException(e);
         }
@@ -136,7 +115,6 @@ public class ResourceFactory {
                     throw new ResourceException(e);
                 }
             }
-
         }
 
         throw new IllegalArgumentException("Unsupported contentType: " + contentType);

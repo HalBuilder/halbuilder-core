@@ -8,8 +8,4 @@ public interface RenderableResource extends ReadableResource {
 
     String renderContent(String contentType);
 
-//    String renderContent(ResourceFactory.HALJSON);
-
-//    String renderContent(ResourceFactory.HALXML);
-
 }
