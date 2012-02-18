@@ -3,6 +3,7 @@ package com.theoryinpractise.halbuilder.impl.resources;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
@@ -82,6 +83,9 @@ public abstract class BaseResource implements ReadableResource {
     }
 
     public List<Link> getLinksByRel(final String rel) {
+        Preconditions.checkArgument(rel != null, "Provided rel should not be null.");
+        Preconditions.checkArgument(!"".equals(rel) && !rel.contains(" "), "Provided rel should not be empty or contain spaces.");
+
         final String resolvedRelType = resolvableUri.matcher(rel).matches() ? resolveRelativeHref(rel) : rel;
         final String curiedRel = currieHref(resolvedRelType);
         final ImmutableList.Builder<Link> linkBuilder = ImmutableList.builder();
@@ -92,6 +96,10 @@ public abstract class BaseResource implements ReadableResource {
         }
 
         return linkBuilder.build();
+    }
+
+    public Optional<Object> get(String name) {
+        return Optional.fromNullable(properties.get(name));
     }
 
     private List<Link> getLinksByRel(ReadableResource resource, final String curiedRel) {
@@ -173,7 +181,7 @@ public abstract class BaseResource implements ReadableResource {
      * @param anInterface The interface we wish to check
      * @return Is that Resource structurally like the interface?
      */
-    public <T> boolean isSatisfiedBy(Contract contract) {
+    public boolean isSatisfiedBy(Contract contract) {
         return contract.isSatisfiedBy(this);
     }
 

@@ -59,6 +59,30 @@ public class CollatedLinksTest {
 
     }
 
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testRelLookupsWithNullFail() {
+        Resource resource = new ResourceFactory().newResource("/foo")
+                                                 .withLink("/bar", "bar foo");
+
+        resource.getLinkByRel(null);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testRelLookupsWithEmptyRelFail() {
+        Resource resource = new ResourceFactory().newResource("/foo")
+                                                 .withLink("/bar", "bar foo");
+
+        resource.getLinkByRel("");
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testRelLookupsWithSpacesFail() {
+        Resource resource = new ResourceFactory().newResource("/foo")
+                                                 .withLink("/bar", "bar foo");
+
+        resource.getLinkByRel("test fail");
+    }
+
     private static class ContainsRelCondition extends Condition<List<?>> {
 
         private final String rel;

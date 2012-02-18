@@ -6,7 +6,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 import com.theoryinpractise.halbuilder.impl.ContentType;
-import com.theoryinpractise.halbuilder.impl.api.Renderer;
 import com.theoryinpractise.halbuilder.impl.json.JsonRenderer;
 import com.theoryinpractise.halbuilder.impl.json.JsonResourceReader;
 import com.theoryinpractise.halbuilder.impl.resources.MutableResource;
@@ -14,6 +13,7 @@ import com.theoryinpractise.halbuilder.impl.xml.XmlRenderer;
 import com.theoryinpractise.halbuilder.impl.xml.XmlResourceReader;
 import com.theoryinpractise.halbuilder.spi.Link;
 import com.theoryinpractise.halbuilder.spi.ReadableResource;
+import com.theoryinpractise.halbuilder.spi.Renderer;
 import com.theoryinpractise.halbuilder.spi.Resource;
 import com.theoryinpractise.halbuilder.spi.ResourceException;
 

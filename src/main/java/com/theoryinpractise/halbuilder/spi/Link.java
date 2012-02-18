@@ -3,8 +3,9 @@ package com.theoryinpractise.halbuilder.spi;
 import com.google.common.base.Optional;
 import com.theoryinpractise.halbuilder.ResourceFactory;
 
-import java.util.concurrent.Future;
-
+/**
+ * A Link to an exteral resource.
+ */
 public class Link {
     private ResourceFactory resourceFactory;
 

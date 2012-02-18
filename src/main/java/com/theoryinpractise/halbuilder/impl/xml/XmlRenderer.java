@@ -1,9 +1,9 @@
 package com.theoryinpractise.halbuilder.impl.xml;
 
 import com.google.common.base.Optional;
-import com.theoryinpractise.halbuilder.impl.api.Renderer;
 import com.theoryinpractise.halbuilder.spi.Link;
 import com.theoryinpractise.halbuilder.spi.ReadableResource;
+import com.theoryinpractise.halbuilder.spi.Renderer;
 import com.theoryinpractise.halbuilder.spi.Resource;
 import org.jdom.Element;
 import org.jdom.Namespace;
