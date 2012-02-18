@@ -17,6 +17,8 @@ public interface Resource extends ReadableResource {
 
     Resource withFields(Object value);
 
+    Resource withSerializable(Serializable serializable);
+
     Resource withFieldBasedSubresource(String rel, String href, Object o);
 
     Resource withBeanBasedSubresource(String rel, String href, Object o);

@@ -5,6 +5,7 @@ import com.google.common.io.Resources;
 import com.theoryinpractise.halbuilder.spi.RenderableResource;
 import com.theoryinpractise.halbuilder.spi.Resource;
 import com.theoryinpractise.halbuilder.spi.ResourceException;
+import com.theoryinpractise.halbuilder.spi.Serializable;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -79,6 +80,27 @@ public class RenderingTest {
                 .withProperty("name", "Example Resource")
                 .withProperty("optional", Boolean.TRUE)
                 .withProperty("expired", Boolean.FALSE)
+                .asRenderableResource();
+
+        assertThat(party.renderContent(ResourceFactory.HAL_XML)).isEqualTo(exampleXml);
+        assertThat(party.renderContent(ResourceFactory.HAL_JSON)).isEqualTo(exampleJson);
+
+    }
+
+    @Test
+    public void testWithSerializable() {
+
+        RenderableResource party = newBaseResource("customer/123456")
+                .withLink("?users", "ns:users")
+                .withSerializable(new Serializable() {
+                    public void serializeResource(Resource resource) {
+                        resource.withProperty("id", 123456)
+                                .withProperty("age", 33)
+                                .withProperty("name", "Example Resource")
+                                .withProperty("optional", Boolean.TRUE)
+                                .withProperty("expired", Boolean.FALSE);
+                    }
+                })
                 .asRenderableResource();
 
         assertThat(party.renderContent(ResourceFactory.HAL_XML)).isEqualTo(exampleXml);

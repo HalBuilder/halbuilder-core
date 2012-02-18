@@ -8,6 +8,7 @@ import com.theoryinpractise.halbuilder.spi.Link;
 import com.theoryinpractise.halbuilder.spi.ReadableResource;
 import com.theoryinpractise.halbuilder.spi.Resource;
 import com.theoryinpractise.halbuilder.spi.ResourceException;
+import com.theoryinpractise.halbuilder.spi.Serializable;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -120,6 +121,11 @@ public class MutableResource extends BaseResource implements Resource {
         }
         return this;
 
+    }
+
+    public Resource withSerializable(Serializable serializable) {
+        serializable.serializeResource(this);
+        return this;
     }
 
     public Resource withFieldBasedSubresource(String rel, String href, Object o) {
