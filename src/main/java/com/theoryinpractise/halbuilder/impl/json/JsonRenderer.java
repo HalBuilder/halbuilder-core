@@ -84,7 +84,17 @@ public class JsonRenderer<T> implements Renderer<T> {
             for (Map.Entry<String, Collection<Link>> linkEntry : linkMap.asMap().entrySet()) {
                 if (linkEntry.getValue().size() == 1) {
                     g.writeObjectFieldStart(linkEntry.getKey());
-                    g.writeStringField(HREF, linkEntry.getValue().iterator().next().getHref());
+                    Link link = linkEntry.getValue().iterator().next();
+                    g.writeStringField(HREF, link.getHref());
+                    if (link.getName().isPresent()) {
+                        g.writeStringField(NAME, link.getName().get());
+                    }
+                    if (link.getTitle().isPresent()) {
+                        g.writeStringField(TITLE, link.getTitle().get());
+                    }
+                    if (link.getHreflang().isPresent()) {
+                        g.writeStringField(HREFLANG, link.getHreflang().get());
+                    }
                     g.writeEndObject();
                 } else {
                     g.writeArrayFieldStart(linkEntry.getKey());
