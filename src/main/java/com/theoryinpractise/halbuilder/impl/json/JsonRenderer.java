@@ -83,33 +83,15 @@ public class JsonRenderer<T> implements Renderer<T> {
 
             for (Map.Entry<String, Collection<Link>> linkEntry : linkMap.asMap().entrySet()) {
                 if (linkEntry.getValue().size() == 1) {
-                    g.writeObjectFieldStart(linkEntry.getKey());
                     Link link = linkEntry.getValue().iterator().next();
-                    g.writeStringField(HREF, link.getHref());
-                    if (link.getName().isPresent()) {
-                        g.writeStringField(NAME, link.getName().get());
-                    }
-                    if (link.getTitle().isPresent()) {
-                        g.writeStringField(TITLE, link.getTitle().get());
-                    }
-                    if (link.getHreflang().isPresent()) {
-                        g.writeStringField(HREFLANG, link.getHreflang().get());
-                    }
+                    g.writeObjectFieldStart(linkEntry.getKey());
+                    writeJsonLinkContent(g, link);
                     g.writeEndObject();
                 } else {
                     g.writeArrayFieldStart(linkEntry.getKey());
                     for (Link link : linkEntry.getValue()) {
                         g.writeStartObject();
-                        g.writeStringField(HREF, link.getHref());
-                        if (link.getName().isPresent()) {
-                            g.writeStringField(NAME, link.getName().get());
-                        }
-                        if (link.getTitle().isPresent()) {
-                            g.writeStringField(TITLE, link.getTitle().get());
-                        }
-                        if (link.getHreflang().isPresent()) {
-                            g.writeStringField(HREFLANG, link.getHreflang().get());
-                        }
+                        writeJsonLinkContent(g, link);
                         g.writeEndObject();
                     }
                     g.writeEndArray();
@@ -155,6 +137,19 @@ public class JsonRenderer<T> implements Renderer<T> {
                     g.writeEndArray();
                 }
             }
+        }
+    }
+
+    private void writeJsonLinkContent(JsonGenerator g, Link link) throws IOException {
+        g.writeStringField(HREF, link.getHref());
+        if (link.getName().isPresent()) {
+            g.writeStringField(NAME, link.getName().get());
+        }
+        if (link.getTitle().isPresent()) {
+            g.writeStringField(TITLE, link.getTitle().get());
+        }
+        if (link.getHreflang().isPresent()) {
+            g.writeStringField(HREFLANG, link.getHreflang().get());
         }
     }
 }
