@@ -1,5 +1,5 @@
 <resource xmlns:ns="https://example.com/apidocs/accounts" xmlns:role="https://example.com/apidocs/roles" href="https://example.com/api/customer/123456">
-  <link rel="ns:parent" href="https://example.com/api/customer/1234" />
+  <link rel="ns:parent" href="https://example.com/api/customer/1234" name="bob" title="The Parent" hreflang="en" />
   <link rel="ns:users" href="https://example.com/api/customer/123456?users" />
   <age>33</age>
   <expired>false</expired>

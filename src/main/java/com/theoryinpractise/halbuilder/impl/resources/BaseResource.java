@@ -5,6 +5,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
+import com.google.common.base.Strings;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -27,6 +28,7 @@ import com.theoryinpractise.halbuilder.spi.ResourceException;
 import javax.annotation.Nullable;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +36,8 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import static com.google.common.base.Optional.fromNullable;
+import static com.google.common.base.Strings.emptyToNull;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Ordering.usingToString;
 import static com.theoryinpractise.halbuilder.impl.api.Support.WHITESPACE_SPLITTER;
@@ -79,7 +83,7 @@ public abstract class BaseResource implements ReadableResource {
     }
 
     public Optional<Link> getLinkByRel(String rel) {
-        return Optional.fromNullable(Iterables.getFirst(getLinksByRel(rel), null));
+        return fromNullable(Iterables.getFirst(getLinksByRel(rel), null));
     }
 
     public List<Link> getLinksByRel(final String rel) {
@@ -99,7 +103,7 @@ public abstract class BaseResource implements ReadableResource {
     }
 
     public Optional<Object> get(String name) {
-        return Optional.fromNullable(properties.get(name));
+        return fromNullable(properties.get(name));
     }
 
     private List<Link> getLinksByRel(ReadableResource resource, final String curiedRel) {
@@ -122,15 +126,44 @@ public abstract class BaseResource implements ReadableResource {
 
         for (String href : linkTable.rowKeySet()) {
             Set<String> relTypes = linkTable.row(href).keySet();
-            String rels = Joiner.on(" ").join(usingToString().sortedCopy(transform(relTypes, new Function<String, String>() {
+            Collection<Link> hrefLinks = linkTable.row(href).values();
+
+            // TODO I'm not sure I like this - when collating links we 'lose' the titles, names, and lang - so we
+            // combine them - it feels iki tho.
+            String rels = Joiner.on(" ").skipNulls().join(usingToString().sortedCopy(transform(relTypes, new Function<String, String>() {
                 public String apply(@Nullable String relType) {
                     return currieHref(relType);
                 }
             })));
 
+            Ordering<Object> ordering = usingToString().nullsFirst();
+            Joiner joiner = Joiner.on(", ").skipNulls();
+
+            String titles = joiner.join(ordering.sortedCopy(transform(hrefLinks, new Function<Link, Object>() {
+                public Object apply(@Nullable Link link) {
+                    return link.getTitle().orNull();
+                }
+            })));
+
+            String names = joiner.join(ordering.sortedCopy(transform(hrefLinks, new Function<Link, Object>() {
+                public Object apply(@Nullable Link link) {
+                    return link.getName().orNull();
+                }
+            })));
+
+            String hreflangs = joiner.join(ordering.sortedCopy(transform(hrefLinks, new Function<Link, Object>() {
+                public Object apply(@Nullable Link link) {
+                    return link.getHreflang().orNull();
+                }
+            })));
+
+
             String curiedHref = currieHref(href);
 
-            collatedLinks.add(new Link(resourceFactory, curiedHref, rels));
+            collatedLinks.add(new Link(resourceFactory, curiedHref, rels,
+                                              fromNullable(emptyToNull(names)),
+                                              fromNullable(emptyToNull(titles)),
+                                              fromNullable(emptyToNull(hreflangs))));
         }
 
         return RELATABLE_ORDERING.sortedCopy(collatedLinks);

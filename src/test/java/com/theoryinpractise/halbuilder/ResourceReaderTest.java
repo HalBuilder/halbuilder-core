@@ -1,5 +1,6 @@
 package com.theoryinpractise.halbuilder;
 
+import com.theoryinpractise.halbuilder.spi.Link;
 import com.theoryinpractise.halbuilder.spi.ReadableResource;
 import com.theoryinpractise.halbuilder.spi.ResourceException;
 import org.testng.annotations.DataProvider;
@@ -38,6 +39,16 @@ public class ResourceReaderTest {
         assertThat(resource.getProperties().get("name")).isEqualTo("Example Resource");
         assertThat(resource.getCanonicalLinks()).hasSize(3);
         assertThat(resource.getResources()).hasSize(0);
+    }
+
+    @Test(dataProvider = "provideResources")
+    public void testLinkAttributes(ReadableResource resource) {
+        Link parent = resource.getLinkByRel("ns:parent").get();
+        assertThat(parent.getHref()).isEqualTo("https://example.com/api/customer/1234");
+        assertThat(parent.getRel()).isEqualTo("ns:parent");
+        assertThat(parent.getName().get()).isEqualTo("bob");
+        assertThat(parent.getTitle().get()).isEqualTo("The Parent");
+        assertThat(parent.getHreflang().get()).isEqualTo("en");
     }
 
     @Test(dataProvider = "provideSubResources")
