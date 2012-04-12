@@ -1,5 +1,7 @@
 package com.theoryinpractise.halbuilder.impl.xml;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.theoryinpractise.halbuilder.ResourceFactory;
 import com.theoryinpractise.halbuilder.impl.api.ResourceReader;
 import com.theoryinpractise.halbuilder.impl.resources.MutableResource;
@@ -7,6 +9,7 @@ import com.theoryinpractise.halbuilder.spi.ReadableResource;
 import com.theoryinpractise.halbuilder.spi.RenderableResource;
 import com.theoryinpractise.halbuilder.spi.Resource;
 import com.theoryinpractise.halbuilder.spi.ResourceException;
+import org.codehaus.jackson.JsonNode;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -16,6 +19,10 @@ import org.jdom.input.SAXBuilder;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.List;
+
+import static com.theoryinpractise.halbuilder.impl.api.Support.HREFLANG;
+import static com.theoryinpractise.halbuilder.impl.api.Support.NAME;
+import static com.theoryinpractise.halbuilder.impl.api.Support.TITLE;
 
 public class XmlResourceReader implements ResourceReader {
     private ResourceFactory resourceFactory;
@@ -59,9 +66,21 @@ public class XmlResourceReader implements ResourceReader {
 
         List<Element> links = element.getChildren("link");
         for (Element link : links) {
-            resource.withLink(link.getAttributeValue("href"), link.getAttributeValue("rel"));
+            String rel = link.getAttributeValue("rel");
+            String href = link.getAttributeValue("href");
+            Optional<String> name = optionalElementValueAsText(link, NAME);
+            Optional<String> title = optionalElementValueAsText(link, TITLE);
+            Optional<String> hreflang = optionalElementValueAsText(link, HREFLANG);
+            Optional<Predicate<ReadableResource>> predicate = Optional.<Predicate<ReadableResource>>absent();
+
+            resource.withLink(href, rel, predicate, name, title, hreflang);
         }
 
+    }
+
+    Optional<String> optionalElementValueAsText(Element node, String key) {
+        String value = node.getAttributeValue(key);
+        return value != null ? Optional.of(value) : Optional.<String>absent();
     }
 
     private void readProperties(Resource resource, Element element) {

@@ -1,5 +1,7 @@
 package com.theoryinpractise.halbuilder.impl.json;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.theoryinpractise.halbuilder.ResourceFactory;
 import com.theoryinpractise.halbuilder.impl.api.ResourceReader;
 import com.theoryinpractise.halbuilder.impl.resources.MutableResource;
@@ -16,7 +18,9 @@ import java.util.Map;
 import static com.theoryinpractise.halbuilder.impl.api.Support.CURIE;
 import static com.theoryinpractise.halbuilder.impl.api.Support.EMBEDDED;
 import static com.theoryinpractise.halbuilder.impl.api.Support.HREF;
+import static com.theoryinpractise.halbuilder.impl.api.Support.HREFLANG;
 import static com.theoryinpractise.halbuilder.impl.api.Support.LINKS;
+import static com.theoryinpractise.halbuilder.impl.api.Support.TITLE;
 import static com.theoryinpractise.halbuilder.impl.api.Support.NAME;
 
 
@@ -81,14 +85,30 @@ public class JsonResourceReader implements ResourceReader {
                         Iterator<JsonNode> values = keyNode.getValue().getElements();
                         while (values.hasNext()) {
                             JsonNode valueNode = values.next();
-                            resource.withLink(valueNode.get(HREF).asText(), keyNode.getKey());
+                            withJsonLink(resource, keyNode, valueNode);
                         }
                     } else {
-                        resource.withLink(keyNode.getValue().get(HREF).asText(), keyNode.getKey());
+                        withJsonLink(resource, keyNode, keyNode.getValue());
                     }
                 }
             }
         }
+    }
+
+    private void withJsonLink(MutableResource resource, Map.Entry<String, JsonNode> keyNode, JsonNode valueNode) {
+        String rel = keyNode.getKey();
+        String href = valueNode.get(HREF).asText();
+        Optional<String> name = optionalNodeValueAsText(valueNode, NAME);
+        Optional<String> title = optionalNodeValueAsText(valueNode, TITLE);
+        Optional<String> hreflang = optionalNodeValueAsText(valueNode, HREFLANG);
+        Optional<Predicate<ReadableResource>> predicate = Optional.<Predicate<ReadableResource>>absent();
+
+        resource.withLink(href, rel, predicate, name, title, hreflang );
+    }
+
+    Optional<String> optionalNodeValueAsText(JsonNode node, String key) {
+        JsonNode value = node.get(key);
+        return value != null ? Optional.of(value.asText()) : Optional.<String>absent();
     }
 
     private void readProperties(MutableResource resource, JsonNode rootNode) {

@@ -1,7 +1,10 @@
 package com.theoryinpractise.halbuilder;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.common.io.Resources;
+import com.theoryinpractise.halbuilder.spi.ReadableResource;
 import com.theoryinpractise.halbuilder.spi.RenderableResource;
 import com.theoryinpractise.halbuilder.spi.Resource;
 import com.theoryinpractise.halbuilder.spi.ResourceException;
@@ -45,7 +48,11 @@ public class RenderingTest {
 
     private Resource newBaseResource(final String href) {
         return resourceFactory.newResource(href)
-                              .withLink("/api/customer/1234", "ns:parent");
+                              .withLink("/api/customer/1234", "ns:parent",
+                                               Optional.<Predicate<ReadableResource>>absent(),
+                                               Optional.of("bob"),
+                                               Optional.of("The Parent"),
+                                               Optional.of("en") );
     }
 
     @Test
