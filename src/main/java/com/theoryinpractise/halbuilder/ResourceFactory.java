@@ -27,8 +27,8 @@ import static java.lang.String.format;
 
 public class ResourceFactory {
 
-    public static String HAL_XML = "application/hal+xml";
-    public static String HAL_JSON = "application/hal+json";
+    public static final String HAL_XML = "application/hal+xml";
+    public static final String HAL_JSON = "application/hal+json";
 
     private Map<ContentType, Class<? extends Renderer>> contentRenderers = Maps.newHashMap();
     private TreeMap<String, String> namespaces = Maps.newTreeMap(Ordering.usingToString());
