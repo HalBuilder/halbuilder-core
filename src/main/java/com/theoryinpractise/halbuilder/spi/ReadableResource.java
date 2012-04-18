@@ -5,7 +5,6 @@ import java.util.Map;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.theoryinpractise.halbuilder.impl.resources.ImmutableResource;
 
 /**
  * A ReadableResource is a read-only, immutable HAL Resource object.
@@ -95,12 +94,6 @@ public interface ReadableResource {
      * @return A Guava Optional of the functions return value.
      */
     <T, V> Optional<V> ifSatisfiedBy(Class<T> anInterface, Function<T, V> function);
-
-    /**
-     * Return the resource as a optimized for rendering resource.
-     * @return A RenderableResource
-     */
-    ImmutableResource asRenderableResource();
 
 	/**
 	 * Returns an optional proxy to the given interface mirroring the resource.

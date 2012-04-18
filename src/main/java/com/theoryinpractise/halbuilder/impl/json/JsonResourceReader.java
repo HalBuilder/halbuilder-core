@@ -40,7 +40,7 @@ public class JsonResourceReader implements ResourceReader {
 
             MutableResource resource = readResource(rootNode);
 
-            return resource.asRenderableResource();
+            return resource.toImmutableResource();
         } catch (Exception e) {
             throw new ResourceException(e);
         }

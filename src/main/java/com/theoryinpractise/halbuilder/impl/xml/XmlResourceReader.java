@@ -35,7 +35,7 @@ public class XmlResourceReader implements ResourceReader {
         try {
             Document d = new SAXBuilder().build(reader);
             Element root = d.getRootElement();
-            return readResource(root).asRenderableResource();
+            return readResource(root).toImmutableResource();
         } catch (JDOMException e) {
             throw new ResourceException(e);
         } catch (IOException e) {
@@ -43,7 +43,7 @@ public class XmlResourceReader implements ResourceReader {
         }
     }
 
-    private Resource readResource(Element root) {
+    private MutableResource readResource(Element root) {
         String href = root.getAttributeValue("href");
         MutableResource resource = new MutableResource(resourceFactory, href);
 

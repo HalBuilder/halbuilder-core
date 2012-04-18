@@ -168,7 +168,7 @@ public class MutableResource extends BaseResource implements Resource {
      */
     public <T> Optional<T> renderClass(Class<T> anInterface) {
         if (InterfaceContract.newInterfaceContract(anInterface).isSatisfiedBy(this)) {
-            return InterfaceRenderer.newInterfaceRenderer(anInterface).render(asRenderableResource(), null);
+            return InterfaceRenderer.newInterfaceRenderer(anInterface).render(toImmutableResource(), null);
         } else {
             return Optional.absent();
         }
@@ -182,7 +182,7 @@ public class MutableResource extends BaseResource implements Resource {
     private String renderAsString(final Renderer renderer) {
         validateNamespaces(this);
         StringWriter sw = new StringWriter();
-        renderer.render(asRenderableResource(), sw);
+        renderer.render(toImmutableResource(), sw);
         return sw.toString();
     }
 }

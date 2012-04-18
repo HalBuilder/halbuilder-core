@@ -2,8 +2,8 @@ package com.theoryinpractise.halbuilder.impl.api;
 
 import java.io.Reader;
 
-import com.theoryinpractise.halbuilder.impl.resources.ImmutableResource;
+import com.theoryinpractise.halbuilder.spi.ReadableResource;
 
 public interface ResourceReader {
-    ImmutableResource read(Reader source);
+    ReadableResource read(Reader source);
 }
