@@ -19,6 +19,7 @@ import com.theoryinpractise.halbuilder.spi.ResourceException;
 
 import java.io.BufferedReader;
 import java.io.Reader;
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -37,6 +38,10 @@ public class ResourceFactory {
 
     public ResourceFactory() {
         this("http://localhost");
+    }
+
+    public ResourceFactory(URI baseUri) {
+        this(baseUri.toASCIIString());
     }
 
     public ResourceFactory(String baseHref) {
@@ -65,6 +70,10 @@ public class ResourceFactory {
     public ResourceFactory withLink(String url, String rel) {
         links.add(new Link(this, url, rel));
         return this;
+    }
+
+    public Resource newResource(URI uri) {
+        return newResource(uri.toASCIIString());
     }
 
     public Resource newResource(String href) {
