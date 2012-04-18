@@ -93,7 +93,7 @@ public class ResourceFactory {
         return resource;
     }
 
-    public ReadableResource newResource(Reader reader) {
+    public ReadableResource readResource(Reader reader) {
         try {
             Reader bufferedReader =  new BufferedReader(reader);
             bufferedReader.mark(1);
