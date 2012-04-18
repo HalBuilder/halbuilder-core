@@ -1,10 +1,11 @@
 package com.theoryinpractise.halbuilder.spi;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
-
 import java.util.List;
 import java.util.Map;
+
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.theoryinpractise.halbuilder.impl.resources.ImmutableResource;
 
 /**
  * A ReadableResource is a read-only, immutable HAL Resource object.
@@ -99,7 +100,7 @@ public interface ReadableResource {
      * Return the resource as a optimized for rendering resource.
      * @return A RenderableResource
      */
-    RenderableResource asRenderableResource();
+    ImmutableResource asRenderableResource();
 
 	/**
 	 * Returns an optional proxy to the given interface mirroring the resource.

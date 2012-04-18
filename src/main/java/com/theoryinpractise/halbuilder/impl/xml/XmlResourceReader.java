@@ -1,28 +1,28 @@
 package com.theoryinpractise.halbuilder.impl.xml;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.theoryinpractise.halbuilder.ResourceFactory;
-import com.theoryinpractise.halbuilder.impl.api.ResourceReader;
-import com.theoryinpractise.halbuilder.impl.resources.MutableResource;
-import com.theoryinpractise.halbuilder.spi.ReadableResource;
-import com.theoryinpractise.halbuilder.spi.RenderableResource;
-import com.theoryinpractise.halbuilder.spi.Resource;
-import com.theoryinpractise.halbuilder.spi.ResourceException;
-import org.codehaus.jackson.JsonNode;
+import static com.theoryinpractise.halbuilder.impl.api.Support.HREFLANG;
+import static com.theoryinpractise.halbuilder.impl.api.Support.NAME;
+import static com.theoryinpractise.halbuilder.impl.api.Support.TITLE;
+
+import java.io.IOException;
+import java.io.Reader;
+import java.util.List;
+
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.Namespace;
 import org.jdom.input.SAXBuilder;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.util.List;
-
-import static com.theoryinpractise.halbuilder.impl.api.Support.HREFLANG;
-import static com.theoryinpractise.halbuilder.impl.api.Support.NAME;
-import static com.theoryinpractise.halbuilder.impl.api.Support.TITLE;
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.theoryinpractise.halbuilder.ResourceFactory;
+import com.theoryinpractise.halbuilder.impl.api.ResourceReader;
+import com.theoryinpractise.halbuilder.impl.resources.ImmutableResource;
+import com.theoryinpractise.halbuilder.impl.resources.MutableResource;
+import com.theoryinpractise.halbuilder.spi.ReadableResource;
+import com.theoryinpractise.halbuilder.spi.Resource;
+import com.theoryinpractise.halbuilder.spi.ResourceException;
 
 public class XmlResourceReader implements ResourceReader {
     private ResourceFactory resourceFactory;
@@ -31,7 +31,7 @@ public class XmlResourceReader implements ResourceReader {
         this.resourceFactory = resourceFactory;
     }
 
-    public RenderableResource read(Reader reader) {
+    public ImmutableResource read(Reader reader) {
         try {
             Document d = new SAXBuilder().build(reader);
             Element root = d.getRootElement();

@@ -1,11 +1,30 @@
 package com.theoryinpractise.halbuilder.impl.resources;
 
+import static com.google.common.base.Optional.fromNullable;
+import static com.google.common.base.Strings.emptyToNull;
+import static com.google.common.collect.Iterables.transform;
+import static com.google.common.collect.Ordering.usingToString;
+import static com.theoryinpractise.halbuilder.impl.api.Support.WHITESPACE_SPLITTER;
+import static com.theoryinpractise.halbuilder.impl.resources.LinkPredicate.newLinkPredicate;
+import static java.lang.String.format;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Set;
+import java.util.regex.Pattern;
+
+import javax.annotation.Nullable;
+
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
-import com.google.common.base.Strings;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -21,28 +40,8 @@ import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceRenderer;
 import com.theoryinpractise.halbuilder.spi.Contract;
 import com.theoryinpractise.halbuilder.spi.Link;
 import com.theoryinpractise.halbuilder.spi.ReadableResource;
-import com.theoryinpractise.halbuilder.spi.RenderableResource;
 import com.theoryinpractise.halbuilder.spi.Resource;
 import com.theoryinpractise.halbuilder.spi.ResourceException;
-
-import javax.annotation.Nullable;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Set;
-import java.util.regex.Pattern;
-
-import static com.google.common.base.Optional.fromNullable;
-import static com.google.common.base.Strings.emptyToNull;
-import static com.google.common.collect.Iterables.transform;
-import static com.google.common.collect.Ordering.usingToString;
-import static com.theoryinpractise.halbuilder.impl.api.Support.WHITESPACE_SPLITTER;
-import static com.theoryinpractise.halbuilder.impl.resources.LinkPredicate.newLinkPredicate;
-import static java.lang.String.format;
 
 
 public abstract class BaseResource implements ReadableResource {
@@ -256,7 +255,7 @@ public abstract class BaseResource implements ReadableResource {
      * @deprecated RenderableResource was folded into ReadableResource
      */
     @Deprecated
-    public RenderableResource asRenderableResource() {
+    public ImmutableResource asRenderableResource() {
         return new ImmutableResource(resourceFactory, getNamespaces(), getCanonicalLinks(), getProperties(), getResources());
     }
 

@@ -1,20 +1,21 @@
 package com.theoryinpractise.halbuilder;
 
+import static org.fest.assertions.Assertions.assertThat;
+
+import java.io.IOException;
+
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.io.Resources;
+import com.theoryinpractise.halbuilder.impl.resources.ImmutableResource;
 import com.theoryinpractise.halbuilder.spi.ReadableResource;
-import com.theoryinpractise.halbuilder.spi.RenderableResource;
 import com.theoryinpractise.halbuilder.spi.Resource;
 import com.theoryinpractise.halbuilder.spi.ResourceException;
 import com.theoryinpractise.halbuilder.spi.Serializable;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
-import java.io.IOException;
-
-import static org.fest.assertions.Assertions.assertThat;
 
 public class RenderingTest {
 
@@ -80,7 +81,7 @@ public class RenderingTest {
     @Test
     public void testCustomerHal() {
 
-        RenderableResource party = newBaseResource("customer/123456")
+        ImmutableResource party = newBaseResource("customer/123456")
                 .withLink("?users", "ns:users")
                 .withProperty("id", 123456)
                 .withProperty("age", 33)
@@ -97,7 +98,7 @@ public class RenderingTest {
     @Test
     public void testWithSerializable() {
 
-        RenderableResource party = newBaseResource("customer/123456")
+        ImmutableResource party = newBaseResource("customer/123456")
                 .withLink("?users", "ns:users")
                 .withSerializable(new Serializable() {
                     public void serializeResource(Resource resource) {
@@ -119,7 +120,7 @@ public class RenderingTest {
     @Test
     public void testHalWithBean() {
 
-        RenderableResource party = newBaseResource("customer/123456")
+        ImmutableResource party = newBaseResource("customer/123456")
                 .withLink("?users", "ns:users")
                 .withBean(new Customer(123456, "Example Resource", 33))
                 .asRenderableResource();
@@ -132,7 +133,7 @@ public class RenderingTest {
     @Test
     public void testHalWithFields() {
 
-        RenderableResource party = newBaseResource("customer/123456")
+        ImmutableResource party = newBaseResource("customer/123456")
                 .withLink("?users", "ns:users")
                 .withFields(new OtherCustomer(123456, "Example Resource", 33))
                 .asRenderableResource();
@@ -145,7 +146,7 @@ public class RenderingTest {
     @Test
     public void testHalWithSubResources() {
 
-        RenderableResource party = newBaseResource("customer/123456")
+        ImmutableResource party = newBaseResource("customer/123456")
                 .withLink("?users", "ns:users")
                 .withSubresource("ns:user role:admin", resourceFactory
                         .newResource("/user/11")
@@ -164,7 +165,7 @@ public class RenderingTest {
     @Test
     public void testHalWithBeanSubResource() {
 
-        RenderableResource party = newBaseResource("customer/123456")
+        ImmutableResource party = newBaseResource("customer/123456")
                 .withLink("?users", "ns:users")
                 .withBeanBasedSubresource("ns:user role:admin", "/user/11", new Customer(11, "Example User", 32))
                 .asRenderableResource();
@@ -177,7 +178,7 @@ public class RenderingTest {
     @Test
     public void testHalWithBeanMultipleSubResources() {
 
-        RenderableResource party = newBaseResource("customer/123456")
+        ImmutableResource party = newBaseResource("customer/123456")
                 .withLink("?users", "ns:users")
                 .withBeanBasedSubresource("ns:user role:admin", "/user/11", new Customer(11, "Example User", 32))
                 .withBeanBasedSubresource("ns:user role:admin", "/user/12", new Customer(12, "Example User", 32))

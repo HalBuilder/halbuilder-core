@@ -1,27 +1,28 @@
 package com.theoryinpractise.halbuilder.impl.json;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.theoryinpractise.halbuilder.ResourceFactory;
-import com.theoryinpractise.halbuilder.impl.api.ResourceReader;
-import com.theoryinpractise.halbuilder.impl.resources.MutableResource;
-import com.theoryinpractise.halbuilder.spi.ReadableResource;
-import com.theoryinpractise.halbuilder.spi.RenderableResource;
-import com.theoryinpractise.halbuilder.spi.ResourceException;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
-
-import java.io.Reader;
-import java.util.Iterator;
-import java.util.Map;
-
 import static com.theoryinpractise.halbuilder.impl.api.Support.CURIE;
 import static com.theoryinpractise.halbuilder.impl.api.Support.EMBEDDED;
 import static com.theoryinpractise.halbuilder.impl.api.Support.HREF;
 import static com.theoryinpractise.halbuilder.impl.api.Support.HREFLANG;
 import static com.theoryinpractise.halbuilder.impl.api.Support.LINKS;
-import static com.theoryinpractise.halbuilder.impl.api.Support.TITLE;
 import static com.theoryinpractise.halbuilder.impl.api.Support.NAME;
+import static com.theoryinpractise.halbuilder.impl.api.Support.TITLE;
+
+import java.io.Reader;
+import java.util.Iterator;
+import java.util.Map;
+
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.map.ObjectMapper;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.theoryinpractise.halbuilder.ResourceFactory;
+import com.theoryinpractise.halbuilder.impl.api.ResourceReader;
+import com.theoryinpractise.halbuilder.impl.resources.ImmutableResource;
+import com.theoryinpractise.halbuilder.impl.resources.MutableResource;
+import com.theoryinpractise.halbuilder.spi.ReadableResource;
+import com.theoryinpractise.halbuilder.spi.ResourceException;
 
 
 public class JsonResourceReader implements ResourceReader {
@@ -31,7 +32,7 @@ public class JsonResourceReader implements ResourceReader {
         this.resourceFactory = resourceFactory;
     }
 
-    public RenderableResource read(Reader reader) {
+    public ImmutableResource read(Reader reader) {
         try {
             ObjectMapper mapper = new ObjectMapper();
 
