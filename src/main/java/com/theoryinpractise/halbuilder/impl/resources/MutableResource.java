@@ -17,6 +17,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
+import java.net.URI;
 
 import static com.theoryinpractise.halbuilder.impl.api.Support.WHITESPACE_SPLITTER;
 import static java.lang.String.format;
@@ -49,6 +50,17 @@ public class MutableResource extends BaseResource implements Resource {
 
     /**
      * Add a link to this resource
+     * @param uri The target URI for the link, possibly relative to the href of
+     *            this resource.
+     * @param rel
+     * @return
+     */
+    public MutableResource withLink(URI uri, String rel) {
+    	return withLink(uri.toASCIIString(), rel);
+    }
+
+    /**
+     * Add a link to this resource
      * @param href The target href for the link, relative to the href of this resource.
      * @param rel
      * @return
@@ -64,11 +76,22 @@ public class MutableResource extends BaseResource implements Resource {
 
     /**
      * Add a link to this resource
-     * @param href The target href for the link, relative to the href of this resource.
+     * @param uri The target URI for the link, possibly relative to the href of
+     *            this resource.
      * @param rel
      * @return
      */
-    public MutableResource withLink(String href, String rel, Optional<Predicate<ReadableResource>> predicate, Optional<String> name, Optional<String> title, Optional<String> hreflang) {
+    public MutableResource withLink(URI uri, String rel, Predicate<ReadableResource> predicate) {
+    	return withLink(uri.toASCIIString(), rel, predicate);
+    }
+
+	/**
+	 * Add a link to this resource
+	 * @param href The target href for the link, relative to the href of this resource.
+	 * @param rel
+	 * @return
+	 */
+	public MutableResource withLink(String href, String rel, Optional<Predicate<ReadableResource>> predicate, Optional<String> name, Optional<String> title, Optional<String> hreflang) {
         if (predicate.or(Predicates.<ReadableResource>alwaysTrue()).apply(this)) {
             String resolvedHref = resolvableUri.matcher(href).matches() ? resolveRelativeHref(href) : href;
             for (String reltype : WHITESPACE_SPLITTER.split(rel)) {
@@ -79,6 +102,17 @@ public class MutableResource extends BaseResource implements Resource {
 
         return this;
     }
+
+	/**
+	 * Add a link to this resource
+	 * @param uri The target URI for the link, possibly relative to the href of
+	 *            this resource.
+	 * @param rel
+	 * @return
+	 */
+	public MutableResource withLink(URI uri, String rel, Optional<Predicate<ReadableResource>> predicate, Optional<String> name, Optional<String> title, Optional<String> hreflang) {
+		return withLink(uri.toASCIIString(), rel, predicate, name, title, hreflang);
+	}
 
     public Resource withProperty(String name, Object value) {
         if (properties.containsKey(name)) {
