@@ -4,8 +4,12 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.theoryinpractise.halbuilder.ResourceFactory;
+import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceContract;
+import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceRenderer;
 import com.theoryinpractise.halbuilder.spi.Link;
 import com.theoryinpractise.halbuilder.spi.ReadableResource;
+import com.theoryinpractise.halbuilder.spi.RenderableResource;
+import com.theoryinpractise.halbuilder.spi.Renderer;
 import com.theoryinpractise.halbuilder.spi.Resource;
 import com.theoryinpractise.halbuilder.spi.ResourceException;
 import com.theoryinpractise.halbuilder.spi.Serializable;
@@ -14,6 +18,7 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
@@ -21,7 +26,7 @@ import java.lang.reflect.Modifier;
 import static com.theoryinpractise.halbuilder.impl.api.Support.WHITESPACE_SPLITTER;
 import static java.lang.String.format;
 
-public class MutableResource extends BaseResource implements Resource {
+public class MutableResource extends BaseResource implements Resource, RenderableResource {
 
     public MutableResource(ResourceFactory resourceFactory, String href) {
         super(resourceFactory);
@@ -156,4 +161,29 @@ public class MutableResource extends BaseResource implements Resource {
         return this;
     }
 
+    /**
+     * Renders the current Resource as a proxy to the provider interface
+     *
+     * @param anInterface The interface we wish to proxy the resource as
+     * @return A Guava Optional of the rendered class, this will be absent if the interface doesn't satisfy the interface
+     */
+    public <T> Optional<T> renderClass(Class<T> anInterface) {
+        if (InterfaceContract.newInterfaceContract(anInterface).isSatisfiedBy(this)) {
+            return InterfaceRenderer.newInterfaceRenderer(anInterface).render(this, null);
+        } else {
+            return Optional.absent();
+        }
+    }
+
+    public String renderContent(String contentType) {
+        Renderer<String> renderer = resourceFactory.lookupRenderer(contentType);
+        return renderAsString(renderer);
+    }
+
+    private String renderAsString(final Renderer renderer) {
+        validateNamespaces(this);
+        StringWriter sw = new StringWriter();
+        renderer.render(this, sw);
+        return sw.toString();
+    }
 }

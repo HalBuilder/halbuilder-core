@@ -252,6 +252,10 @@ public abstract class BaseResource implements ReadableResource {
 
     }
 
+    /**
+     * @deprecated RenderableResource was folded into ReadableResource
+     */
+    @Deprecated
     public RenderableResource asRenderableResource() {
         return new ImmutableResource(resourceFactory, getNamespaces(), getCanonicalLinks(), getProperties(), getResources());
     }
