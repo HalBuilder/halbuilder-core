@@ -1,18 +1,16 @@
 package com.theoryinpractise.halbuilder;
 
-import static org.fest.assertions.Assertions.assertThat;
-
-import java.io.InputStreamReader;
-
-import javax.annotation.Nullable;
-
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
 import com.google.common.base.Function;
 import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceContract;
 import com.theoryinpractise.halbuilder.spi.Contract;
 import com.theoryinpractise.halbuilder.spi.ReadableResource;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import javax.annotation.Nullable;
+import java.io.InputStreamReader;
+
+import static org.fest.assertions.Assertions.assertThat;
 
 public class InterfaceSatisfactionTest {
 

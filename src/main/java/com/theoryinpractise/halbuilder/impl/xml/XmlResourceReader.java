@@ -1,19 +1,5 @@
 package com.theoryinpractise.halbuilder.impl.xml;
 
-import static com.theoryinpractise.halbuilder.impl.api.Support.HREFLANG;
-import static com.theoryinpractise.halbuilder.impl.api.Support.NAME;
-import static com.theoryinpractise.halbuilder.impl.api.Support.TITLE;
-
-import java.io.IOException;
-import java.io.Reader;
-import java.util.List;
-
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.JDOMException;
-import org.jdom.Namespace;
-import org.jdom.input.SAXBuilder;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.theoryinpractise.halbuilder.ResourceFactory;
@@ -23,6 +9,19 @@ import com.theoryinpractise.halbuilder.impl.resources.MutableResource;
 import com.theoryinpractise.halbuilder.spi.ReadableResource;
 import com.theoryinpractise.halbuilder.spi.Resource;
 import com.theoryinpractise.halbuilder.spi.ResourceException;
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.Namespace;
+import org.jdom.input.SAXBuilder;
+
+import java.io.IOException;
+import java.io.Reader;
+import java.util.List;
+
+import static com.theoryinpractise.halbuilder.impl.api.Support.HREFLANG;
+import static com.theoryinpractise.halbuilder.impl.api.Support.NAME;
+import static com.theoryinpractise.halbuilder.impl.api.Support.TITLE;
 
 public class XmlResourceReader implements ResourceReader {
     private ResourceFactory resourceFactory;

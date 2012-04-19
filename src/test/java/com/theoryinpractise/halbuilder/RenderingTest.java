@@ -1,12 +1,5 @@
 package com.theoryinpractise.halbuilder;
 
-import static org.fest.assertions.Assertions.assertThat;
-
-import java.io.IOException;
-
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
@@ -15,6 +8,12 @@ import com.theoryinpractise.halbuilder.spi.ReadableResource;
 import com.theoryinpractise.halbuilder.spi.Resource;
 import com.theoryinpractise.halbuilder.spi.ResourceException;
 import com.theoryinpractise.halbuilder.spi.Serializable;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import java.io.IOException;
+
+import static org.fest.assertions.Assertions.assertThat;
 
 public class RenderingTest {
 

@@ -1,9 +1,5 @@
 package com.theoryinpractise.halbuilder.impl.resources;
 
-import java.io.StringWriter;
-import java.util.List;
-import java.util.Map;
-
 import com.google.common.base.Optional;
 import com.theoryinpractise.halbuilder.ResourceFactory;
 import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceContract;
@@ -11,6 +7,10 @@ import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceRenderer;
 import com.theoryinpractise.halbuilder.spi.Link;
 import com.theoryinpractise.halbuilder.spi.Renderer;
 import com.theoryinpractise.halbuilder.spi.Resource;
+
+import java.io.StringWriter;
+import java.util.List;
+import java.util.Map;
 
 public class ImmutableResource extends BaseResource {
 

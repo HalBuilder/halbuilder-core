@@ -1,10 +1,10 @@
 package com.theoryinpractise.halbuilder.spi;
 
-import java.util.List;
-import java.util.Map;
-
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * A ReadableResource is a read-only, immutable HAL Resource object.
