@@ -6,10 +6,8 @@ import com.theoryinpractise.halbuilder.ResourceFactory;
 import com.theoryinpractise.halbuilder.impl.api.ResourceReader;
 import com.theoryinpractise.halbuilder.impl.resources.MutableResource;
 import com.theoryinpractise.halbuilder.spi.ReadableResource;
-import com.theoryinpractise.halbuilder.spi.RenderableResource;
 import com.theoryinpractise.halbuilder.spi.Resource;
 import com.theoryinpractise.halbuilder.spi.ResourceException;
-import org.codehaus.jackson.JsonNode;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -31,11 +29,11 @@ public class XmlResourceReader implements ResourceReader {
         this.resourceFactory = resourceFactory;
     }
 
-    public RenderableResource read(Reader reader) {
+    public ReadableResource read(Reader reader) {
         try {
             Document d = new SAXBuilder().build(reader);
             Element root = d.getRootElement();
-            return readResource(root).asRenderableResource();
+            return readResource(root).toImmutableResource();
         } catch (JDOMException e) {
             throw new ResourceException(e);
         } catch (IOException e) {
@@ -43,7 +41,7 @@ public class XmlResourceReader implements ResourceReader {
         }
     }
 
-    private Resource readResource(Element root) {
+    private MutableResource readResource(Element root) {
         String href = root.getAttributeValue("href");
         MutableResource resource = new MutableResource(resourceFactory, href);
 

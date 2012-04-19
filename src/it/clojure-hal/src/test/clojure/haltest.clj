@@ -6,4 +6,4 @@
           resource (doto (.newResource resource-factory "/foo")
                          (.withProperty "name" "Mark")
                          (.withLink "/home" "home"))]
-         (println (.renderContent (.asRenderableResource resource) "application/hal+xml"))) )
+         (println (.renderContent resource "application/hal+xml"))) )

@@ -4,7 +4,6 @@ import com.google.common.base.Function;
 import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceContract;
 import com.theoryinpractise.halbuilder.spi.Contract;
 import com.theoryinpractise.halbuilder.spi.ReadableResource;
-import com.theoryinpractise.halbuilder.spi.RenderableResource;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -88,8 +87,7 @@ public class InterfaceSatisfactionTest {
 
     @Test
     public void testClassRendering() {
-        RenderableResource resource = resourceFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("example.xml")))
-                                                     .asRenderableResource();
+        ReadableResource resource = resourceFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("example.xml")));
 
         assertThat(resource.renderClass(INamed.class).get().name()).isEqualTo("Example Resource");
         assertThat(resource.renderClass(IPerson.class).get().getName()).isEqualTo("Example Resource");
