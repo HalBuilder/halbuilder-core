@@ -87,7 +87,7 @@ public class InterfaceSatisfactionTest {
 
     @Test
     public void testClassRendering() {
-        ReadableResource resource = resourceFactory.newResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("example.xml")));
+        ReadableResource resource = resourceFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("example.xml")));
 
         assertThat(resource.renderClass(INamed.class).get().name()).isEqualTo("Example Resource");
         assertThat(resource.renderClass(IPerson.class).get().getName()).isEqualTo("Example Resource");

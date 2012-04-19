@@ -92,14 +92,13 @@ public class RenderingTest {
 
         URI path = UriBuilder.fromPath("customer/{id}").buildFromMap(ImmutableMap.of("id", "123456"));
 
-        RenderableResource party = newBaseResource(path)
+        ReadableResource party = newBaseResource(path)
                                            .withLink("?users", "ns:users")
                                            .withProperty("id", 123456)
                                            .withProperty("age", 33)
                                            .withProperty("name", "Example Resource")
                                            .withProperty("optional", Boolean.TRUE)
-                                           .withProperty("expired", Boolean.FALSE)
-                                           .asRenderableResource();
+                                           .withProperty("expired", Boolean.FALSE);
 
         assertThat(party.getResourceLink().getHref()).isEqualTo("https://example.com/api/customer/123456");
         assertThat(party.renderContent(ResourceFactory.HAL_XML)).isEqualTo(exampleXml);
@@ -175,12 +174,12 @@ public class RenderingTest {
         ReadableResource party = newBaseResource("customer/123456")
                 .withLink("?users", "ns:users")
                 .withSubresource("ns:user role:admin", resourceFactory
-                        .newResource("/user/11")
-                        .withProperty("id", 11)
-                        .withProperty("name", "Example User")
-                        .withProperty("expired", false)
-                        .withProperty("age", 32)
-                        .withProperty("optional", true));
+                                                               .newResource("/user/11")
+                                                               .withProperty("id", 11)
+                                                               .withProperty("name", "Example User")
+                                                               .withProperty("expired", false)
+                                                               .withProperty("age", 32)
+                                                               .withProperty("optional", true));
 
         assertThat(party.renderContent(ResourceFactory.HAL_XML)).isEqualTo(exampleWithSubresourceXml);
         assertThat(party.renderContent(ResourceFactory.HAL_JSON)).isEqualTo(exampleWithSubresourceJson);
