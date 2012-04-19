@@ -5,7 +5,6 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
-import com.google.common.base.Strings;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -21,7 +20,6 @@ import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceRenderer;
 import com.theoryinpractise.halbuilder.spi.Contract;
 import com.theoryinpractise.halbuilder.spi.Link;
 import com.theoryinpractise.halbuilder.spi.ReadableResource;
-import com.theoryinpractise.halbuilder.spi.RenderableResource;
 import com.theoryinpractise.halbuilder.spi.Resource;
 import com.theoryinpractise.halbuilder.spi.ResourceException;
 
@@ -43,7 +41,6 @@ import static com.google.common.collect.Ordering.usingToString;
 import static com.theoryinpractise.halbuilder.impl.api.Support.WHITESPACE_SPLITTER;
 import static com.theoryinpractise.halbuilder.impl.resources.LinkPredicate.newLinkPredicate;
 import static java.lang.String.format;
-
 
 public abstract class BaseResource implements ReadableResource {
 
@@ -252,7 +249,7 @@ public abstract class BaseResource implements ReadableResource {
 
     }
 
-    public RenderableResource asRenderableResource() {
+    public ImmutableResource toImmutableResource() {
         return new ImmutableResource(resourceFactory, getNamespaces(), getCanonicalLinks(), getProperties(), getResources());
     }
 
