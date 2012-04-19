@@ -27,3 +27,13 @@ Halbuilder is a simple Java API for generating and consuming HAL documents confo
     ResourceFactory resourceFactory = new ResourceFactory();
 
     Resource resource = resourceFactory.newResource(new InputStreamReader(Some.class.getResourceAsStream("/test.xml")));
+
+### Apache Maven
+
+HalBuilder is deployed to Apache Maven Central under the following coordinates:
+
+    <dependency>
+      <groupId>com.theoryinpractise</groupId>
+      <artifactId>halbuilder</artifactId>
+      <version>1.0.3</version>
+    </dependency>
