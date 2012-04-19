@@ -19,6 +19,7 @@ import com.theoryinpractise.halbuilder.spi.ResourceException;
 
 import java.io.BufferedReader;
 import java.io.Reader;
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -27,8 +28,8 @@ import static java.lang.String.format;
 
 public class ResourceFactory {
 
-    public static String HAL_XML = "application/hal+xml";
-    public static String HAL_JSON = "application/hal+json";
+    public static final String HAL_XML = "application/hal+xml";
+    public static final String HAL_JSON = "application/hal+json";
 
     private Map<ContentType, Class<? extends Renderer>> contentRenderers = Maps.newHashMap();
     private TreeMap<String, String> namespaces = Maps.newTreeMap(Ordering.usingToString());
@@ -37,6 +38,10 @@ public class ResourceFactory {
 
     public ResourceFactory() {
         this("http://localhost");
+    }
+
+    public ResourceFactory(URI baseUri) {
+        this(baseUri.toASCIIString());
     }
 
     public ResourceFactory(String baseHref) {
@@ -67,6 +72,10 @@ public class ResourceFactory {
         return this;
     }
 
+    public Resource newResource(URI uri) {
+        return newResource(uri.toASCIIString());
+    }
+
     public Resource newResource(String href) {
         MutableResource resource = new MutableResource(this, href);
 
@@ -84,7 +93,7 @@ public class ResourceFactory {
         return resource;
     }
 
-    public ReadableResource newResource(Reader reader) {
+    public ReadableResource readResource(Reader reader) {
         try {
             Reader bufferedReader =  new BufferedReader(reader);
             bufferedReader.mark(1);

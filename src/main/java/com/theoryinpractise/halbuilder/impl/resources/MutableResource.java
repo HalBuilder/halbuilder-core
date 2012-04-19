@@ -4,8 +4,11 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.theoryinpractise.halbuilder.ResourceFactory;
+import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceContract;
+import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceRenderer;
 import com.theoryinpractise.halbuilder.spi.Link;
 import com.theoryinpractise.halbuilder.spi.ReadableResource;
+import com.theoryinpractise.halbuilder.spi.Renderer;
 import com.theoryinpractise.halbuilder.spi.Resource;
 import com.theoryinpractise.halbuilder.spi.ResourceException;
 import com.theoryinpractise.halbuilder.spi.Serializable;
@@ -14,9 +17,11 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
+import java.net.URI;
 
 import static com.theoryinpractise.halbuilder.impl.api.Support.WHITESPACE_SPLITTER;
 import static java.lang.String.format;
@@ -49,6 +54,17 @@ public class MutableResource extends BaseResource implements Resource {
 
     /**
      * Add a link to this resource
+     * @param uri The target URI for the link, possibly relative to the href of
+     *            this resource.
+     * @param rel
+     * @return
+     */
+    public MutableResource withLink(URI uri, String rel) {
+    	return withLink(uri.toASCIIString(), rel);
+    }
+
+    /**
+     * Add a link to this resource
      * @param href The target href for the link, relative to the href of this resource.
      * @param rel
      * @return
@@ -64,11 +80,22 @@ public class MutableResource extends BaseResource implements Resource {
 
     /**
      * Add a link to this resource
-     * @param href The target href for the link, relative to the href of this resource.
+     * @param uri The target URI for the link, possibly relative to the href of
+     *            this resource.
      * @param rel
      * @return
      */
-    public MutableResource withLink(String href, String rel, Optional<Predicate<ReadableResource>> predicate, Optional<String> name, Optional<String> title, Optional<String> hreflang) {
+    public MutableResource withLink(URI uri, String rel, Predicate<ReadableResource> predicate) {
+    	return withLink(uri.toASCIIString(), rel, predicate);
+    }
+
+	/**
+	 * Add a link to this resource
+	 * @param href The target href for the link, relative to the href of this resource.
+	 * @param rel
+	 * @return
+	 */
+	public MutableResource withLink(String href, String rel, Optional<Predicate<ReadableResource>> predicate, Optional<String> name, Optional<String> title, Optional<String> hreflang) {
         if (predicate.or(Predicates.<ReadableResource>alwaysTrue()).apply(this)) {
             String resolvedHref = resolvableUri.matcher(href).matches() ? resolveRelativeHref(href) : href;
             for (String reltype : WHITESPACE_SPLITTER.split(rel)) {
@@ -79,6 +106,17 @@ public class MutableResource extends BaseResource implements Resource {
 
         return this;
     }
+
+	/**
+	 * Add a link to this resource
+	 * @param uri The target URI for the link, possibly relative to the href of
+	 *            this resource.
+	 * @param rel
+	 * @return
+	 */
+	public MutableResource withLink(URI uri, String rel, Optional<Predicate<ReadableResource>> predicate, Optional<String> name, Optional<String> title, Optional<String> hreflang) {
+		return withLink(uri.toASCIIString(), rel, predicate, name, title, hreflang);
+	}
 
     public Resource withProperty(String name, Object value) {
         if (properties.containsKey(name)) {
@@ -156,4 +194,29 @@ public class MutableResource extends BaseResource implements Resource {
         return this;
     }
 
+    /**
+     * Renders the current Resource as a proxy to the provider interface
+     *
+     * @param anInterface The interface we wish to proxy the resource as
+     * @return A Guava Optional of the rendered class, this will be absent if the interface doesn't satisfy the interface
+     */
+    public <T> Optional<T> renderClass(Class<T> anInterface) {
+        if (InterfaceContract.newInterfaceContract(anInterface).isSatisfiedBy(this)) {
+            return InterfaceRenderer.newInterfaceRenderer(anInterface).render(toImmutableResource(), null);
+        } else {
+            return Optional.absent();
+        }
+    }
+
+    public String renderContent(String contentType) {
+        Renderer<String> renderer = resourceFactory.lookupRenderer(contentType);
+        return renderAsString(renderer);
+    }
+
+    private String renderAsString(final Renderer renderer) {
+        validateNamespaces(this);
+        StringWriter sw = new StringWriter();
+        renderer.render(toImmutableResource(), sw);
+        return sw.toString();
+    }
 }

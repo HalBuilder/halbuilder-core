@@ -19,16 +19,16 @@ public class ResourceReaderTest {
     @DataProvider
     public Object[][] provideResources() {
         return new Object[][]{
-                {resourceFactory.newResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("example.xml")))},
-                {resourceFactory.newResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("example.json")))},
+                {resourceFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("example.xml")))},
+                {resourceFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("example.json")))},
         };
     }
 
     @DataProvider
     public Object[][] provideSubResources() {
         return new Object[][]{
-                {resourceFactory.newResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("exampleWithSubresource.xml")))},
-                {resourceFactory.newResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("exampleWithSubresource.json")))},
+                {resourceFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("exampleWithSubresource.xml")))},
+                {resourceFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("exampleWithSubresource.json")))},
         };
     }
 
@@ -62,12 +62,12 @@ public class ResourceReaderTest {
 
     @Test(expectedExceptions = ResourceException.class)
     public void testUnknownFormat() {
-        resourceFactory.newResource(new StringReader("!!!"));
+        resourceFactory.readResource(new StringReader("!!!"));
     }
 
     @Test(expectedExceptions = ResourceException.class)
     public void testNullReader() {
-        resourceFactory.newResource((Reader) null);
+        resourceFactory.readResource((Reader) null);
     }
 
 }
