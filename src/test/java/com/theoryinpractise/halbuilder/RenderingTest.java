@@ -3,6 +3,7 @@ package com.theoryinpractise.halbuilder;
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import com.theoryinpractise.halbuilder.spi.ReadableResource;
 import com.theoryinpractise.halbuilder.spi.RenderableResource;
@@ -12,15 +13,17 @@ import com.theoryinpractise.halbuilder.spi.Serializable;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
+import java.net.URI;
 
 import static org.fest.assertions.Assertions.assertThat;
 
 public class RenderingTest {
 
     private ResourceFactory resourceFactory = new ResourceFactory("https://example.com/api/")
-            .withNamespace("ns", "/apidocs/accounts")
-            .withNamespace("role", "/apidocs/roles");
+                                                      .withNamespace("ns", "/apidocs/accounts")
+                                                      .withNamespace("role", "/apidocs/roles");
 
     private String exampleXml;
     private String exampleJson;
@@ -40,26 +43,34 @@ public class RenderingTest {
         exampleWithSubresourceJson = Resources.toString(RenderingTest.class.getResource("exampleWithSubresource.json"), Charsets.UTF_8)
                                               .trim();
         exampleWithMultipleSubresourcesXml = Resources.toString(RenderingTest.class.getResource("exampleWithMultipleSubresources.xml"), Charsets.UTF_8)
-                                             .trim().replaceAll("\n", "\r\n");
+                                                      .trim().replaceAll("\n", "\r\n");
         exampleWithMultipleSubresourcesJson = Resources.toString(RenderingTest.class.getResource("exampleWithMultipleSubresources.json"), Charsets.UTF_8)
-                                              .trim();
+                                                       .trim();
     }
 
 
+    private Resource newBaseResource(final Resource resource) {
+        return resource.withLink("/api/customer/1234", "ns:parent",
+                                        Optional.<Predicate<ReadableResource>>absent(),
+                                        Optional.of("bob"),
+                                        Optional.of("The Parent"),
+                                        Optional.of("en"));
+    }
+
+    private Resource newBaseResource(final URI uri) {
+        return newBaseResource(resourceFactory.newResource(uri));
+
+    }
+
     private Resource newBaseResource(final String href) {
-        return resourceFactory.newResource(href)
-                              .withLink("/api/customer/1234", "ns:parent",
-                                               Optional.<Predicate<ReadableResource>>absent(),
-                                               Optional.of("bob"),
-                                               Optional.of("The Parent"),
-                                               Optional.of("en") );
+        return newBaseResource(resourceFactory.newResource(href));
     }
 
     @Test
     public void testFactoryWithLinks() {
 
         ResourceFactory resourceFactory = new ResourceFactory("https://example.com/api/")
-                .withLink("/home", "home");
+                                                  .withLink("/home", "home");
 
         Resource resource = resourceFactory.newResource("/");
 
@@ -72,23 +83,44 @@ public class RenderingTest {
     @Test(expectedExceptions = ResourceException.class)
     public void testFactoryWithDuplicateNamespaces() {
         ResourceFactory resourceFactory = new ResourceFactory()
-                .withNamespace("home", "https://example.com/api/")
-                .withNamespace("home", "https://example.com/api/");
+                                                  .withNamespace("home", "https://example.com/api/")
+                                                  .withNamespace("home", "https://example.com/api/");
     }
 
+
+    @Test
+    public void testUriBuilderHal() {
+
+        URI path = UriBuilder.fromPath("customer/{id}").buildFromMap(ImmutableMap.of("id", "123456"));
+
+        RenderableResource party = newBaseResource(path)
+                                           .withLink("?users", "ns:users")
+                                           .withProperty("id", 123456)
+                                           .withProperty("age", 33)
+                                           .withProperty("name", "Example Resource")
+                                           .withProperty("optional", Boolean.TRUE)
+                                           .withProperty("expired", Boolean.FALSE)
+                                           .asRenderableResource();
+
+        assertThat(party.getResourceLink().getHref()).isEqualTo("https://example.com/api/customer/123456");
+        assertThat(party.renderContent(ResourceFactory.HAL_XML)).isEqualTo(exampleXml);
+        assertThat(party.renderContent(ResourceFactory.HAL_JSON)).isEqualTo(exampleJson);
+
+    }
 
     @Test
     public void testCustomerHal() {
 
         RenderableResource party = newBaseResource("customer/123456")
-                .withLink("?users", "ns:users")
-                .withProperty("id", 123456)
-                .withProperty("age", 33)
-                .withProperty("name", "Example Resource")
-                .withProperty("optional", Boolean.TRUE)
-                .withProperty("expired", Boolean.FALSE)
-                .asRenderableResource();
+                                           .withLink("?users", "ns:users")
+                                           .withProperty("id", 123456)
+                                           .withProperty("age", 33)
+                                           .withProperty("name", "Example Resource")
+                                           .withProperty("optional", Boolean.TRUE)
+                                           .withProperty("expired", Boolean.FALSE)
+                                           .asRenderableResource();
 
+        assertThat(party.getResourceLink().getHref()).isEqualTo("https://example.com/api/customer/123456");
         assertThat(party.renderContent(ResourceFactory.HAL_XML)).isEqualTo(exampleXml);
         assertThat(party.renderContent(ResourceFactory.HAL_JSON)).isEqualTo(exampleJson);
 
@@ -98,17 +130,17 @@ public class RenderingTest {
     public void testWithSerializable() {
 
         RenderableResource party = newBaseResource("customer/123456")
-                .withLink("?users", "ns:users")
-                .withSerializable(new Serializable() {
-                    public void serializeResource(Resource resource) {
-                        resource.withProperty("id", 123456)
-                                .withProperty("age", 33)
-                                .withProperty("name", "Example Resource")
-                                .withProperty("optional", Boolean.TRUE)
-                                .withProperty("expired", Boolean.FALSE);
-                    }
-                })
-                .asRenderableResource();
+                                           .withLink("?users", "ns:users")
+                                           .withSerializable(new Serializable() {
+                                               public void serializeResource(Resource resource) {
+                                                   resource.withProperty("id", 123456)
+                                                           .withProperty("age", 33)
+                                                           .withProperty("name", "Example Resource")
+                                                           .withProperty("optional", Boolean.TRUE)
+                                                           .withProperty("expired", Boolean.FALSE);
+                                               }
+                                           })
+                                           .asRenderableResource();
 
         assertThat(party.renderContent(ResourceFactory.HAL_XML)).isEqualTo(exampleXml);
         assertThat(party.renderContent(ResourceFactory.HAL_JSON)).isEqualTo(exampleJson);
@@ -120,9 +152,9 @@ public class RenderingTest {
     public void testHalWithBean() {
 
         RenderableResource party = newBaseResource("customer/123456")
-                .withLink("?users", "ns:users")
-                .withBean(new Customer(123456, "Example Resource", 33))
-                .asRenderableResource();
+                                           .withLink("?users", "ns:users")
+                                           .withBean(new Customer(123456, "Example Resource", 33))
+                                           .asRenderableResource();
 
         assertThat(party.renderContent(ResourceFactory.HAL_XML)).isEqualTo(exampleXml);
         assertThat(party.renderContent(ResourceFactory.HAL_JSON)).isEqualTo(exampleJson);
@@ -133,9 +165,9 @@ public class RenderingTest {
     public void testHalWithFields() {
 
         RenderableResource party = newBaseResource("customer/123456")
-                .withLink("?users", "ns:users")
-                .withFields(new OtherCustomer(123456, "Example Resource", 33))
-                .asRenderableResource();
+                                           .withLink("?users", "ns:users")
+                                           .withFields(new OtherCustomer(123456, "Example Resource", 33))
+                                           .asRenderableResource();
 
         assertThat(party.renderContent(ResourceFactory.HAL_XML)).isEqualTo(exampleXml);
         assertThat(party.renderContent(ResourceFactory.HAL_JSON)).isEqualTo(exampleJson);
@@ -146,15 +178,15 @@ public class RenderingTest {
     public void testHalWithSubResources() {
 
         RenderableResource party = newBaseResource("customer/123456")
-                .withLink("?users", "ns:users")
-                .withSubresource("ns:user role:admin", resourceFactory
-                        .newResource("/user/11")
-                        .withProperty("id", 11)
-                        .withProperty("name", "Example User")
-                        .withProperty("expired", false)
-                        .withProperty("age", 32)
-                        .withProperty("optional", true))
-                .asRenderableResource();
+                                           .withLink("?users", "ns:users")
+                                           .withSubresource("ns:user role:admin", resourceFactory
+                                                                                          .newResource("/user/11")
+                                                                                          .withProperty("id", 11)
+                                                                                          .withProperty("name", "Example User")
+                                                                                          .withProperty("expired", false)
+                                                                                          .withProperty("age", 32)
+                                                                                          .withProperty("optional", true))
+                                           .asRenderableResource();
 
         assertThat(party.renderContent(ResourceFactory.HAL_XML)).isEqualTo(exampleWithSubresourceXml);
         assertThat(party.renderContent(ResourceFactory.HAL_JSON)).isEqualTo(exampleWithSubresourceJson);
@@ -165,9 +197,9 @@ public class RenderingTest {
     public void testHalWithBeanSubResource() {
 
         RenderableResource party = newBaseResource("customer/123456")
-                .withLink("?users", "ns:users")
-                .withBeanBasedSubresource("ns:user role:admin", "/user/11", new Customer(11, "Example User", 32))
-                .asRenderableResource();
+                                           .withLink("?users", "ns:users")
+                                           .withBeanBasedSubresource("ns:user role:admin", "/user/11", new Customer(11, "Example User", 32))
+                                           .asRenderableResource();
 
         assertThat(party.renderContent(ResourceFactory.HAL_XML)).isEqualTo(exampleWithSubresourceXml);
         assertThat(party.renderContent(ResourceFactory.HAL_JSON)).isEqualTo(exampleWithSubresourceJson);
@@ -178,10 +210,10 @@ public class RenderingTest {
     public void testHalWithBeanMultipleSubResources() {
 
         RenderableResource party = newBaseResource("customer/123456")
-                .withLink("?users", "ns:users")
-                .withBeanBasedSubresource("ns:user role:admin", "/user/11", new Customer(11, "Example User", 32))
-                .withBeanBasedSubresource("ns:user role:admin", "/user/12", new Customer(12, "Example User", 32))
-                .asRenderableResource();
+                                           .withLink("?users", "ns:users")
+                                           .withBeanBasedSubresource("ns:user role:admin", "/user/11", new Customer(11, "Example User", 32))
+                                           .withBeanBasedSubresource("ns:user role:admin", "/user/12", new Customer(12, "Example User", 32))
+                                           .asRenderableResource();
 
         assertThat(party.renderContent(ResourceFactory.HAL_XML)).isEqualTo(exampleWithMultipleSubresourcesXml);
         assertThat(party.renderContent(ResourceFactory.HAL_JSON)).isEqualTo(exampleWithMultipleSubresourcesJson);
