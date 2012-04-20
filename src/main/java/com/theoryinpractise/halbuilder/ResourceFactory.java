@@ -29,6 +29,8 @@ import java.util.TreeMap;
 import static java.lang.String.format;
 
 public class ResourceFactory {
+    public static final char JSON_CHARACTER = '{';
+    public static final char XML_CHARACTER = '<';
 
     public static final String HAL_XML = "application/hal+xml";
     public static final String HAL_JSON = "application/hal+json";
@@ -51,8 +53,8 @@ public class ResourceFactory {
         this.baseHref = baseHref;
         this.contentRenderers.put(new ContentType(HAL_XML), XmlRenderer.class);
         this.contentRenderers.put(new ContentType(HAL_JSON), JsonRenderer.class);
-        this.resourceReaders.put('<', XmlResourceReader.class);
-        this.resourceReaders.put('{', JsonResourceReader.class);
+        this.resourceReaders.put(XML_CHARACTER, XmlResourceReader.class);
+        this.resourceReaders.put(JSON_CHARACTER, JsonResourceReader.class);
     }
 
     public String getBaseHref() {
