@@ -64,6 +64,11 @@ public class ResourceFactory {
         return this;
     }
 
+    public ResourceFactory withReader(Character character, Class<? extends ResourceReader> readerClass) {
+        resourceReaders.put(character, readerClass);
+        return this;
+    }
+
     public ResourceFactory withNamespace(String namespace, String url) {
         if (namespaces.containsKey(namespace)) {
             throw new ResourceException(format("Duplicate namespace '%s' found for resource factory", namespace));
