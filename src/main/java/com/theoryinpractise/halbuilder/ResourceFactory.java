@@ -29,14 +29,11 @@ import java.util.TreeMap;
 import static java.lang.String.format;
 
 public class ResourceFactory {
-    public static final char JSON_CHARACTER = '{';
-    public static final char XML_CHARACTER = '<';
-
     public static final String HAL_XML = "application/hal+xml";
     public static final String HAL_JSON = "application/hal+json";
 
     private Map<ContentType, Class<? extends Renderer>> contentRenderers = Maps.newHashMap();
-    private Map<Character, Class<? extends ResourceReader>> resourceReaders = Maps.newHashMap();
+    private Map<ContentType, Class<? extends ResourceReader>> resourceReaders = Maps.newHashMap();
     private TreeMap<String, String> namespaces = Maps.newTreeMap(Ordering.usingToString());
     private List<Link> links = Lists.newArrayList();
     private String baseHref;
@@ -53,8 +50,8 @@ public class ResourceFactory {
         this.baseHref = baseHref;
         this.contentRenderers.put(new ContentType(HAL_XML), XmlRenderer.class);
         this.contentRenderers.put(new ContentType(HAL_JSON), JsonRenderer.class);
-        this.resourceReaders.put(XML_CHARACTER, XmlResourceReader.class);
-        this.resourceReaders.put(JSON_CHARACTER, JsonResourceReader.class);
+        this.resourceReaders.put(new ContentType(HAL_XML), XmlResourceReader.class);
+        this.resourceReaders.put(new ContentType(HAL_JSON), JsonResourceReader.class);
     }
 
     public String getBaseHref() {
@@ -66,8 +63,8 @@ public class ResourceFactory {
         return this;
     }
 
-    public ResourceFactory withReader(Character character, Class<? extends ResourceReader> readerClass) {
-        resourceReaders.put(character, readerClass);
+    public ResourceFactory withReader(String contentType, Class<? extends ResourceReader> readerClass) {
+        resourceReaders.put(new ContentType(contentType), readerClass);
         return this;
     }
 
@@ -112,7 +109,17 @@ public class ResourceFactory {
             char firstChar = (char) bufferedReader.read();
             bufferedReader.reset();
 
-            Class<? extends ResourceReader> readerClass = resourceReaders.get(firstChar);
+            Class<? extends ResourceReader> readerClass;
+            switch (firstChar) {
+            case '{':
+                readerClass = resourceReaders.get(new ContentType(HAL_JSON));
+                break;
+            case '<':
+                readerClass = resourceReaders.get(new ContentType(HAL_XML));
+                break;
+            default:
+                throw new ResourceException("unrecognized initial character in stream: " + firstChar);
+            }
             Constructor<? extends ResourceReader> readerConstructor = readerClass.getConstructor(ResourceFactory.class);
             return readerConstructor.newInstance(this).read(bufferedReader);
         } catch (Exception e) {
