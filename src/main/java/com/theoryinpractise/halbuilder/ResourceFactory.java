@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 import com.theoryinpractise.halbuilder.impl.ContentType;
+import com.theoryinpractise.halbuilder.impl.api.ResourceReader;
 import com.theoryinpractise.halbuilder.impl.json.JsonRenderer;
 import com.theoryinpractise.halbuilder.impl.json.JsonResourceReader;
 import com.theoryinpractise.halbuilder.impl.resources.MutableResource;
@@ -19,6 +20,7 @@ import com.theoryinpractise.halbuilder.spi.ResourceException;
 
 import java.io.BufferedReader;
 import java.io.Reader;
+import java.lang.reflect.Constructor;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
@@ -27,11 +29,11 @@ import java.util.TreeMap;
 import static java.lang.String.format;
 
 public class ResourceFactory {
-
     public static final String HAL_XML = "application/hal+xml";
     public static final String HAL_JSON = "application/hal+json";
 
     private Map<ContentType, Class<? extends Renderer>> contentRenderers = Maps.newHashMap();
+    private Map<ContentType, Class<? extends ResourceReader>> resourceReaders = Maps.newHashMap();
     private TreeMap<String, String> namespaces = Maps.newTreeMap(Ordering.usingToString());
     private List<Link> links = Lists.newArrayList();
     private String baseHref;
@@ -48,6 +50,8 @@ public class ResourceFactory {
         this.baseHref = baseHref;
         this.contentRenderers.put(new ContentType(HAL_XML), XmlRenderer.class);
         this.contentRenderers.put(new ContentType(HAL_JSON), JsonRenderer.class);
+        this.resourceReaders.put(new ContentType(HAL_XML), XmlResourceReader.class);
+        this.resourceReaders.put(new ContentType(HAL_JSON), JsonResourceReader.class);
     }
 
     public String getBaseHref() {
@@ -56,6 +60,11 @@ public class ResourceFactory {
 
     public ResourceFactory withRenderer(String contentType, Class<? extends Renderer<String>> rendererClass) {
         contentRenderers.put(new ContentType(contentType), rendererClass);
+        return this;
+    }
+
+    public ResourceFactory withReader(String contentType, Class<? extends ResourceReader> readerClass) {
+        resourceReaders.put(new ContentType(contentType), readerClass);
         return this;
     }
 
@@ -100,13 +109,19 @@ public class ResourceFactory {
             char firstChar = (char) bufferedReader.read();
             bufferedReader.reset();
 
-            if (firstChar == '<') {
-                return new XmlResourceReader(this).read(bufferedReader);
-            } else if (firstChar == '{') {
-                return new JsonResourceReader(this).read(bufferedReader);
-            } else {
-                throw new ResourceException("Unknown resource format");
+            Class<? extends ResourceReader> readerClass;
+            switch (firstChar) {
+            case '{':
+                readerClass = resourceReaders.get(new ContentType(HAL_JSON));
+                break;
+            case '<':
+                readerClass = resourceReaders.get(new ContentType(HAL_XML));
+                break;
+            default:
+                throw new ResourceException("unrecognized initial character in stream: " + firstChar);
             }
+            Constructor<? extends ResourceReader> readerConstructor = readerClass.getConstructor(ResourceFactory.class);
+            return readerConstructor.newInstance(this).read(bufferedReader);
         } catch (Exception e) {
             throw new ResourceException(e);
         }
