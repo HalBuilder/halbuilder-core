@@ -104,6 +104,10 @@ public class JsonRenderer<T> implements Renderer<T> {
             g.writeObjectField(entry.getKey(), entry.getValue());
         }
 
+        for (String nullProperty : resource.getNullProperties()) {
+            g.writeNullField(nullProperty);
+        }
+
         if (!resource.getResources().isEmpty()) {
             g.writeObjectFieldStart(EMBEDDED);
 

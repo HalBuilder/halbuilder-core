@@ -68,6 +68,13 @@ public interface ReadableResource {
     Map<String, Object> getProperties();
 
     /**
+     * Returns an ImmutableList of the resource properties that have null
+     * values.
+     * @return A List of properties that have null values. 
+     */
+    List<String> getNullProperties();
+
+    /**
      * Returns an ImmutableList of the resources currently embedded resources.
      * @return A Map
      */

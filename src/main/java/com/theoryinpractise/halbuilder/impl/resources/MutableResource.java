@@ -119,11 +119,15 @@ public class MutableResource extends BaseResource implements Resource {
 	}
 
     public Resource withProperty(String name, Object value) {
-        if (properties.containsKey(name)) {
+        if (properties.containsKey(name) || nullProperties.contains(name)) {
             throw new ResourceException(format("Duplicate property '%s' found for resource", name));
         }
+        
         if (value != null) {
             properties.put(name, value);
+        }
+        else {
+            nullProperties.add(name);
         }
         return this;
     }

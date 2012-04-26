@@ -55,6 +55,7 @@ public abstract class BaseResource implements ReadableResource {
     protected Map<String, String> namespaces = Maps.newTreeMap(usingToString());
     protected List<Link> links = Lists.newArrayList();
     protected Map<String, Object> properties = Maps.newTreeMap(usingToString());
+    protected List<String> nullProperties = Lists.newArrayList();
     protected List<Resource> resources = Lists.newArrayList();
     protected ResourceFactory resourceFactory;
     protected final Pattern resolvableUri = Pattern.compile("^[/|?|~].*");
@@ -181,6 +182,10 @@ public abstract class BaseResource implements ReadableResource {
         return ImmutableMap.copyOf(properties);
     }
 
+    public List<String> getNullProperties() {
+        return ImmutableList.copyOf(nullProperties);
+    }
+
     public List<Resource> getResources() {
         return ImmutableList.copyOf(resources);
     }
@@ -250,7 +255,7 @@ public abstract class BaseResource implements ReadableResource {
     }
 
     public ImmutableResource toImmutableResource() {
-        return new ImmutableResource(resourceFactory, getNamespaces(), getCanonicalLinks(), getProperties(), getResources());
+        return new ImmutableResource(resourceFactory, getNamespaces(), getCanonicalLinks(), getProperties(), getNullProperties(), getResources());
     }
     
     @Override
@@ -258,6 +263,7 @@ public abstract class BaseResource implements ReadableResource {
         int h = namespaces.hashCode();
         h += links.hashCode();
         h += properties.hashCode();
+        h += nullProperties.hashCode();
         h += resources.hashCode();
         return h;
     }
@@ -277,6 +283,7 @@ public abstract class BaseResource implements ReadableResource {
         boolean e = this.namespaces.equals(that.namespaces);
         e &= this.links.equals(that.links);
         e &= this.properties.equals(that.properties);
+        e &= this.nullProperties.equals(that.nullProperties);
         e &= this.resources.equals(that.resources);
         return e;
     }
