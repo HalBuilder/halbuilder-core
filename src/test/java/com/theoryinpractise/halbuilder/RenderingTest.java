@@ -38,19 +38,19 @@ public class RenderingTest {
         exampleXml = Resources.toString(RenderingTest.class.getResource("example.xml"), Charsets.UTF_8)
                               .trim().replaceAll("\n", "\r\n");
         exampleJson = Resources.toString(RenderingTest.class.getResource("example.json"), Charsets.UTF_8)
-                               .trim().replaceAll("\n", "\r\n");
+                               .trim();
         exampleWithSubresourceXml = Resources.toString(RenderingTest.class.getResource("exampleWithSubresource.xml"), Charsets.UTF_8)
                                              .trim().replaceAll("\n", "\r\n");
         exampleWithSubresourceJson = Resources.toString(RenderingTest.class.getResource("exampleWithSubresource.json"), Charsets.UTF_8)
-                                              .trim().replaceAll("\n", "\r\n");
+                                              .trim();
         exampleWithMultipleSubresourcesXml = Resources.toString(RenderingTest.class.getResource("exampleWithMultipleSubresources.xml"), Charsets.UTF_8)
                                                       .trim().replaceAll("\n", "\r\n");
         exampleWithMultipleSubresourcesJson = Resources.toString(RenderingTest.class.getResource("exampleWithMultipleSubresources.json"), Charsets.UTF_8)
-                                                       .trim().replaceAll("\n", "\r\n");
+                                                       .trim();
         exampleWithNullPropertyXml = Resources.toString(RenderingTest.class.getResource("exampleWithNullProperty.xml"), Charsets.UTF_8)
                                                       .trim().replaceAll("\n", "\r\n");
         exampleWithNullPropertyJson = Resources.toString(RenderingTest.class.getResource("exampleWithNullProperty.json"), Charsets.UTF_8)
-                                                       .trim().replaceAll("\n", "\r\n");
+                                                       .trim();
     }
 
 
