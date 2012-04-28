@@ -54,11 +54,11 @@ public abstract class BaseResource implements ReadableResource {
 
     protected Map<String, String> namespaces = Maps.newTreeMap(usingToString());
     protected List<Link> links = Lists.newArrayList();
-    protected Map<String, Object> properties = Maps.newTreeMap(usingToString());
-    protected List<String> nullProperties = Lists.newArrayList();
+    protected Map<String, Optional<Object>> properties = Maps.newTreeMap(usingToString());
     protected List<Resource> resources = Lists.newArrayList();
     protected ResourceFactory resourceFactory;
     protected final Pattern resolvableUri = Pattern.compile("^[/|?|~].*");
+    protected boolean hasNullProperties = false;
 
     protected BaseResource(ResourceFactory resourceFactory) {
         this.resourceFactory = resourceFactory;
@@ -101,7 +101,7 @@ public abstract class BaseResource implements ReadableResource {
     }
 
     public Optional<Object> get(String name) {
-        return fromNullable(properties.get(name));
+        return fromNullable(properties.get(name).get());
     }
 
     private List<Link> getLinksByRel(ReadableResource resource, final String curiedRel) {
@@ -178,12 +178,8 @@ public abstract class BaseResource implements ReadableResource {
         return href;
     }
 
-    public Map<String, Object> getProperties() {
+    public Map<String, Optional<Object>> getProperties() {
         return ImmutableMap.copyOf(properties);
-    }
-
-    public List<String> getNullProperties() {
-        return ImmutableList.copyOf(nullProperties);
     }
 
     public List<Resource> getResources() {
@@ -253,9 +249,13 @@ public abstract class BaseResource implements ReadableResource {
         }
 
     }
+    
+    public boolean hasNullProperties() {
+        return hasNullProperties;
+    }
 
     public ImmutableResource toImmutableResource() {
-        return new ImmutableResource(resourceFactory, getNamespaces(), getCanonicalLinks(), getProperties(), getNullProperties(), getResources());
+        return new ImmutableResource(resourceFactory, getNamespaces(), getCanonicalLinks(), getProperties(), getResources(), hasNullProperties);
     }
     
     @Override
@@ -263,7 +263,6 @@ public abstract class BaseResource implements ReadableResource {
         int h = namespaces.hashCode();
         h += links.hashCode();
         h += properties.hashCode();
-        h += nullProperties.hashCode();
         h += resources.hashCode();
         return h;
     }
@@ -283,7 +282,6 @@ public abstract class BaseResource implements ReadableResource {
         boolean e = this.namespaces.equals(that.namespaces);
         e &= this.links.equals(that.links);
         e &= this.properties.equals(that.properties);
-        e &= this.nullProperties.equals(that.nullProperties);
         e &= this.resources.equals(that.resources);
         return e;
     }

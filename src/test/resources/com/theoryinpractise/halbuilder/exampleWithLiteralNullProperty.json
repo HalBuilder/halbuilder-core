@@ -24,6 +24,6 @@
   "expired" : false,
   "id" : 123456,
   "name" : "Example Resource",
-  "nullprop" : null,
+  "nullval" : "null",
   "optional" : true
 }

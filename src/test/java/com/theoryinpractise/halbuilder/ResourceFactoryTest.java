@@ -18,7 +18,7 @@ public class ResourceFactoryTest {
                 .withReader(ResourceFactory.HAL_XML, DummyResourceReader.class);
         ReadableResource resource = resourceFactory.readResource(new InputStreamReader(
                 ResourceFactoryTest.class.getResourceAsStream("example.xml")));
-        assertThat(resource.getProperties().get("name")).isEqualTo("dummy");
+        assertThat(resource.getProperties().get("name").get()).isEqualTo("dummy");
     }
 
     @Test
@@ -27,7 +27,7 @@ public class ResourceFactoryTest {
                 .withReader(ResourceFactory.HAL_JSON, DummyResourceReader.class);
         ReadableResource resource = resourceFactory.readResource(new InputStreamReader(
                 ResourceFactoryTest.class.getResourceAsStream("example.json")));
-        assertThat(resource.getProperties().get("name")).isEqualTo("dummy");
+        assertThat(resource.getProperties().get("name").get()).isEqualTo("dummy");
     }
 
     public static class DummyResourceReader implements ResourceReader {

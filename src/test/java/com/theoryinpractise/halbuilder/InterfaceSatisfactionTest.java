@@ -73,7 +73,7 @@ public class InterfaceSatisfactionTest {
 
         Contract contractHasOptionalFalse = new Contract() {
             public boolean isSatisfiedBy(ReadableResource resource) {
-                return resource.getProperties().containsKey("optional") && resource.getProperties().get("optional").equals("false");
+                return resource.getProperties().containsKey("optional") && resource.getProperties().get("optional").get().equals("false");
             }
         };
 

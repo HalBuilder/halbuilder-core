@@ -36,7 +36,7 @@ public class ResourceReaderTest {
     public void testReader(ReadableResource resource) {
         assertThat(resource.getResourceLink().getHref()).isEqualTo("https://example.com/api/customer/123456");
         assertThat(resource.getNamespaces()).hasSize(2);
-        assertThat(resource.getProperties().get("name")).isEqualTo("Example Resource");
+        assertThat(resource.getProperties().get("name").get()).isEqualTo("Example Resource");
         assertThat(resource.getCanonicalLinks()).hasSize(3);
         assertThat(resource.getResources()).hasSize(0);
     }
@@ -57,7 +57,7 @@ public class ResourceReaderTest {
         assertThat(resource.getNamespaces()).hasSize(2);
         assertThat(resource.getCanonicalLinks()).hasSize(3);
         assertThat(resource.getResources()).hasSize(1);
-        assertThat(resource.getResources().iterator().next().getProperties().get("name")).isEqualTo("Example User");
+        assertThat(resource.getResources().iterator().next().getProperties().get("name").get()).isEqualTo("Example User");
     }
 
     @Test(expectedExceptions = ResourceException.class)

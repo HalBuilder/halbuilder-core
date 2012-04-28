@@ -60,7 +60,7 @@ public class XmlRenderer<T> implements Renderer<T> {
             }
             // Add the instance namespace if there are null properties on this
             // resource or on any embedded resources.
-            if(hasNullProperties(resource)) {
+            if(resource.hasNullProperties()) {
                 resourceElement.addNamespaceDeclaration(XSI_NAMESPACE);
         }
         }
@@ -89,16 +89,14 @@ public class XmlRenderer<T> implements Renderer<T> {
         }
 
         // add properties
-        for (Map.Entry<String, Object> entry : resource.getProperties().entrySet()) {
+        for (Map.Entry<String, Optional<Object>> entry : resource.getProperties().entrySet()) {
             Element propertyElement = new Element(entry.getKey());
-            propertyElement.setContent(new Text(entry.getValue().toString()));
-            resourceElement.addContent(propertyElement);
-        }
-
-        // add null properties
-        for (String nullProperty : resource.getNullProperties()) {
-            Element propertyElement = new Element(nullProperty);
-            propertyElement.setAttribute("nil", "true", XSI_NAMESPACE);
+            if(entry.getValue().isPresent()) {
+                propertyElement.setContent(new Text(entry.getValue().get().toString()));
+            }
+            else {
+                propertyElement.setAttribute("nil", "true", XSI_NAMESPACE);
+            }
             resourceElement.addContent(propertyElement);
         }
 
@@ -109,24 +107,6 @@ public class XmlRenderer<T> implements Renderer<T> {
         }
 
         return resourceElement;
-    }
-
-    /**
-     * Given a resource, determine whether there are null properties present
-     * on the resource or any subresources.
-     * @param resource Resource to be checked.
-     * @return True if there are null properties present, false if not.
-     */
-    private boolean hasNullProperties(ReadableResource resource) {
-        if(!resource.getNullProperties().isEmpty()) {
-            return true;
-}
-        else {
-            for(Resource subresource : resource.getResources()) {
-                return hasNullProperties(subresource);
-            }
-            return false;
-        }
     }
 
 }

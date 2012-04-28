@@ -37,7 +37,7 @@ public class InterfaceRenderer<T> implements Renderer<T> {
 
                     String propertyName = derivePropertyNameFromMethod(method);
 
-                    Object propertyValue = resource.getProperties().get(propertyName);
+                    Object propertyValue = resource.getProperties().get(propertyName).get();
 
                     Class<?> returnType = method.getReturnType();
                     Object returnValue = returnType.getConstructor(propertyValue.getClass()).newInstance(propertyValue);
