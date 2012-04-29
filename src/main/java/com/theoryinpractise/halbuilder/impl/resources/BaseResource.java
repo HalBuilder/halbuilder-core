@@ -101,7 +101,7 @@ public abstract class BaseResource implements ReadableResource {
     }
 
     public Optional<Object> get(String name) {
-        return fromNullable(properties.get(name).get());
+        return properties.get(name);
     }
 
     private List<Link> getLinksByRel(ReadableResource resource, final String curiedRel) {
