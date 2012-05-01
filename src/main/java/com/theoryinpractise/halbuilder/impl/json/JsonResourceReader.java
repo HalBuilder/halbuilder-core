@@ -1,5 +1,7 @@
 package com.theoryinpractise.halbuilder.impl.json;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.theoryinpractise.halbuilder.ResourceFactory;
@@ -7,8 +9,6 @@ import com.theoryinpractise.halbuilder.impl.api.ResourceReader;
 import com.theoryinpractise.halbuilder.impl.resources.MutableResource;
 import com.theoryinpractise.halbuilder.spi.ReadableResource;
 import com.theoryinpractise.halbuilder.spi.ResourceException;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.Reader;
 import java.util.Iterator;
@@ -19,8 +19,8 @@ import static com.theoryinpractise.halbuilder.impl.api.Support.EMBEDDED;
 import static com.theoryinpractise.halbuilder.impl.api.Support.HREF;
 import static com.theoryinpractise.halbuilder.impl.api.Support.HREFLANG;
 import static com.theoryinpractise.halbuilder.impl.api.Support.LINKS;
-import static com.theoryinpractise.halbuilder.impl.api.Support.TITLE;
 import static com.theoryinpractise.halbuilder.impl.api.Support.NAME;
+import static com.theoryinpractise.halbuilder.impl.api.Support.TITLE;
 
 public class JsonResourceReader implements ResourceReader {
     private ResourceFactory resourceFactory;
@@ -61,7 +61,7 @@ public class JsonResourceReader implements ResourceReader {
                 JsonNode curieNode = linksNode.get(CURIE);
 
                 if (curieNode.isArray()) {
-                    Iterator<JsonNode> values = curieNode.getElements();
+                    Iterator<JsonNode> values = curieNode.elements();
                     while (values.hasNext()) {
                         JsonNode valueNode = values.next();
                         resource.withNamespace(valueNode.get(NAME).asText(), valueNode.get(HREF).asText());
@@ -75,12 +75,12 @@ public class JsonResourceReader implements ResourceReader {
 
     private void readLinks(MutableResource resource, JsonNode rootNode) {
         if (rootNode.has(LINKS)) {
-            Iterator<Map.Entry<String, JsonNode>> fields = rootNode.get(LINKS).getFields();
+            Iterator<Map.Entry<String, JsonNode>> fields = rootNode.get(LINKS).fields();
             while (fields.hasNext()) {
                 Map.Entry<String, JsonNode> keyNode = fields.next();
                 if (!CURIE.equals((keyNode.getKey()))) {
                     if (keyNode.getValue().isArray()) {
-                        Iterator<JsonNode> values = keyNode.getValue().getElements();
+                        Iterator<JsonNode> values = keyNode.getValue().elements();
                         while (values.hasNext()) {
                             JsonNode valueNode = values.next();
                             withJsonLink(resource, keyNode, valueNode);
@@ -111,7 +111,7 @@ public class JsonResourceReader implements ResourceReader {
 
     private void readProperties(MutableResource resource, JsonNode rootNode) {
 
-        Iterator<String> fieldNames = rootNode.getFieldNames();
+        Iterator<String> fieldNames = rootNode.fieldNames();
         while (fieldNames.hasNext()) {
             String fieldName = fieldNames.next();
             if (!fieldName.startsWith("_")) {
@@ -124,11 +124,11 @@ public class JsonResourceReader implements ResourceReader {
 
     private void readResources(MutableResource resource, JsonNode rootNode) {
         if (rootNode.has(EMBEDDED)) {
-            Iterator<Map.Entry<String, JsonNode>> fields = rootNode.get(EMBEDDED).getFields();
+            Iterator<Map.Entry<String, JsonNode>> fields = rootNode.get(EMBEDDED).fields();
             while (fields.hasNext()) {
                 Map.Entry<String, JsonNode> keyNode = fields.next();
                 if (keyNode.getValue().isArray()) {
-                    Iterator<JsonNode> values = keyNode.getValue().getElements();
+                    Iterator<JsonNode> values = keyNode.getValue().elements();
                     while (values.hasNext()) {
                         JsonNode valueNode = values.next();
                         resource.withSubresource(keyNode.getKey(), readResource(valueNode));

@@ -10,7 +10,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.fest.assertions.api.Assertions.assertThat;
 
 public class ResourceReaderTest {
 
@@ -18,7 +18,7 @@ public class ResourceReaderTest {
 
     @DataProvider
     public Object[][] provideResources() {
-        return new Object[][]{
+        return new Object[][] {
                 {resourceFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("example.xml")))},
                 {resourceFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("example.json")))},
         };
@@ -26,7 +26,7 @@ public class ResourceReaderTest {
 
     @DataProvider
     public Object[][] provideSubResources() {
-        return new Object[][]{
+        return new Object[][] {
                 {resourceFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("exampleWithSubresource.xml")))},
                 {resourceFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("exampleWithSubresource.json")))},
         };

@@ -1,14 +1,13 @@
 package com.theoryinpractise.halbuilder;
 
-import static org.fest.assertions.Assertions.assertThat;
+import com.theoryinpractise.halbuilder.impl.api.ResourceReader;
+import com.theoryinpractise.halbuilder.spi.ReadableResource;
+import org.testng.annotations.Test;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
 
-import org.testng.annotations.Test;
-
-import com.theoryinpractise.halbuilder.impl.api.ResourceReader;
-import com.theoryinpractise.halbuilder.spi.ReadableResource;
+import static org.fest.assertions.api.Assertions.assertThat;
 
 public class ResourceFactoryTest {
 

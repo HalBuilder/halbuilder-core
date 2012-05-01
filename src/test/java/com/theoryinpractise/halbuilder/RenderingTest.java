@@ -16,7 +16,7 @@ import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URI;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.fest.assertions.api.Assertions.assertThat;
 
 public class RenderingTest {
 
@@ -222,7 +222,7 @@ public class RenderingTest {
         assertThat(party.renderContent(ResourceFactory.HAL_JSON)).isEqualTo(exampleWithMultipleSubresourcesJson);
 
     }
-    
+
     @Test
     public void testNullPropertyHal() {
 
@@ -241,7 +241,7 @@ public class RenderingTest {
         assertThat(party.renderContent(ResourceFactory.HAL_XML)).isEqualTo(exampleWithNullPropertyXml);
         assertThat(party.renderContent(ResourceFactory.HAL_JSON)).isEqualTo(exampleWithNullPropertyJson);
     }
-    
+
     @Test
     public void testLiteralNullPropertyHal() {
         URI path = UriBuilder.fromPath("customer/{id}").buildFromMap(ImmutableMap.of("id", "123456"));
