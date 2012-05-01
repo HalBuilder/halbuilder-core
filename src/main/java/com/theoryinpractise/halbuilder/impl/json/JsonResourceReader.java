@@ -116,7 +116,7 @@ public class JsonResourceReader implements ResourceReader {
             String fieldName = fieldNames.next();
             if (!fieldName.startsWith("_")) {
                 JsonNode field = rootNode.get(fieldName);
-                resource.withProperty(fieldName, field.asText());
+                resource.withProperty(fieldName, field == null ? null : field.asText());
             }
         }
 

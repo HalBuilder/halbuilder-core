@@ -23,6 +23,7 @@ import static com.theoryinpractise.halbuilder.impl.api.Support.NAME;
 import static com.theoryinpractise.halbuilder.impl.api.Support.REL;
 import static com.theoryinpractise.halbuilder.impl.api.Support.SELF;
 import static com.theoryinpractise.halbuilder.impl.api.Support.TITLE;
+import static com.theoryinpractise.halbuilder.impl.api.Support.XSI_NAMESPACE;
 
 
 public class XmlRenderer<T> implements Renderer<T> {
@@ -57,6 +58,11 @@ public class XmlRenderer<T> implements Renderer<T> {
                 resourceElement.addNamespaceDeclaration(
                         Namespace.getNamespace(entry.getKey(), entry.getValue()));
             }
+            // Add the instance namespace if there are null properties on this
+            // resource or on any embedded resources.
+            if(resource.hasNullProperties()) {
+                resourceElement.addNamespaceDeclaration(XSI_NAMESPACE);
+        }
         }
 
         //add a comment
@@ -83,9 +89,14 @@ public class XmlRenderer<T> implements Renderer<T> {
         }
 
         // add properties
-        for (Map.Entry<String, Object> entry : resource.getProperties().entrySet()) {
+        for (Map.Entry<String, Optional<Object>> entry : resource.getProperties().entrySet()) {
             Element propertyElement = new Element(entry.getKey());
-            propertyElement.setContent(new Text(entry.getValue().toString()));
+            if(entry.getValue().isPresent()) {
+                propertyElement.setContent(new Text(entry.getValue().get().toString()));
+            }
+            else {
+                propertyElement.setAttribute("nil", "true", XSI_NAMESPACE);
+            }
             resourceElement.addContent(propertyElement);
         }
 

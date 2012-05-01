@@ -100,8 +100,13 @@ public class JsonRenderer<T> implements Renderer<T> {
             g.writeEndObject();
         }
 
-        for (Map.Entry<String, Object> entry : resource.getProperties().entrySet()) {
-            g.writeObjectField(entry.getKey(), entry.getValue());
+        for (Map.Entry<String, Optional<Object>> entry : resource.getProperties().entrySet()) {
+            if(entry.getValue().isPresent()) {
+                g.writeObjectField(entry.getKey(), entry.getValue().get());
+            }
+            else {
+                g.writeNullField(entry.getKey());
+            }
         }
 
         if (!resource.getResources().isEmpty()) {

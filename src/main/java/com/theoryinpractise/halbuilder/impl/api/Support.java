@@ -1,6 +1,7 @@
 package com.theoryinpractise.halbuilder.impl.api;
 
 import com.google.common.base.Splitter;
+import org.jdom.Namespace;
 
 public class Support {
 
@@ -18,5 +19,12 @@ public class Support {
     public static final String CURIE = "curie";
     public static final String TITLE = "title";
     public static final String HREFLANG = "hreflang";
+
+    /** 
+     * Define the XML schema instance namespace, so we can use it when
+     * rendering nil elements.
+     */
+    public static final Namespace XSI_NAMESPACE = Namespace.getNamespace(
+            "xsi", "http://www.w3.org/2001/XMLSchema-instance");
 
 }

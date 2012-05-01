@@ -21,6 +21,7 @@ import java.util.List;
 import static com.theoryinpractise.halbuilder.impl.api.Support.HREFLANG;
 import static com.theoryinpractise.halbuilder.impl.api.Support.NAME;
 import static com.theoryinpractise.halbuilder.impl.api.Support.TITLE;
+import static com.theoryinpractise.halbuilder.impl.api.Support.XSI_NAMESPACE;
 
 public class XmlResourceReader implements ResourceReader {
     private ResourceFactory resourceFactory;
@@ -85,9 +86,13 @@ public class XmlResourceReader implements ResourceReader {
         List<Element> properties = element.getChildren();
         for (Element property : properties) {
             if (!property.getName().matches("(link|resource)")) {
+                if (property.getAttribute("nil", XSI_NAMESPACE) != null) {
+                    resource.withProperty(property.getName(), null);
+                } else {
                 resource.withProperty(property.getName(), property.getValue());
             }
         }
+    }
     }
 
     private void readResources(Resource halResource, Element element) {

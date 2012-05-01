@@ -30,6 +30,10 @@ public class RenderingTest {
     private String exampleWithSubresourceJson;
     private String exampleWithMultipleSubresourcesXml;
     private String exampleWithMultipleSubresourcesJson;
+    private String exampleWithNullPropertyXml;
+    private String exampleWithNullPropertyJson;
+    private String exampleWithLiteralNullPropertyXml;
+    private String exampleWithLiteralNullPropertyJson;
 
     @BeforeMethod
     public void setup() throws IOException {
@@ -44,6 +48,14 @@ public class RenderingTest {
         exampleWithMultipleSubresourcesXml = Resources.toString(RenderingTest.class.getResource("exampleWithMultipleSubresources.xml"), Charsets.UTF_8)
                                                       .trim().replaceAll("\n", "\r\n");
         exampleWithMultipleSubresourcesJson = Resources.toString(RenderingTest.class.getResource("exampleWithMultipleSubresources.json"), Charsets.UTF_8)
+                                                       .trim();
+        exampleWithNullPropertyXml = Resources.toString(RenderingTest.class.getResource("exampleWithNullProperty.xml"), Charsets.UTF_8)
+                                                      .trim().replaceAll("\n", "\r\n");
+        exampleWithNullPropertyJson = Resources.toString(RenderingTest.class.getResource("exampleWithNullProperty.json"), Charsets.UTF_8)
+                                                       .trim();
+        exampleWithLiteralNullPropertyXml = Resources.toString(RenderingTest.class.getResource("exampleWithLiteralNullProperty.xml"), Charsets.UTF_8)
+                                                      .trim().replaceAll("\n", "\r\n");
+        exampleWithLiteralNullPropertyJson = Resources.toString(RenderingTest.class.getResource("exampleWithLiteralNullProperty.json"), Charsets.UTF_8)
                                                        .trim();
     }
 
@@ -209,6 +221,43 @@ public class RenderingTest {
         assertThat(party.renderContent(ResourceFactory.HAL_XML)).isEqualTo(exampleWithMultipleSubresourcesXml);
         assertThat(party.renderContent(ResourceFactory.HAL_JSON)).isEqualTo(exampleWithMultipleSubresourcesJson);
 
+    }
+    
+    @Test
+    public void testNullPropertyHal() {
+
+        URI path = UriBuilder.fromPath("customer/{id}").buildFromMap(ImmutableMap.of("id", "123456"));
+
+        ReadableResource party = newBaseResource(path)
+                                           .withLink("?users", "ns:users")
+                                           .withProperty("id", 123456)
+                                           .withProperty("age", 33)
+                                           .withProperty("name", "Example Resource")
+                                           .withProperty("optional", Boolean.TRUE)
+                                           .withProperty("expired", Boolean.FALSE)
+                                           .withProperty("nullprop", null);
+
+        assertThat(party.getResourceLink().getHref()).isEqualTo("https://example.com/api/customer/123456");
+        assertThat(party.renderContent(ResourceFactory.HAL_XML)).isEqualTo(exampleWithNullPropertyXml);
+        assertThat(party.renderContent(ResourceFactory.HAL_JSON)).isEqualTo(exampleWithNullPropertyJson);
+    }
+    
+    @Test
+    public void testLiteralNullPropertyHal() {
+        URI path = UriBuilder.fromPath("customer/{id}").buildFromMap(ImmutableMap.of("id", "123456"));
+
+        ReadableResource party = newBaseResource(path)
+                                           .withLink("?users", "ns:users")
+                                           .withProperty("id", 123456)
+                                           .withProperty("age", 33)
+                                           .withProperty("name", "Example Resource")
+                                           .withProperty("optional", Boolean.TRUE)
+                                           .withProperty("expired", Boolean.FALSE)
+                                           .withProperty("nullval", "null");
+
+        assertThat(party.getResourceLink().getHref()).isEqualTo("https://example.com/api/customer/123456");
+        assertThat(party.renderContent(ResourceFactory.HAL_XML)).isEqualTo(exampleWithLiteralNullPropertyXml);
+        assertThat(party.renderContent(ResourceFactory.HAL_JSON)).isEqualTo(exampleWithLiteralNullPropertyJson);
     }
 
     public static class OtherCustomer {

@@ -122,9 +122,10 @@ public class MutableResource extends BaseResource implements Resource {
         if (properties.containsKey(name)) {
             throw new ResourceException(format("Duplicate property '%s' found for resource", name));
         }
-        if (value != null) {
-            properties.put(name, value);
+        if (null == value) {
+            this.hasNullProperties = true;
         }
+        properties.put(name, Optional.fromNullable(value));
         return this;
     }
 
@@ -191,6 +192,10 @@ public class MutableResource extends BaseResource implements Resource {
     public MutableResource withSubresource(String rel, Resource resource) {
         resource.withLink(resource.getResourceLink().getHref(), rel);
         resources.add(resource);
+        // Propagate null property flag to parent.
+        if(resource.hasNullProperties()) {
+            hasNullProperties = true;
+        }
         return this;
     }
 

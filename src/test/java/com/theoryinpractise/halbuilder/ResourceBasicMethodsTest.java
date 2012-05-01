@@ -30,6 +30,7 @@ public class ResourceBasicMethodsTest {
                 .withNamespace("testns", "http://example.com/test")
                 .withLink("http://example.com/link", "testlink")
                 .withProperty("testprop", "value")
+                .withProperty("nullprop", null)
                 .withSubresource("testsub", resourceFactory.newResource("/subtest"));
     }
     
@@ -57,6 +58,12 @@ public class ResourceBasicMethodsTest {
     }
     
     @Test
+    public void testHashCodeIsDependentOnNullProperties() {
+        resource.withProperty("othernullprop", null);
+        assertThat(resource.hashCode()).isNotEqualTo(resourceHashCode);
+    }
+    
+    @Test
     public void testHashCodeIsDependentOnResources() {
         resource.withSubresource("testsub2", resourceFactory.newResource("/subtest2"));
         assertThat(resource.hashCode()).isNotEqualTo(resourceHashCode);
@@ -77,6 +84,12 @@ public class ResourceBasicMethodsTest {
     @Test
     public void testEqualsIsDependentOnProperties() {
         resource.withProperty("proptest2", "value2");
+        assertThat(resource).isNotEqualTo(otherResource);
+    }
+    
+    @Test
+    public void testEqualsIsDependentOnNullProperties() {
+        resource.withProperty("othernullprop", null);
         assertThat(resource).isNotEqualTo(otherResource);
     }
     

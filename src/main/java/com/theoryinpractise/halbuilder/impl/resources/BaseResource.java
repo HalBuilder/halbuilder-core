@@ -54,10 +54,11 @@ public abstract class BaseResource implements ReadableResource {
 
     protected Map<String, String> namespaces = Maps.newTreeMap(usingToString());
     protected List<Link> links = Lists.newArrayList();
-    protected Map<String, Object> properties = Maps.newTreeMap(usingToString());
+    protected Map<String, Optional<Object>> properties = Maps.newTreeMap(usingToString());
     protected List<Resource> resources = Lists.newArrayList();
     protected ResourceFactory resourceFactory;
     protected final Pattern resolvableUri = Pattern.compile("^[/|?|~].*");
+    protected boolean hasNullProperties = false;
 
     protected BaseResource(ResourceFactory resourceFactory) {
         this.resourceFactory = resourceFactory;
@@ -100,7 +101,7 @@ public abstract class BaseResource implements ReadableResource {
     }
 
     public Optional<Object> get(String name) {
-        return fromNullable(properties.get(name));
+        return properties.get(name);
     }
 
     private List<Link> getLinksByRel(ReadableResource resource, final String curiedRel) {
@@ -177,7 +178,7 @@ public abstract class BaseResource implements ReadableResource {
         return href;
     }
 
-    public Map<String, Object> getProperties() {
+    public Map<String, Optional<Object>> getProperties() {
         return ImmutableMap.copyOf(properties);
     }
 
@@ -248,9 +249,13 @@ public abstract class BaseResource implements ReadableResource {
         }
 
     }
+    
+    public boolean hasNullProperties() {
+        return hasNullProperties;
+    }
 
     public ImmutableResource toImmutableResource() {
-        return new ImmutableResource(resourceFactory, getNamespaces(), getCanonicalLinks(), getProperties(), getResources());
+        return new ImmutableResource(resourceFactory, getNamespaces(), getCanonicalLinks(), getProperties(), getResources(), hasNullProperties);
     }
     
     @Override

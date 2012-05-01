@@ -65,7 +65,15 @@ public interface ReadableResource {
      * Returns an ImmutableMap of the resources properties.
      * @return A Map
      */
-    Map<String, Object> getProperties();
+    Map<String, Optional<Object>> getProperties();
+    
+    /**
+     * Return an indication of whether this resource, or subresources of this
+     * resource, contain null properties.
+     * @return True if this resource, or subresources of this resource,
+     * contain null properties.  False if not.
+     */
+    boolean hasNullProperties();
 
     /**
      * Returns an ImmutableList of the resources currently embedded resources.
