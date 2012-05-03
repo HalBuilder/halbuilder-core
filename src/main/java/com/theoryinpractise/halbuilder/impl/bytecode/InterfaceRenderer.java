@@ -36,12 +36,22 @@ public class InterfaceRenderer<T> implements Renderer<T> {
                 public Object invoke(Object o, Method method, Object[] objects) throws Throwable {
 
                     String propertyName = derivePropertyNameFromMethod(method);
-
-                    Object propertyValue = resource.getProperties().get(propertyName).get();
-
+                    
+                    Optional<Object> propertyOptional = resource.getProperties().get(propertyName);
+                    
                     Class<?> returnType = method.getReturnType();
-                    Object returnValue = returnType.getConstructor(propertyValue.getClass()).newInstance(propertyValue);
-
+                    
+                    Object returnValue;
+                    
+                    if(propertyOptional.isPresent()) {
+                        Object propertyValue = propertyOptional.get();
+                        returnValue = returnType.getConstructor(propertyValue.getClass()).newInstance(propertyValue);
+                    }
+                    else {
+                        // In this case, we have a null property.
+                        returnValue = null;
+                    }
+                    
                     return returnValue;
                 }
             });

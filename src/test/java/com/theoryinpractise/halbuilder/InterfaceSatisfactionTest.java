@@ -38,6 +38,10 @@ public class InterfaceSatisfactionTest {
     public static interface ISimpleJob {
         Integer jobId();
     }
+    
+    public static interface INullprop {
+        String nullprop();
+    }
 
     @DataProvider
     public Object[][] providerSatisfactionData() {
@@ -103,6 +107,14 @@ public class InterfaceSatisfactionTest {
         assertThat(resource.renderClass(IPerson.class).get().getName()).isEqualTo("Example Resource");
         assertThat(resource.renderClass(ISimpleJob.class).isPresent()).isFalse();
         assertThat(resource.renderClass(IJob.class).isPresent()).isFalse();
+    }
+    
+    @Test
+    public void testNullPropertyClassRendering() {
+        ReadableResource resource = resourceFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("exampleWithNullProperty.xml")));
+
+        assertThat(resource.renderClass(INullprop.class).isPresent()).isTrue();
+        assertThat(resource.renderClass(INullprop.class).get().nullprop() == null);
     }
 
     @Test
