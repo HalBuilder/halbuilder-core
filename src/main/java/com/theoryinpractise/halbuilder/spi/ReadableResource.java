@@ -62,11 +62,25 @@ public interface ReadableResource {
     Optional<Object> get(String name);
 
     /**
+     * Returns a property from the Resource
+     * @param name The property to return
+     * @return An Object of the property value, or null if absent
+     */
+    Object getValue(String name);
+
+    /**
+     * Returns a property from the Resource
+     * @param name The property to return
+     * @return An Object of the property value, or a user supplied default value
+     */
+    Object getValue(String name, Object defaultValue);
+
+    /**
      * Returns an ImmutableMap of the resources properties.
      * @return A Map
      */
     Map<String, Optional<Object>> getProperties();
-    
+
     /**
      * Return an indication of whether this resource, or subresources of this
      * resource, contain null properties.

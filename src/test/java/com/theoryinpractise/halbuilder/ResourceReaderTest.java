@@ -37,6 +37,8 @@ public class ResourceReaderTest {
         assertThat(resource.getResourceLink().getHref()).isEqualTo("https://example.com/api/customer/123456");
         assertThat(resource.getNamespaces()).hasSize(2);
         assertThat(resource.getProperties().get("name").get()).isEqualTo("Example Resource");
+        assertThat(resource.get("name").get()).isEqualTo("Example Resource");
+        assertThat(resource.getValue("name")).isEqualTo("Example Resource");
         assertThat(resource.getCanonicalLinks()).hasSize(3);
         assertThat(resource.getResources()).hasSize(0);
     }

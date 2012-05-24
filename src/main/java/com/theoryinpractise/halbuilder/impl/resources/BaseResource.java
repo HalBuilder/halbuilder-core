@@ -104,6 +104,19 @@ public abstract class BaseResource implements ReadableResource {
         return properties.get(name);
     }
 
+    public Object getValue(String name) {
+        return getValue(name, null);
+    }
+
+    public Object getValue(String name, Object defaultValue) {
+        Optional<Object> property = properties.get(name);
+        if (property.isPresent()) {
+            return property.get();
+        } else {
+            return defaultValue;
+        }
+    }
+
     private List<Link> getLinksByRel(ReadableResource resource, final String curiedRel) {
         return ImmutableList.copyOf(Iterables.filter(resource.getLinks(), new Predicate<Link>() {
             public boolean apply(@Nullable Link relatable) {
@@ -249,7 +262,7 @@ public abstract class BaseResource implements ReadableResource {
         }
 
     }
-    
+
     public boolean hasNullProperties() {
         return hasNullProperties;
     }
@@ -257,7 +270,7 @@ public abstract class BaseResource implements ReadableResource {
     public ImmutableResource toImmutableResource() {
         return new ImmutableResource(resourceFactory, getNamespaces(), getCanonicalLinks(), getProperties(), getResources(), hasNullProperties);
     }
-    
+
     @Override
     public int hashCode() {
         int h = namespaces.hashCode();
@@ -285,7 +298,7 @@ public abstract class BaseResource implements ReadableResource {
         e &= this.resources.equals(that.resources);
         return e;
     }
-    
+
     @Override
     public String toString() {
         Optional<Link> href = getLinkByRel("self");
