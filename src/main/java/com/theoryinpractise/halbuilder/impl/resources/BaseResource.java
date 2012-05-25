@@ -100,6 +100,22 @@ public abstract class BaseResource implements ReadableResource {
         return linkBuilder.build();
     }
 
+    public List<? extends ReadableResource> getResourcesByRel(final String rel) {
+        Preconditions.checkArgument(rel != null, "Provided rel should not be null.");
+        Preconditions.checkArgument(!"".equals(rel) && !rel.contains(" "), "Provided rel should not be empty or contain spaces.");
+
+        return findResources(new Predicate<Resource>() {
+            public boolean apply(@Nullable Resource resource) {
+                return Iterables.contains(WHITESPACE_SPLITTER.split(resource.getResourceLink().getRel()), rel);
+            }
+        });
+    }
+
+    public List<? extends ReadableResource> findResources(Predicate<Resource> findPredicate) {
+        Preconditions.checkArgument(findPredicate != null, "Provided findPredicate should not be null.");
+        return ImmutableList.copyOf(Iterables.filter(resources, findPredicate));
+    }
+
     public Optional<Object> get(String name) {
         return properties.get(name);
     }
@@ -308,4 +324,5 @@ public abstract class BaseResource implements ReadableResource {
             return "<Resource: @" +  Integer.toHexString(hashCode()) + ">";
         }
     }
+
 }

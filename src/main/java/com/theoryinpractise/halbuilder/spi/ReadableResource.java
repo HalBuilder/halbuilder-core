@@ -2,6 +2,7 @@ package com.theoryinpractise.halbuilder.spi;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 
 import java.util.List;
 import java.util.Map;
@@ -53,6 +54,22 @@ public interface ReadableResource {
      * @return An Immutable List of Links
      */
     List<Link> getLinksByRel(String rel);
+
+    /**
+     * Returns all embedded resources matching the given rel by searching this, then
+     * any embedded resource instance.
+     * @param rel The rel type to search for.
+     * @return An Immutable List of Resources
+     */
+    List<? extends ReadableResource> getResourcesByRel(String rel);
+
+    /**
+     * Returns a finds all embedded resources from the Resource
+     * that match the predicate
+     * @param findPredicate The predicate to check against in the embedded resources
+     * @return A List of matching objects (properties, links, resource)
+     */
+    List<? extends ReadableResource> findResources(Predicate<Resource> findPredicate);
 
     /**
      * Returns a property from the Resource.
@@ -135,4 +152,5 @@ public interface ReadableResource {
      * @return A String
      */
     String renderContent(String contentType);
+
 }
