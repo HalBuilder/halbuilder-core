@@ -101,7 +101,11 @@ public abstract class BaseResource implements ReadableResource {
     }
 
     public Optional<Object> get(String name) {
-        return properties.get(name);
+        if (properties.containsKey(name)) {
+            return properties.get(name);
+        } else {
+            return Optional.absent();
+        }
     }
 
     public Object getValue(String name) {
@@ -109,7 +113,7 @@ public abstract class BaseResource implements ReadableResource {
     }
 
     public Object getValue(String name, Object defaultValue) {
-        Optional<Object> property = properties.get(name);
+        Optional<Object> property = get(name);
         if (property.isPresent()) {
             return property.get();
         } else {
