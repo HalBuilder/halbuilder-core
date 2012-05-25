@@ -135,4 +135,13 @@ public interface ReadableResource {
      * @return A String
      */
     String renderContent(String contentType);
+
+    /**
+     * Returns an optional proxy to the given interface mirroring the resource.
+     *
+     * @param anInterface An interface to mirror
+     * @return A Guava Optional Resource Proxy
+     */
+    <T> Optional<T> resolveClass(Function<ReadableResource, Optional<T>> resolver);
+
 }

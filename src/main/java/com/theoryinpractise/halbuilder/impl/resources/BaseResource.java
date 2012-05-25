@@ -20,10 +20,12 @@ import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceRenderer;
 import com.theoryinpractise.halbuilder.spi.Contract;
 import com.theoryinpractise.halbuilder.spi.Link;
 import com.theoryinpractise.halbuilder.spi.ReadableResource;
+import com.theoryinpractise.halbuilder.spi.Renderer;
 import com.theoryinpractise.halbuilder.spi.Resource;
 import com.theoryinpractise.halbuilder.spi.ResourceException;
 
 import javax.annotation.Nullable;
+import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
@@ -273,6 +275,37 @@ public abstract class BaseResource implements ReadableResource {
 
     public ImmutableResource toImmutableResource() {
         return new ImmutableResource(resourceFactory, getNamespaces(), getCanonicalLinks(), getProperties(), getResources(), hasNullProperties);
+    }
+
+
+    /**
+     * Renders the current Resource as a proxy to the provider interface
+     *
+     * @param anInterface The interface we wish to proxy the resource as
+     * @return A Guava Optional of the rendered class, this will be absent if the interface doesn't satisfy the interface
+     */
+    public <T> Optional<T> renderClass(Class<T> anInterface) {
+        if (InterfaceContract.newInterfaceContract(anInterface).isSatisfiedBy(this)) {
+            return InterfaceRenderer.newInterfaceRenderer(anInterface).render(this, null);
+        } else {
+            return Optional.absent();
+        }
+    }
+
+    public String renderContent(String contentType) {
+        Renderer<String> renderer = resourceFactory.lookupRenderer(contentType);
+        return renderAsString(renderer);
+    }
+
+    public <T> Optional<T> resolveClass(Function<ReadableResource, Optional<T>> resolver) {
+        return resolver.apply(this);
+    }
+
+    private String renderAsString(final Renderer renderer) {
+        validateNamespaces(this);
+        StringWriter sw = new StringWriter();
+        renderer.render(this, sw);
+        return sw.toString();
     }
 
     @Override
