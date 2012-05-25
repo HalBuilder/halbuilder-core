@@ -2,12 +2,12 @@ package com.theoryinpractise.halbuilder;
 
 import com.theoryinpractise.halbuilder.spi.Link;
 import com.theoryinpractise.halbuilder.spi.Resource;
-import org.fest.assertions.Condition;
+import org.fest.assertions.core.Condition;
 import org.testng.annotations.Test;
 
 import java.util.List;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.fest.assertions.api.Assertions.assertThat;
 
 public class CollatedLinksTest {
 
@@ -22,11 +22,11 @@ public class CollatedLinksTest {
 
         assertThat(collatedLinks)
                 .isNotEmpty()
-                .satisfies(new ContainsRelCondition("bar foo"));
+                .has(new ContainsRelCondition("bar foo"));
 
         assertThat(resource.getLinksByRel("bar"))
                 .isNotNull()
-                .satisfies(new ContainsRelCondition("bar foo"));
+                .has(new ContainsRelCondition("bar foo"));
 
 
     }
@@ -40,8 +40,8 @@ public class CollatedLinksTest {
         assertThat(resource.getCanonicalLinks())
                 .isNotEmpty()
                 .hasSize(3)
-                .satisfies(new ContainsRelCondition("bar"))
-                .satisfies(new ContainsRelCondition("foo"));
+                .has(new ContainsRelCondition("bar"))
+                .has(new ContainsRelCondition("foo"));
 
     }
 
@@ -54,8 +54,8 @@ public class CollatedLinksTest {
         assertThat(resource.getCanonicalLinks())
                 .isNotEmpty()
                 .hasSize(3)
-                .satisfies(new ContainsRelCondition("bar"))
-                .satisfies(new ContainsRelCondition("foo"));
+                .has(new ContainsRelCondition("bar"))
+                .has(new ContainsRelCondition("foo"));
 
     }
 

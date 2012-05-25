@@ -2,7 +2,7 @@ package com.theoryinpractise.halbuilder.impl;
 
 import org.testng.annotations.Test;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.fest.assertions.api.Assertions.assertThat;
 
 public class ContentTypeTest {
 

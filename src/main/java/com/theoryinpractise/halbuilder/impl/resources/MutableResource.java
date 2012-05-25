@@ -122,9 +122,10 @@ public class MutableResource extends BaseResource implements Resource {
         if (properties.containsKey(name)) {
             throw new ResourceException(format("Duplicate property '%s' found for resource", name));
         }
-        if (value != null) {
-            properties.put(name, value);
+        if (null == value) {
+            this.hasNullProperties = true;
         }
+        properties.put(name, Optional.fromNullable(value));
         return this;
     }
 
@@ -191,32 +192,11 @@ public class MutableResource extends BaseResource implements Resource {
     public MutableResource withSubresource(String rel, Resource resource) {
         resource.withLink(resource.getResourceLink().getHref(), rel);
         resources.add(resource);
+        // Propagate null property flag to parent.
+        if(resource.hasNullProperties()) {
+            hasNullProperties = true;
+        }
         return this;
     }
 
-    /**
-     * Renders the current Resource as a proxy to the provider interface
-     *
-     * @param anInterface The interface we wish to proxy the resource as
-     * @return A Guava Optional of the rendered class, this will be absent if the interface doesn't satisfy the interface
-     */
-    public <T> Optional<T> renderClass(Class<T> anInterface) {
-        if (InterfaceContract.newInterfaceContract(anInterface).isSatisfiedBy(this)) {
-            return InterfaceRenderer.newInterfaceRenderer(anInterface).render(toImmutableResource(), null);
-        } else {
-            return Optional.absent();
-        }
-    }
-
-    public String renderContent(String contentType) {
-        Renderer<String> renderer = resourceFactory.lookupRenderer(contentType);
-        return renderAsString(renderer);
-    }
-
-    private String renderAsString(final Renderer renderer) {
-        validateNamespaces(this);
-        StringWriter sw = new StringWriter();
-        renderer.render(toImmutableResource(), sw);
-        return sw.toString();
-    }
 }

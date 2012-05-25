@@ -10,7 +10,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.fest.assertions.api.Assertions.assertThat;
 
 public class ResourceReaderTest {
 
@@ -18,7 +18,7 @@ public class ResourceReaderTest {
 
     @DataProvider
     public Object[][] provideResources() {
-        return new Object[][]{
+        return new Object[][] {
                 {resourceFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("example.xml")))},
                 {resourceFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("example.json")))},
         };
@@ -26,7 +26,7 @@ public class ResourceReaderTest {
 
     @DataProvider
     public Object[][] provideSubResources() {
-        return new Object[][]{
+        return new Object[][] {
                 {resourceFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("exampleWithSubresource.xml")))},
                 {resourceFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("exampleWithSubresource.json")))},
         };
@@ -36,9 +36,12 @@ public class ResourceReaderTest {
     public void testReader(ReadableResource resource) {
         assertThat(resource.getResourceLink().getHref()).isEqualTo("https://example.com/api/customer/123456");
         assertThat(resource.getNamespaces()).hasSize(2);
-        assertThat(resource.getProperties().get("name")).isEqualTo("Example Resource");
+        assertThat(resource.getProperties().get("name").get()).isEqualTo("Example Resource");
+        assertThat(resource.get("name").get()).isEqualTo("Example Resource");
+        assertThat(resource.getValue("name")).isEqualTo("Example Resource");
         assertThat(resource.getCanonicalLinks()).hasSize(3);
         assertThat(resource.getResources()).hasSize(0);
+        assertThat(resource.getResourcesByRel("role:admin")).hasSize(0);
     }
 
     @Test(dataProvider = "provideResources")
@@ -57,7 +60,8 @@ public class ResourceReaderTest {
         assertThat(resource.getNamespaces()).hasSize(2);
         assertThat(resource.getCanonicalLinks()).hasSize(3);
         assertThat(resource.getResources()).hasSize(1);
-        assertThat(resource.getResources().iterator().next().getProperties().get("name")).isEqualTo("Example User");
+        assertThat(resource.getResources().iterator().next().getProperties().get("name").get()).isEqualTo("Example User");
+        assertThat(resource.getResourcesByRel("role:admin")).hasSize(1);
     }
 
     @Test(expectedExceptions = ResourceException.class)

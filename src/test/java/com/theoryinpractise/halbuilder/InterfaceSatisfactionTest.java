@@ -1,6 +1,7 @@
 package com.theoryinpractise.halbuilder;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceContract;
 import com.theoryinpractise.halbuilder.spi.Contract;
 import com.theoryinpractise.halbuilder.spi.ReadableResource;
@@ -10,7 +11,7 @@ import org.testng.annotations.Test;
 import javax.annotation.Nullable;
 import java.io.InputStreamReader;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.fest.assertions.api.Assertions.assertThat;
 
 public class InterfaceSatisfactionTest {
 
@@ -36,6 +37,10 @@ public class InterfaceSatisfactionTest {
 
     public static interface ISimpleJob {
         Integer jobId();
+    }
+    
+    public static interface INullprop {
+        String nullprop();
     }
 
     @DataProvider
@@ -73,16 +78,25 @@ public class InterfaceSatisfactionTest {
 
         Contract contractHasOptionalFalse = new Contract() {
             public boolean isSatisfiedBy(ReadableResource resource) {
-                return resource.getProperties().containsKey("optional") && resource.getProperties().get("optional").equals("false");
+                return resource.getProperties().containsKey("optional") && resource.getProperties().get("optional").get().equals("false");
+            }
+        };
+
+        Contract contractHasNullProperty = new Contract() {
+            public boolean isSatisfiedBy(ReadableResource resource) {
+                return resource.getProperties().containsKey("nullprop") && resource.getProperties().get("nullprop").equals(Optional.absent());
             }
         };
 
         ReadableResource resource = resourceFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("example.xml")));
+        ReadableResource nullPropertyResource = resourceFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("exampleWithNullProperty.xml")));
 
         assertThat(resource.isSatisfiedBy(contractHasName)).isEqualTo(true);
         assertThat(resource.isSatisfiedBy(contractHasOptional)).isEqualTo(true);
         assertThat(resource.isSatisfiedBy(contractHasOptionalFalse)).isEqualTo(false);
+        assertThat(resource.isSatisfiedBy(contractHasNullProperty)).isEqualTo(false);
 
+        assertThat(nullPropertyResource.isSatisfiedBy(contractHasNullProperty)).isEqualTo(true);
     }
 
     @Test
@@ -93,6 +107,14 @@ public class InterfaceSatisfactionTest {
         assertThat(resource.renderClass(IPerson.class).get().getName()).isEqualTo("Example Resource");
         assertThat(resource.renderClass(ISimpleJob.class).isPresent()).isFalse();
         assertThat(resource.renderClass(IJob.class).isPresent()).isFalse();
+    }
+    
+    @Test
+    public void testNullPropertyClassRendering() {
+        ReadableResource resource = resourceFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("exampleWithNullProperty.xml")));
+
+        assertThat(resource.renderClass(INullprop.class).isPresent()).isTrue();
+        assertThat(resource.renderClass(INullprop.class).get().nullprop() == null);
     }
 
     @Test

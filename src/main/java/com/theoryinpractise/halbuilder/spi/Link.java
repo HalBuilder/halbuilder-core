@@ -49,6 +49,36 @@ public class Link {
     public Optional<String> getHreflang() {
         return hreflang;
     }
+    
+    @Override
+    public int hashCode() {
+        int h = href.hashCode();
+        h += rel.hashCode();
+        h += name.hashCode();
+        h += title.hashCode();
+        h += hreflang.hashCode();
+        return h;
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof Link)) {
+            return false;
+        }
+        Link that = (Link) obj;
+        boolean e = this.href.equals(that.href);
+        e &= this.rel.equals(that.rel);
+        e &= this.name.equals(that.name);
+        e &= this.title.equals(that.title);
+        e &= this.hreflang.equals(that.hreflang);
+        return e;
+    }
 
     @Override
     public String toString() {

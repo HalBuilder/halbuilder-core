@@ -20,10 +20,12 @@ import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceRenderer;
 import com.theoryinpractise.halbuilder.spi.Contract;
 import com.theoryinpractise.halbuilder.spi.Link;
 import com.theoryinpractise.halbuilder.spi.ReadableResource;
+import com.theoryinpractise.halbuilder.spi.Renderer;
 import com.theoryinpractise.halbuilder.spi.Resource;
 import com.theoryinpractise.halbuilder.spi.ResourceException;
 
 import javax.annotation.Nullable;
+import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
@@ -54,10 +56,11 @@ public abstract class BaseResource implements ReadableResource {
 
     protected Map<String, String> namespaces = Maps.newTreeMap(usingToString());
     protected List<Link> links = Lists.newArrayList();
-    protected Map<String, Object> properties = Maps.newTreeMap(usingToString());
+    protected Map<String, Optional<Object>> properties = Maps.newTreeMap(usingToString());
     protected List<Resource> resources = Lists.newArrayList();
     protected ResourceFactory resourceFactory;
     protected final Pattern resolvableUri = Pattern.compile("^[/|?|~].*");
+    protected boolean hasNullProperties = false;
 
     protected BaseResource(ResourceFactory resourceFactory) {
         this.resourceFactory = resourceFactory;
@@ -99,8 +102,41 @@ public abstract class BaseResource implements ReadableResource {
         return linkBuilder.build();
     }
 
+    public List<? extends ReadableResource> getResourcesByRel(final String rel) {
+        Preconditions.checkArgument(rel != null, "Provided rel should not be null.");
+        Preconditions.checkArgument(!"".equals(rel) && !rel.contains(" "), "Provided rel should not be empty or contain spaces.");
+
+        return findResources(new Predicate<Resource>() {
+            public boolean apply(@Nullable Resource resource) {
+                return Iterables.contains(WHITESPACE_SPLITTER.split(resource.getResourceLink().getRel()), rel);
+            }
+        });
+    }
+
+    public List<? extends ReadableResource> findResources(Predicate<Resource> findPredicate) {
+        Preconditions.checkArgument(findPredicate != null, "Provided findPredicate should not be null.");
+        return ImmutableList.copyOf(Iterables.filter(resources, findPredicate));
+    }
+
     public Optional<Object> get(String name) {
-        return fromNullable(properties.get(name));
+        if (properties.containsKey(name)) {
+            return properties.get(name);
+        } else {
+            return Optional.absent();
+        }
+    }
+
+    public Object getValue(String name) {
+        return getValue(name, null);
+    }
+
+    public Object getValue(String name, Object defaultValue) {
+        Optional<Object> property = get(name);
+        if (property.isPresent()) {
+            return property.get();
+        } else {
+            return defaultValue;
+        }
     }
 
     private List<Link> getLinksByRel(ReadableResource resource, final String curiedRel) {
@@ -177,7 +213,7 @@ public abstract class BaseResource implements ReadableResource {
         return href;
     }
 
-    public Map<String, Object> getProperties() {
+    public Map<String, Optional<Object>> getProperties() {
         return ImmutableMap.copyOf(properties);
     }
 
@@ -249,8 +285,81 @@ public abstract class BaseResource implements ReadableResource {
 
     }
 
+    public boolean hasNullProperties() {
+        return hasNullProperties;
+    }
+
     public ImmutableResource toImmutableResource() {
-        return new ImmutableResource(resourceFactory, getNamespaces(), getCanonicalLinks(), getProperties(), getResources());
+        return new ImmutableResource(resourceFactory, getNamespaces(), getCanonicalLinks(), getProperties(), getResources(), hasNullProperties);
+    }
+
+
+    /**
+     * Renders the current Resource as a proxy to the provider interface
+     *
+     * @param anInterface The interface we wish to proxy the resource as
+     * @return A Guava Optional of the rendered class, this will be absent if the interface doesn't satisfy the interface
+     */
+    public <T> Optional<T> renderClass(Class<T> anInterface) {
+        if (InterfaceContract.newInterfaceContract(anInterface).isSatisfiedBy(this)) {
+            return InterfaceRenderer.newInterfaceRenderer(anInterface).render(this, null);
+        } else {
+            return Optional.absent();
+        }
+    }
+
+    public String renderContent(String contentType) {
+        Renderer<String> renderer = resourceFactory.lookupRenderer(contentType);
+        return renderAsString(renderer);
+    }
+
+    public <T> Optional<T> resolveClass(Function<ReadableResource, Optional<T>> resolver) {
+        return resolver.apply(this);
+    }
+
+    private String renderAsString(final Renderer renderer) {
+        validateNamespaces(this);
+        StringWriter sw = new StringWriter();
+        renderer.render(this, sw);
+        return sw.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        int h = namespaces.hashCode();
+        h += links.hashCode();
+        h += properties.hashCode();
+        h += resources.hashCode();
+        return h;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof BaseResource)) {
+            return false;
+        }
+        BaseResource that = (BaseResource) obj;
+        boolean e = this.namespaces.equals(that.namespaces);
+        e &= this.links.equals(that.links);
+        e &= this.properties.equals(that.properties);
+        e &= this.resources.equals(that.resources);
+        return e;
+    }
+
+    @Override
+    public String toString() {
+        Optional<Link> href = getLinkByRel("self");
+        if (href.isPresent()) {
+            return "<Resource: " + href.get().getHref() + ">";
+        } else {
+            return "<Resource: @" +  Integer.toHexString(hashCode()) + ">";
+        }
     }
 
 }

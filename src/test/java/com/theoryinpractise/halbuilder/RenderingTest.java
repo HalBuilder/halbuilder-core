@@ -16,7 +16,7 @@ import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URI;
 
-import static org.fest.assertions.Assertions.assertThat;
+import static org.fest.assertions.api.Assertions.assertThat;
 
 public class RenderingTest {
 
@@ -30,6 +30,12 @@ public class RenderingTest {
     private String exampleWithSubresourceJson;
     private String exampleWithMultipleSubresourcesXml;
     private String exampleWithMultipleSubresourcesJson;
+    private String exampleWithNullPropertyXml;
+    private String exampleWithNullPropertyJson;
+    private String exampleWithLiteralNullPropertyXml;
+    private String exampleWithLiteralNullPropertyJson;
+    private String exampleWithMultipleNestedSubresourcesXml;
+    private String exampleWithMultipleNestedSubresourcesJson;
 
     @BeforeMethod
     public void setup() throws IOException {
@@ -45,6 +51,18 @@ public class RenderingTest {
                                                       .trim().replaceAll("\n", "\r\n");
         exampleWithMultipleSubresourcesJson = Resources.toString(RenderingTest.class.getResource("exampleWithMultipleSubresources.json"), Charsets.UTF_8)
                                                        .trim();
+        exampleWithNullPropertyXml = Resources.toString(RenderingTest.class.getResource("exampleWithNullProperty.xml"), Charsets.UTF_8)
+                                                      .trim().replaceAll("\n", "\r\n");
+        exampleWithNullPropertyJson = Resources.toString(RenderingTest.class.getResource("exampleWithNullProperty.json"), Charsets.UTF_8)
+                                                       .trim();
+        exampleWithLiteralNullPropertyXml = Resources.toString(RenderingTest.class.getResource("exampleWithLiteralNullProperty.xml"), Charsets.UTF_8)
+                                                      .trim().replaceAll("\n", "\r\n");
+        exampleWithLiteralNullPropertyJson = Resources.toString(RenderingTest.class.getResource("exampleWithLiteralNullProperty.json"), Charsets.UTF_8)
+                                                       .trim();
+        exampleWithMultipleNestedSubresourcesXml = Resources.toString(RenderingTest.class.getResource("exampleWithMultipleNestedSubresources.xml"), Charsets.UTF_8)
+                                                      .trim().replaceAll("\n", "\r\n");
+        exampleWithMultipleNestedSubresourcesJson = Resources.toString(RenderingTest.class.getResource("exampleWithMultipleNestedSubresources.json"), Charsets.UTF_8)
+                                                      .trim();
     }
 
 
@@ -209,6 +227,77 @@ public class RenderingTest {
         assertThat(party.renderContent(ResourceFactory.HAL_XML)).isEqualTo(exampleWithMultipleSubresourcesXml);
         assertThat(party.renderContent(ResourceFactory.HAL_JSON)).isEqualTo(exampleWithMultipleSubresourcesJson);
 
+    }
+
+    @Test
+    public void testNullPropertyHal() {
+
+        URI path = UriBuilder.fromPath("customer/{id}").buildFromMap(ImmutableMap.of("id", "123456"));
+
+        ReadableResource party = newBaseResource(path)
+                                           .withLink("?users", "ns:users")
+                                           .withProperty("id", 123456)
+                                           .withProperty("age", 33)
+                                           .withProperty("name", "Example Resource")
+                                           .withProperty("optional", Boolean.TRUE)
+                                           .withProperty("expired", Boolean.FALSE)
+                                           .withProperty("nullprop", null);
+
+        assertThat(party.getResourceLink().getHref()).isEqualTo("https://example.com/api/customer/123456");
+        assertThat(party.renderContent(ResourceFactory.HAL_XML)).isEqualTo(exampleWithNullPropertyXml);
+        assertThat(party.renderContent(ResourceFactory.HAL_JSON)).isEqualTo(exampleWithNullPropertyJson);
+    }
+
+    @Test
+    public void testLiteralNullPropertyHal() {
+        URI path = UriBuilder.fromPath("customer/{id}").buildFromMap(ImmutableMap.of("id", "123456"));
+
+        ReadableResource party = newBaseResource(path)
+                                           .withLink("?users", "ns:users")
+                                           .withProperty("id", 123456)
+                                           .withProperty("age", 33)
+                                           .withProperty("name", "Example Resource")
+                                           .withProperty("optional", Boolean.TRUE)
+                                           .withProperty("expired", Boolean.FALSE)
+                                           .withProperty("nullval", "null");
+
+        assertThat(party.getResourceLink().getHref()).isEqualTo("https://example.com/api/customer/123456");
+        assertThat(party.renderContent(ResourceFactory.HAL_XML)).isEqualTo(exampleWithLiteralNullPropertyXml);
+        assertThat(party.renderContent(ResourceFactory.HAL_JSON)).isEqualTo(exampleWithLiteralNullPropertyJson);
+    }
+    
+        @Test
+    public void testHalWithBeanMultipleNestedSubResources() {
+
+        ReadableResource party = newBaseResource("customer/123456")
+                .withNamespace("phone", "https://example.com/apidocs/phones")
+                .withLink("?users", "ns:users")
+                .withBeanBasedSubresource("ns:user role:admin", "/user/11", new Customer(11, "Example User", 32))
+                .withBeanBasedSubresource("ns:user role:admin", "/user/12", new Customer(12, "Example User", 32));
+        
+        party.getResources().get(0).withBeanBasedSubresource("ns:user role:admin phone:cell", "/phone/1", new Phone(1, "555-666-7890"));
+
+        assertThat(party.renderContent(ResourceFactory.HAL_XML)).isEqualTo(exampleWithMultipleNestedSubresourcesXml);
+        assertThat(party.renderContent(ResourceFactory.HAL_JSON)).isEqualTo(exampleWithMultipleNestedSubresourcesJson);
+    }
+    
+    public static class Phone {
+        private final Integer id;
+        
+        private final String number;
+        
+        public Phone(Integer id, String number) {
+            this.id = id;
+            this.number = number;
+        }
+        
+        public Integer getId() {
+            return id;
+        }
+        
+        public String getNumber() {
+            return number;
+        }
     }
 
     public static class OtherCustomer {

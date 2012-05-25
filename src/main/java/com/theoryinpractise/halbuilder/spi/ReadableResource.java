@@ -2,6 +2,7 @@ package com.theoryinpractise.halbuilder.spi;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 
 import java.util.List;
 import java.util.Map;
@@ -55,6 +56,22 @@ public interface ReadableResource {
     List<Link> getLinksByRel(String rel);
 
     /**
+     * Returns all embedded resources matching the given rel by searching this, then
+     * any embedded resource instance.
+     * @param rel The rel type to search for.
+     * @return An Immutable List of Resources
+     */
+    List<? extends ReadableResource> getResourcesByRel(String rel);
+
+    /**
+     * Returns a finds all embedded resources from the Resource
+     * that match the predicate
+     * @param findPredicate The predicate to check against in the embedded resources
+     * @return A List of matching objects (properties, links, resource)
+     */
+    List<? extends ReadableResource> findResources(Predicate<Resource> findPredicate);
+
+    /**
      * Returns a property from the Resource.
      * @param name The property to return
      * @return A Guava Optional for the property
@@ -62,10 +79,32 @@ public interface ReadableResource {
     Optional<Object> get(String name);
 
     /**
+     * Returns a property from the Resource
+     * @param name The property to return
+     * @return An Object of the property value, or null if absent
+     */
+    Object getValue(String name);
+
+    /**
+     * Returns a property from the Resource
+     * @param name The property to return
+     * @return An Object of the property value, or a user supplied default value
+     */
+    Object getValue(String name, Object defaultValue);
+
+    /**
      * Returns an ImmutableMap of the resources properties.
      * @return A Map
      */
-    Map<String, Object> getProperties();
+    Map<String, Optional<Object>> getProperties();
+
+    /**
+     * Return an indication of whether this resource, or subresources of this
+     * resource, contain null properties.
+     * @return True if this resource, or subresources of this resource,
+     * contain null properties.  False if not.
+     */
+    boolean hasNullProperties();
 
     /**
      * Returns an ImmutableList of the resources currently embedded resources.
@@ -113,4 +152,13 @@ public interface ReadableResource {
      * @return A String
      */
     String renderContent(String contentType);
+
+    /**
+     * Returns an optional proxy to the given interface mirroring the resource.
+     *
+     * @param anInterface An interface to mirror
+     * @return A Guava Optional Resource Proxy
+     */
+    <T> Optional<T> resolveClass(Function<ReadableResource, Optional<T>> resolver);
+
 }

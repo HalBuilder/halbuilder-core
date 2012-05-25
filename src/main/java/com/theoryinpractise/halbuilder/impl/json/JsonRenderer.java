@@ -1,5 +1,8 @@
 package com.theoryinpractise.halbuilder.impl.json;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
@@ -12,9 +15,6 @@ import com.theoryinpractise.halbuilder.spi.Link;
 import com.theoryinpractise.halbuilder.spi.ReadableResource;
 import com.theoryinpractise.halbuilder.spi.Renderer;
 import com.theoryinpractise.halbuilder.spi.Resource;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.util.DefaultPrettyPrinter;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -100,8 +100,13 @@ public class JsonRenderer<T> implements Renderer<T> {
             g.writeEndObject();
         }
 
-        for (Map.Entry<String, Object> entry : resource.getProperties().entrySet()) {
-            g.writeObjectField(entry.getKey(), entry.getValue());
+        for (Map.Entry<String, Optional<Object>> entry : resource.getProperties().entrySet()) {
+            if(entry.getValue().isPresent()) {
+                g.writeObjectField(entry.getKey(), entry.getValue().get());
+            }
+            else {
+                g.writeNullField(entry.getKey());
+            }
         }
 
         if (!resource.getResources().isEmpty()) {
@@ -137,6 +142,7 @@ public class JsonRenderer<T> implements Renderer<T> {
                     g.writeEndArray();
                 }
             }
+            g.writeEndObject();
         }
     }
 
