@@ -64,12 +64,11 @@ public interface ReadableResource {
     List<? extends ReadableResource> getResourcesByRel(String rel);
 
     /**
-     * Returns a finds all embedded resources from the Resource
-     * that match the predicate
-     * @param findPredicate The predicate to check against in the embedded resources
+     * Returns all embedded resources from the Resource that match the predicate
+     * @param predicate The predicate to check against in the embedded resources
      * @return A List of matching objects (properties, links, resource)
      */
-    List<? extends ReadableResource> findResources(Predicate<Resource> findPredicate);
+    List<? extends ReadableResource> getResources(Predicate<Resource> predicate);
 
     /**
      * Returns a property from the Resource.

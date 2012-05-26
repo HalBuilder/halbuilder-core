@@ -6,6 +6,9 @@ import com.theoryinpractise.halbuilder.spi.ResourceException;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
