@@ -36,6 +36,8 @@ public class RenderingTest {
     private String exampleWithLiteralNullPropertyJson;
     private String exampleWithMultipleNestedSubresourcesXml;
     private String exampleWithMultipleNestedSubresourcesJson;
+    private String exampleWithTemplateXml;
+    private String exampleWithTemplateJson;
 
     @BeforeMethod
     public void setup() throws IOException {
@@ -62,6 +64,10 @@ public class RenderingTest {
         exampleWithMultipleNestedSubresourcesXml = Resources.toString(RenderingTest.class.getResource("exampleWithMultipleNestedSubresources.xml"), Charsets.UTF_8)
                                                       .trim().replaceAll("\n", "\r\n");
         exampleWithMultipleNestedSubresourcesJson = Resources.toString(RenderingTest.class.getResource("exampleWithMultipleNestedSubresources.json"), Charsets.UTF_8)
+                                                      .trim();
+        exampleWithTemplateXml = Resources.toString(RenderingTest.class.getResource("exampleWithTemplate.xml"), Charsets.UTF_8)
+                                                      .trim().replaceAll("\n", "\r\n");
+        exampleWithTemplateJson = Resources.toString(RenderingTest.class.getResource("exampleWithTemplate.json"), Charsets.UTF_8)
                                                       .trim();
     }
 
@@ -264,6 +270,15 @@ public class RenderingTest {
         assertThat(party.getResourceLink().getHref()).isEqualTo("https://example.com/api/customer/123456");
         assertThat(party.renderContent(ResourceFactory.HAL_XML)).isEqualTo(exampleWithLiteralNullPropertyXml);
         assertThat(party.renderContent(ResourceFactory.HAL_JSON)).isEqualTo(exampleWithLiteralNullPropertyJson);
+    }
+    
+    @Test
+    public void testHalWithUriTemplate() {
+        ReadableResource party = newBaseResource("customer")
+                .withLink("/api/customer/search{?queryParam}", "ns:query");
+
+        assertThat(party.renderContent(ResourceFactory.HAL_XML)).isEqualTo(exampleWithTemplateXml);
+        assertThat(party.renderContent(ResourceFactory.HAL_JSON)).isEqualTo(exampleWithTemplateJson);
     }
     
         @Test

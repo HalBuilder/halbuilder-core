@@ -22,6 +22,7 @@ import static com.theoryinpractise.halbuilder.impl.api.Support.LINK;
 import static com.theoryinpractise.halbuilder.impl.api.Support.NAME;
 import static com.theoryinpractise.halbuilder.impl.api.Support.REL;
 import static com.theoryinpractise.halbuilder.impl.api.Support.SELF;
+import static com.theoryinpractise.halbuilder.impl.api.Support.TEMPLATED;
 import static com.theoryinpractise.halbuilder.impl.api.Support.TITLE;
 import static com.theoryinpractise.halbuilder.impl.api.Support.XSI_NAMESPACE;
 
@@ -83,6 +84,9 @@ public class XmlRenderer<T> implements Renderer<T> {
                 }
                 if (link.getHreflang().isPresent()) {
                     linkElement.setAttribute(HREFLANG, link.getHreflang().get());
+                }
+                if (link.hasTemplate()) {
+                    linkElement.setAttribute(TEMPLATED, "true");
                 }
                 resourceElement.addContent(linkElement);
             }

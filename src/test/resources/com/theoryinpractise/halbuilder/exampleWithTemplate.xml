@@ -1,0 +1,4 @@
+<resource xmlns:ns="https://example.com/apidocs/accounts" xmlns:role="https://example.com/apidocs/roles" href="https://example.com/api/customer">
+  <link rel="ns:parent" href="https://example.com/api/customer/1234" name="bob" title="The Parent" hreflang="en" />
+  <link rel="ns:query" href="https://example.com/api/customer/search{?queryParam}" templated="true" />
+</resource>

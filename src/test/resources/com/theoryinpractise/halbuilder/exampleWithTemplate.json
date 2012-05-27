@@ -1,0 +1,24 @@
+{
+  "_links" : {
+    "curie" : [ {
+      "href" : "https://example.com/apidocs/accounts",
+      "name" : "ns"
+    }, {
+      "href" : "https://example.com/apidocs/roles",
+      "name" : "role"
+    } ],
+    "self" : {
+      "href" : "https://example.com/api/customer"
+    },
+    "ns:parent" : {
+      "href" : "https://example.com/api/customer/1234",
+      "name" : "bob",
+      "title" : "The Parent",
+      "hreflang" : "en"
+    },
+    "ns:query" : {
+      "href" : "https://example.com/api/customer/search{?queryParam}",
+      "templated" : true
+    }
+  }
+}

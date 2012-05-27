@@ -30,6 +30,7 @@ import static com.theoryinpractise.halbuilder.impl.api.Support.HREFLANG;
 import static com.theoryinpractise.halbuilder.impl.api.Support.LINKS;
 import static com.theoryinpractise.halbuilder.impl.api.Support.NAME;
 import static com.theoryinpractise.halbuilder.impl.api.Support.SELF;
+import static com.theoryinpractise.halbuilder.impl.api.Support.TEMPLATED;
 import static com.theoryinpractise.halbuilder.impl.api.Support.TITLE;
 import static com.theoryinpractise.halbuilder.impl.api.Support.WHITESPACE_SPLITTER;
 
@@ -156,6 +157,9 @@ public class JsonRenderer<T> implements Renderer<T> {
         }
         if (link.getHreflang().isPresent()) {
             g.writeStringField(HREFLANG, link.getHreflang().get());
+        }
+        if (link.hasTemplate()) {
+            g.writeBooleanField(TEMPLATED, true);
         }
     }
 }
