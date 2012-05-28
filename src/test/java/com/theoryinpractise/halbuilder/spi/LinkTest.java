@@ -100,4 +100,16 @@ public class LinkTest {
         String toString = link.toString();
         assertThat(toString).isEqualTo("<link rel=\"rel\" href=\"http://example.com/\" name=\"name\" title=\"title\" hreflang=\"hreflang\"/>");
     }
+    
+    @Test
+    public void testHasTemplate() {
+        Link templateLink = new Link(resourceFactory, "http://example.com/search{?customerId}", "customerSearch");
+        assertThat(templateLink.hasTemplate()).isTrue();
+    }
+    
+    @Test
+    public void testDoesNotHaveTemplate() {
+        Link nonTemplateLink = new Link(resourceFactory, "http://example.com/other", "rel");
+        assertThat(nonTemplateLink.hasTemplate()).isFalse();
+    }
 }
