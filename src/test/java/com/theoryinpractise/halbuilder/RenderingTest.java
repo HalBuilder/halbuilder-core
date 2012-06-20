@@ -1,5 +1,6 @@
 package com.theoryinpractise.halbuilder;
 
+import com.damnhandy.uri.template.UriTemplate;
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
@@ -236,6 +237,23 @@ public class RenderingTest {
     }
 
     @Test
+    public void testLinkWithDamnHandyUriTemplate() {
+
+        Phone phone = new Phone(1234, "phone-123");
+
+        String uri = UriTemplate.fromExpression("/customer/phone{?id,number}")
+                .set("id", phone.getId())
+                .set("number", phone.getNumber())
+                .expand();
+
+        ReadableResource resource = newBaseResource("/test").withLink(uri, "phone");
+
+
+        assertThat(resource.getLinkByRel("phone").get().getHref()).isEqualTo("https://example.com" + uri);
+
+    }
+
+    @Test
     public void testNullPropertyHal() {
 
         URI path = UriBuilder.fromPath("customer/{id}").buildFromMap(ImmutableMap.of("id", "123456"));
@@ -271,7 +289,7 @@ public class RenderingTest {
         assertThat(party.renderContent(ResourceFactory.HAL_XML)).isEqualTo(exampleWithLiteralNullPropertyXml);
         assertThat(party.renderContent(ResourceFactory.HAL_JSON)).isEqualTo(exampleWithLiteralNullPropertyJson);
     }
-    
+
     @Test
     public void testHalWithUriTemplate() {
         ReadableResource party = newBaseResource("customer")
@@ -280,7 +298,7 @@ public class RenderingTest {
         assertThat(party.renderContent(ResourceFactory.HAL_XML)).isEqualTo(exampleWithTemplateXml);
         assertThat(party.renderContent(ResourceFactory.HAL_JSON)).isEqualTo(exampleWithTemplateJson);
     }
-    
+
         @Test
     public void testHalWithBeanMultipleNestedSubResources() {
 
@@ -289,27 +307,27 @@ public class RenderingTest {
                 .withLink("?users", "ns:users")
                 .withBeanBasedSubresource("ns:user role:admin", "/user/11", new Customer(11, "Example User", 32))
                 .withBeanBasedSubresource("ns:user role:admin", "/user/12", new Customer(12, "Example User", 32));
-        
+
         party.getResources().get(0).withBeanBasedSubresource("ns:user role:admin phone:cell", "/phone/1", new Phone(1, "555-666-7890"));
 
         assertThat(party.renderContent(ResourceFactory.HAL_XML)).isEqualTo(exampleWithMultipleNestedSubresourcesXml);
         assertThat(party.renderContent(ResourceFactory.HAL_JSON)).isEqualTo(exampleWithMultipleNestedSubresourcesJson);
     }
-    
+
     public static class Phone {
         private final Integer id;
-        
+
         private final String number;
-        
+
         public Phone(Integer id, String number) {
             this.id = id;
             this.number = number;
         }
-        
+
         public Integer getId() {
             return id;
         }
-        
+
         public String getNumber() {
             return number;
         }
