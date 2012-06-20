@@ -52,6 +52,13 @@ public class InterfaceSatisfactionTest {
                 {ISimpleJob.class, false},
         };
     }
+    
+    @DataProvider
+    public Object[][] provideSatisfactionResources() {
+        return new Object[][] { 
+            {resourceFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("example.xml"))), resourceFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("exampleWithNullProperty.xml")))},
+            {resourceFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("example.json"))), resourceFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("exampleWithNullProperty.json")))} };
+    }
 
     @Test(dataProvider = "providerSatisfactionData")
     public void testSimpleInterfaceSatisfaction(Class<?> aClass, boolean shouldBeSatisfied) {
@@ -61,8 +68,8 @@ public class InterfaceSatisfactionTest {
 
     }
 
-    @Test
-    public void testAnonymousInnerContractSatisfaction() {
+    @Test(dataProvider = "provideSatisfactionResources")
+    public void testAnonymousInnerContractSatisfaction(ReadableResource resource, ReadableResource nullPropertyResource) {
 
         Contract contractHasName = new Contract() {
             public boolean isSatisfiedBy(ReadableResource resource) {
@@ -87,10 +94,7 @@ public class InterfaceSatisfactionTest {
                 return resource.getProperties().containsKey("nullprop") && resource.getProperties().get("nullprop").equals(Optional.absent());
             }
         };
-
-        ReadableResource resource = resourceFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("example.xml")));
-        ReadableResource nullPropertyResource = resourceFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("exampleWithNullProperty.xml")));
-
+        
         assertThat(resource.isSatisfiedBy(contractHasName)).isEqualTo(true);
         assertThat(resource.isSatisfiedBy(contractHasOptional)).isEqualTo(true);
         assertThat(resource.isSatisfiedBy(contractHasOptionalFalse)).isEqualTo(false);

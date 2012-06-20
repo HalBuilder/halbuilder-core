@@ -26,6 +26,14 @@ public class ResourceReaderTest {
                 {resourceFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("example.json")))},
         };
     }
+    
+    @DataProvider
+    public Object[][] provideResourcesWithNulls() {
+        return new Object[][] {
+                {resourceFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("exampleWithNullProperty.xml")))},
+                {resourceFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("exampleWithNullProperty.json")))},
+        };
+    }
 
     @DataProvider
     public Object[][] provideSubResources() {
@@ -45,6 +53,13 @@ public class ResourceReaderTest {
         assertThat(resource.getCanonicalLinks()).hasSize(3);
         assertThat(resource.getResources()).hasSize(0);
         assertThat(resource.getResourcesByRel("role:admin")).hasSize(0);
+    }
+    
+    @Test(dataProvider = "provideResourcesWithNulls")
+    public void testReaderWithNulls(ReadableResource resource) {
+        assertThat(resource.getValue("nullprop")).isNull();
+        assertThat(resource.get("nullprop").isPresent()).isFalse();
+        assertThat(resource.getProperties().get("nullprop").isPresent()).isFalse();
     }
 
     @Test(dataProvider = "provideResources")
