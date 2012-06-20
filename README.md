@@ -12,7 +12,7 @@ Halbuilder is a simple Java API for generating and consuming HAL documents confo
 
     Resource halResource = resourceFactory.newResource("http://example.com/todo-list")
       .withNamespace("td", "http://example.com/todoapp/rels/")
-      .withLink("/todo-list/search;{searchterm}", "td:search",)
+      .withLink("/todo-list/search;{searchterm}", "td:search")
       .withLink("/todo-list/description", "td:description")
       .withProperty("created_at", "2010-01-16")
       .withProperty("updated_at", "2010-02-21")
