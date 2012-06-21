@@ -40,16 +40,4 @@ HalBuilder is deployed to Apache Maven Central under the following coordinates:
 
 ### Development Forum
 
-<iframe id="forum_embed"
-  src="javascript:void(0)"
-  scrolling="no"
-  frameborder="0"
-  width="900"
-  height="700">
-</iframe>
-<script type="text/javascript">
-  document.getElementById('forum_embed').src =
-     'https://groups.google.com/forum/embed/?place=forum/halbuilder-dev'
-     + '&showsearch=true&showpopout=true&showtabs=false'
-     + '&parenturl=' + encodeURIComponent(window.location.href);
-</script>
+Email support and discussion is available on the [development forum](https://groups.google.com/forum/#!forum/halbuilder-dev).
