@@ -106,16 +106,16 @@ public abstract class BaseResource implements ReadableResource {
         Preconditions.checkArgument(rel != null, "Provided rel should not be null.");
         Preconditions.checkArgument(!"".equals(rel) && !rel.contains(" "), "Provided rel should not be empty or contain spaces.");
 
-        return findResources(new Predicate<Resource>() {
+        return getResources(new Predicate<Resource>() {
             public boolean apply(@Nullable Resource resource) {
                 return Iterables.contains(WHITESPACE_SPLITTER.split(resource.getResourceLink().getRel()), rel);
             }
         });
     }
 
-    public List<? extends ReadableResource> findResources(Predicate<Resource> findPredicate) {
-        Preconditions.checkArgument(findPredicate != null, "Provided findPredicate should not be null.");
-        return ImmutableList.copyOf(Iterables.filter(resources, findPredicate));
+    public List<? extends ReadableResource> getResources(Predicate<Resource> predicate) {
+        Preconditions.checkArgument(predicate != null, "Provided findPredicate should not be null.");
+        return ImmutableList.copyOf(Iterables.filter(resources, predicate));
     }
 
     public Optional<Object> get(String name) {

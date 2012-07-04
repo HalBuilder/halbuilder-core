@@ -19,6 +19,7 @@ public class Support {
     public static final String CURIE = "curie";
     public static final String TITLE = "title";
     public static final String HREFLANG = "hreflang";
+    public static final String TEMPLATED = "templated";
 
     /** 
      * Define the XML schema instance namespace, so we can use it when
