@@ -3,7 +3,7 @@
 
     <groupId>com.theoryinpractise</groupId>
     <artifactId>halbuilder</artifactId>
-    <version>1.0.5</version>
+    <version>1.0.6-SNAPSHOT</version>
     <description>Java based builder for the Hal specification http://stateless.co/hal_specification.html</description>
     <packaging>jar</packaging>
 
@@ -13,7 +13,7 @@
     <scm>
         <developerConnection>scm:git:git@github.com:talios/halbuilder.git</developerConnection>
         <url>http://github.com/talios/halbuilder</url>
-      <tag>halbuilder-1.0.5</tag>
+      <tag>HEAD</tag>
   </scm>
 
     <developers>
