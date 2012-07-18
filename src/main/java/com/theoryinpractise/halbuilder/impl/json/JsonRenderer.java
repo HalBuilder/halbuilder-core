@@ -113,19 +113,7 @@ public class JsonRenderer<T> implements Renderer<T> {
         if (!representation.getResources().isEmpty()) {
             g.writeObjectFieldStart(EMBEDDED);
 
-            Multimap<String, Representation> resourceMap = Multimaps.index(representation.getResources(), new Function<Representation, String>() {
-                public String apply(@Nullable Representation resource) {
-                    List<String> relTypes = Lists.newArrayList(WHITESPACE_SPLITTER.split(resource.getResourceLink().getRel()));
-
-                    Iterables.removeIf(relTypes, new Predicate<String>() {
-                        public boolean apply(@Nullable String s) {
-                            return SELF.equals(s);
-                        }
-                    });
-
-                    return Joiner.on(" ").join(relTypes);
-                }
-            });
+            Multimap<String, Representation> resourceMap = representation.getResources();
 
             for (Map.Entry<String, Collection<Representation>> resourceEntry : resourceMap.asMap().entrySet()) {
                 if (resourceEntry.getValue().size() == 1) {

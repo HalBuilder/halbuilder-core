@@ -48,7 +48,7 @@ public class ResourceReaderTest {
         assertThat(representation.get("name").get()).isEqualTo("Example Resource");
         assertThat(representation.getValue("name")).isEqualTo("Example Resource");
         assertThat(representation.getCanonicalLinks()).hasSize(3);
-        assertThat(representation.getResources()).hasSize(0);
+        assertThat(representation.getResources().values()).hasSize(0);
         assertThat(representation.getResourcesByRel("role:admin")).hasSize(0);
     }
 
@@ -74,9 +74,9 @@ public class ResourceReaderTest {
         assertThat(representation.getResourceLink().getHref()).isEqualTo("https://example.com/api/customer/123456");
         assertThat(representation.getNamespaces()).hasSize(2);
         assertThat(representation.getCanonicalLinks()).hasSize(3);
-        assertThat(representation.getResources()).hasSize(1);
-        assertThat(representation.getResources().iterator().next().getProperties().get("name").get()).isEqualTo("Example User");
-        assertThat(representation.getResourcesByRel("role:admin")).hasSize(1);
+        assertThat(representation.getResources().values()).hasSize(1);
+        assertThat(representation.getResources().values().iterator().next().getProperties().get("name").get()).isEqualTo("Example User");
+        assertThat(representation.getResourcesByRel("ns:user")).hasSize(1);
     }
 
     @Test(expectedExceptions = RepresentationException.class)

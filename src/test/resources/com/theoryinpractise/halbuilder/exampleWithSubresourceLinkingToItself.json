@@ -21,9 +21,9 @@
     }
   },
   "_embedded" : {
-    "ns:user" : [ {
+    "ns:user" : {
       "_links" : {
-        "self" : {
+        "role:admin self" : {
           "href" : "https://example.com/user/11"
         }
       },
@@ -32,17 +32,6 @@
       "id" : 11,
       "name" : "Example User",
       "optional" : true
-    }, {
-      "_links" : {
-        "self" : {
-          "href" : "https://example.com/user/12"
-        }
-      },
-      "age" : 32,
-      "expired" : false,
-      "id" : 12,
-      "name" : "Example User",
-      "optional" : true
-    } ]
+    }
   }
 }

@@ -3,6 +3,7 @@ package com.theoryinpractise.halbuilder.spi;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.collect.Multimap;
 
 import java.util.List;
 import java.util.Map;
@@ -106,10 +107,10 @@ public interface ReadableRepresentation {
     boolean hasNullProperties();
 
     /**
-     * Returns an ImmutableList of the resources currently embedded resources.
+     * Returns an Immutable Multimap of the resources currently embedded resources.
      * @return A Map
      */
-    List<Representation> getResources();
+    Multimap<String, Representation> getResources();
 
     /**
      * Returns whether this resource is satisfied by the provided Contact.

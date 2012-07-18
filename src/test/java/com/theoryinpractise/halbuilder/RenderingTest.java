@@ -5,6 +5,7 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.google.common.io.Resources;
 import com.theoryinpractise.halbuilder.spi.ReadableRepresentation;
 import com.theoryinpractise.halbuilder.spi.Representation;
@@ -22,13 +23,15 @@ import static org.fest.assertions.api.Assertions.assertThat;
 public class RenderingTest {
 
     private RepresentationFactory representationFactory = new RepresentationFactory("https://example.com/api/")
-                                                      .withNamespace("ns", "/apidocs/accounts")
-                                                      .withNamespace("role", "/apidocs/roles");
+            .withNamespace("ns", "/apidocs/accounts")
+            .withNamespace("role", "/apidocs/roles");
 
     private String exampleXml;
     private String exampleJson;
     private String exampleWithSubresourceXml;
     private String exampleWithSubresourceJson;
+    private String exampleWithSubresourceLinkingToItselfXml;
+    private String exampleWithSubresourceLinkingToItselfJson;
     private String exampleWithMultipleSubresourcesXml;
     private String exampleWithMultipleSubresourcesJson;
     private String exampleWithNullPropertyXml;
@@ -43,42 +46,46 @@ public class RenderingTest {
     @BeforeMethod
     public void setup() throws IOException {
         exampleXml = Resources.toString(RenderingTest.class.getResource("example.xml"), Charsets.UTF_8)
-                              .trim().replaceAll("\n", "\r\n");
+                .trim().replaceAll("\n", "\r\n");
         exampleJson = Resources.toString(RenderingTest.class.getResource("example.json"), Charsets.UTF_8)
-                               .trim();
+                .trim();
         exampleWithSubresourceXml = Resources.toString(RenderingTest.class.getResource("exampleWithSubresource.xml"), Charsets.UTF_8)
-                                             .trim().replaceAll("\n", "\r\n");
+                .trim().replaceAll("\n", "\r\n");
         exampleWithSubresourceJson = Resources.toString(RenderingTest.class.getResource("exampleWithSubresource.json"), Charsets.UTF_8)
-                                              .trim();
+                .trim();
+        exampleWithSubresourceLinkingToItselfXml = Resources.toString(RenderingTest.class.getResource("exampleWithSubresourceLinkingToItself.xml"), Charsets.UTF_8)
+                .trim().replaceAll("\n", "\r\n");
+        exampleWithSubresourceLinkingToItselfJson = Resources.toString(RenderingTest.class.getResource("exampleWithSubresourceLinkingToItself.json"), Charsets.UTF_8)
+                .trim();
         exampleWithMultipleSubresourcesXml = Resources.toString(RenderingTest.class.getResource("exampleWithMultipleSubresources.xml"), Charsets.UTF_8)
-                                                      .trim().replaceAll("\n", "\r\n");
+                .trim().replaceAll("\n", "\r\n");
         exampleWithMultipleSubresourcesJson = Resources.toString(RenderingTest.class.getResource("exampleWithMultipleSubresources.json"), Charsets.UTF_8)
-                                                       .trim();
+                .trim();
         exampleWithNullPropertyXml = Resources.toString(RenderingTest.class.getResource("exampleWithNullProperty.xml"), Charsets.UTF_8)
-                                                      .trim().replaceAll("\n", "\r\n");
+                .trim().replaceAll("\n", "\r\n");
         exampleWithNullPropertyJson = Resources.toString(RenderingTest.class.getResource("exampleWithNullProperty.json"), Charsets.UTF_8)
-                                                       .trim();
+                .trim();
         exampleWithLiteralNullPropertyXml = Resources.toString(RenderingTest.class.getResource("exampleWithLiteralNullProperty.xml"), Charsets.UTF_8)
-                                                      .trim().replaceAll("\n", "\r\n");
+                .trim().replaceAll("\n", "\r\n");
         exampleWithLiteralNullPropertyJson = Resources.toString(RenderingTest.class.getResource("exampleWithLiteralNullProperty.json"), Charsets.UTF_8)
-                                                       .trim();
+                .trim();
         exampleWithMultipleNestedSubresourcesXml = Resources.toString(RenderingTest.class.getResource("exampleWithMultipleNestedSubresources.xml"), Charsets.UTF_8)
-                                                      .trim().replaceAll("\n", "\r\n");
+                .trim().replaceAll("\n", "\r\n");
         exampleWithMultipleNestedSubresourcesJson = Resources.toString(RenderingTest.class.getResource("exampleWithMultipleNestedSubresources.json"), Charsets.UTF_8)
-                                                      .trim();
+                .trim();
         exampleWithTemplateXml = Resources.toString(RenderingTest.class.getResource("exampleWithTemplate.xml"), Charsets.UTF_8)
-                                                      .trim().replaceAll("\n", "\r\n");
+                .trim().replaceAll("\n", "\r\n");
         exampleWithTemplateJson = Resources.toString(RenderingTest.class.getResource("exampleWithTemplate.json"), Charsets.UTF_8)
-                                                      .trim();
+                .trim();
     }
 
 
     private Representation newBaseResource(final Representation resource) {
         return resource.withLink("ns:parent", "/api/customer/1234",
                                  Optional.<Predicate<ReadableRepresentation>>absent(),
-                                        Optional.of("bob"),
-                                        Optional.of("The Parent"),
-                                        Optional.of("en"));
+                                 Optional.of("bob"),
+                                 Optional.of("The Parent"),
+                                 Optional.of("en"));
     }
 
     private Representation newBaseResource(final URI uri) {
@@ -94,7 +101,7 @@ public class RenderingTest {
     public void testFactoryWithLinks() {
 
         RepresentationFactory representationFactory = new RepresentationFactory("https://example.com/api/")
-                                                  .withLink("/home", "home");
+                .withLink("/home", "home");
 
         Representation resource = representationFactory.newResource("/");
 
@@ -118,12 +125,12 @@ public class RenderingTest {
         URI path = UriBuilder.fromPath("customer/{id}").buildFromMap(ImmutableMap.of("id", "123456"));
 
         ReadableRepresentation party = newBaseResource(path)
-                                           .withLink("ns:users", "?users")
-                                           .withProperty("id", 123456)
-                                           .withProperty("age", 33)
-                                           .withProperty("name", "Example Resource")
-                                           .withProperty("optional", Boolean.TRUE)
-                                           .withProperty("expired", Boolean.FALSE);
+                .withLink("ns:users", "?users")
+                .withProperty("id", 123456)
+                .withProperty("age", 33)
+                .withProperty("name", "Example Resource")
+                .withProperty("optional", Boolean.TRUE)
+                .withProperty("expired", Boolean.FALSE);
 
         assertThat(party.getResourceLink().getHref()).isEqualTo("https://example.com/api/customer/123456");
         assertThat(party.renderContent(RepresentationFactory.HAL_XML)).isEqualTo(exampleXml);
@@ -198,16 +205,35 @@ public class RenderingTest {
 
         ReadableRepresentation party = newBaseResource("customer/123456")
                 .withLink("ns:users", "?users")
-                .withSubresource("ns:user role:admin", representationFactory
-                                                               .newResource("/user/11")
-                                                               .withProperty("id", 11)
-                                                               .withProperty("name", "Example User")
-                                                               .withProperty("expired", false)
-                                                               .withProperty("age", 32)
-                                                               .withProperty("optional", true));
+                .withSubresource("ns:user", representationFactory
+                        .newResource("/user/11")
+                        .withProperty("id", 11)
+                        .withProperty("name", "Example User")
+                        .withProperty("expired", false)
+                        .withProperty("age", 32)
+                        .withProperty("optional", true));
 
         assertThat(party.renderContent(RepresentationFactory.HAL_XML)).isEqualTo(exampleWithSubresourceXml);
         assertThat(party.renderContent(RepresentationFactory.HAL_JSON)).isEqualTo(exampleWithSubresourceJson);
+
+    }
+
+    @Test
+    public void testHalWithSubResourceLinkingToItself() {
+
+        ReadableRepresentation party = newBaseResource("customer/123456")
+                .withLink("ns:users", "?users")
+                .withSubresource("ns:user", representationFactory
+                        .newResource("/user/11")
+                        .withLink("role:admin", "/user/11")
+                        .withProperty("id", 11)
+                        .withProperty("name", "Example User")
+                        .withProperty("expired", false)
+                        .withProperty("age", 32)
+                        .withProperty("optional", true));
+
+        assertThat(party.renderContent(RepresentationFactory.HAL_XML)).isEqualTo(exampleWithSubresourceLinkingToItselfXml);
+        assertThat(party.renderContent(RepresentationFactory.HAL_JSON)).isEqualTo(exampleWithSubresourceLinkingToItselfJson);
 
     }
 
@@ -216,7 +242,7 @@ public class RenderingTest {
 
         ReadableRepresentation party = newBaseResource("customer/123456")
                 .withLink("ns:users", "?users")
-                .withBeanBasedSubresource("ns:user role:admin", "/user/11", new Customer(11, "Example User", 32));
+                .withBeanBasedSubresource("ns:user", "/user/11", new Customer(11, "Example User", 32));
 
         assertThat(party.renderContent(RepresentationFactory.HAL_XML)).isEqualTo(exampleWithSubresourceXml);
         assertThat(party.renderContent(RepresentationFactory.HAL_JSON)).isEqualTo(exampleWithSubresourceJson);
@@ -228,8 +254,8 @@ public class RenderingTest {
 
         ReadableRepresentation party = newBaseResource("customer/123456")
                 .withLink("ns:users", "?users")
-                .withBeanBasedSubresource("ns:user role:admin", "/user/11", new Customer(11, "Example User", 32))
-                .withBeanBasedSubresource("ns:user role:admin", "/user/12", new Customer(12, "Example User", 32));
+                .withBeanBasedSubresource("ns:user", "/user/11", new Customer(11, "Example User", 32))
+                .withBeanBasedSubresource("ns:user", "/user/12", new Customer(12, "Example User", 32));
 
         assertThat(party.renderContent(RepresentationFactory.HAL_XML)).isEqualTo(exampleWithMultipleSubresourcesXml);
         assertThat(party.renderContent(RepresentationFactory.HAL_JSON)).isEqualTo(exampleWithMultipleSubresourcesJson);
@@ -259,13 +285,13 @@ public class RenderingTest {
         URI path = UriBuilder.fromPath("customer/{id}").buildFromMap(ImmutableMap.of("id", "123456"));
 
         ReadableRepresentation party = newBaseResource(path)
-                                           .withLink("ns:users", "?users")
-                                           .withProperty("id", 123456)
-                                           .withProperty("age", 33)
-                                           .withProperty("name", "Example Resource")
-                                           .withProperty("optional", Boolean.TRUE)
-                                           .withProperty("expired", Boolean.FALSE)
-                                           .withProperty("nullprop", null);
+                .withLink("ns:users", "?users")
+                .withProperty("id", 123456)
+                .withProperty("age", 33)
+                .withProperty("name", "Example Resource")
+                .withProperty("optional", Boolean.TRUE)
+                .withProperty("expired", Boolean.FALSE)
+                .withProperty("nullprop", null);
 
         assertThat(party.getResourceLink().getHref()).isEqualTo("https://example.com/api/customer/123456");
         assertThat(party.renderContent(RepresentationFactory.HAL_XML)).isEqualTo(exampleWithNullPropertyXml);
@@ -277,13 +303,13 @@ public class RenderingTest {
         URI path = UriBuilder.fromPath("customer/{id}").buildFromMap(ImmutableMap.of("id", "123456"));
 
         ReadableRepresentation party = newBaseResource(path)
-                                           .withLink("ns:users", "?users")
-                                           .withProperty("id", 123456)
-                                           .withProperty("age", 33)
-                                           .withProperty("name", "Example Resource")
-                                           .withProperty("optional", Boolean.TRUE)
-                                           .withProperty("expired", Boolean.FALSE)
-                                           .withProperty("nullval", "null");
+                .withLink("ns:users", "?users")
+                .withProperty("id", 123456)
+                .withProperty("age", 33)
+                .withProperty("name", "Example Resource")
+                .withProperty("optional", Boolean.TRUE)
+                .withProperty("expired", Boolean.FALSE)
+                .withProperty("nullval", "null");
 
         assertThat(party.getResourceLink().getHref()).isEqualTo("https://example.com/api/customer/123456");
         assertThat(party.renderContent(RepresentationFactory.HAL_XML)).isEqualTo(exampleWithLiteralNullPropertyXml);
@@ -299,16 +325,16 @@ public class RenderingTest {
         assertThat(party.renderContent(RepresentationFactory.HAL_JSON)).isEqualTo(exampleWithTemplateJson);
     }
 
-        @Test
+    @Test
     public void testHalWithBeanMultipleNestedSubResources() {
 
         ReadableRepresentation party = newBaseResource("customer/123456")
                 .withNamespace("phone", "https://example.com/apidocs/phones")
                 .withLink("ns:users", "?users")
-                .withBeanBasedSubresource("ns:user role:admin", "/user/11", new Customer(11, "Example User", 32))
-                .withBeanBasedSubresource("ns:user role:admin", "/user/12", new Customer(12, "Example User", 32));
+                .withBeanBasedSubresource("ns:user", "/user/11", new Customer(11, "Example User", 32))
+                .withBeanBasedSubresource("ns:user", "/user/12", new Customer(12, "Example User", 32));
 
-        party.getResources().get(0).withBeanBasedSubresource("ns:user role:admin phone:cell", "/phone/1", new Phone(1, "555-666-7890"));
+        Iterables.getFirst(party.getResources().values(), null).withBeanBasedSubresource("phone:cell", "/phone/1", new Phone(1, "555-666-7890"));
 
         assertThat(party.renderContent(RepresentationFactory.HAL_XML)).isEqualTo(exampleWithMultipleNestedSubresourcesXml);
         assertThat(party.renderContent(RepresentationFactory.HAL_JSON)).isEqualTo(exampleWithMultipleNestedSubresourcesJson);

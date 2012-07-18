@@ -5,12 +5,15 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Table;
 import com.theoryinpractise.halbuilder.RepresentationFactory;
@@ -56,7 +59,8 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
     protected Map<String, String> namespaces = Maps.newTreeMap(usingToString());
     protected List<Link> links = Lists.newArrayList();
     protected Map<String, Optional<Object>> properties = Maps.newTreeMap(usingToString());
-    protected List<Representation> resources = Lists.newArrayList();
+    protected Multimap<String,Representation> resources = ArrayListMultimap.create();
+
     protected RepresentationFactory representationFactory;
     protected final Pattern resolvableUri = Pattern.compile("^[/|?|~].*");
     protected boolean hasNullProperties = false;
@@ -94,7 +98,8 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
         final ImmutableList.Builder<Link> linkBuilder = ImmutableList.builder();
 
         linkBuilder.addAll(getLinksByRel(this, curiedRel));
-        for (Representation resource : resources) {
+        // TODO Should this check descendants? Should maybe be an overloaded method with a boolean check
+        for (Representation resource : resources.values()) {
             linkBuilder.addAll(getLinksByRel(resource, curiedRel));
         }
 
@@ -102,19 +107,14 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
     }
 
     public List<? extends ReadableRepresentation> getResourcesByRel(final String rel) {
-        Preconditions.checkArgument(rel != null, "Provided rel should not be null.");
-        Preconditions.checkArgument(!"".equals(rel) && !rel.contains(" "), "Provided rel should not be empty or contain spaces.");
+        Support.checkRelType(rel);
 
-        return getResources(new Predicate<Representation>() {
-            public boolean apply(@Nullable Representation resource) {
-                return Iterables.contains(WHITESPACE_SPLITTER.split(resource.getResourceLink().getRel()), rel);
-            }
-        });
+        return ImmutableList.copyOf(resources.get(rel));
     }
 
     public List<? extends ReadableRepresentation> getResources(Predicate<Representation> predicate) {
         Preconditions.checkArgument(predicate != null, "Provided findPredicate should not be null.");
-        return ImmutableList.copyOf(Iterables.filter(resources, predicate));
+        return ImmutableList.copyOf(Iterables.filter(resources.values(), predicate));
     }
 
     public Optional<Object> get(String name) {
@@ -139,6 +139,7 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
     }
 
     private List<Link> getLinksByRel(ReadableRepresentation representation, final String curiedRel) {
+        Support.checkRelType(curiedRel);
         return ImmutableList.copyOf(Iterables.filter(representation.getLinks(), new Predicate<Link>() {
             public boolean apply(@Nullable Link relatable) {
                 return Iterables.contains(WHITESPACE_SPLITTER.split(relatable.getRel()), curiedRel);
@@ -216,16 +217,17 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
         return ImmutableMap.copyOf(properties);
     }
 
-    public List<Representation> getResources() {
-        return ImmutableList.copyOf(resources);
+    public Multimap<String, Representation> getResources() {
+        return ImmutableMultimap.copyOf(resources);
     }
 
     protected  void validateNamespaces(ReadableRepresentation representation) {
         for (Link link : representation.getCanonicalLinks()) {
             validateNamespaces(link.getRel());
         }
-        for (Representation aResource : representation.getResources()) {
-            validateNamespaces(aResource);
+        for (Map.Entry<String, Representation> aResource : representation.getResources().entries()) {
+            validateNamespaces(aResource.getKey());
+            validateNamespaces(aResource.getValue());
         }
     }
 

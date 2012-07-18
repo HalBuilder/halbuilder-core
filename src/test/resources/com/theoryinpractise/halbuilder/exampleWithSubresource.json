@@ -21,9 +21,9 @@
     }
   },
   "_embedded" : {
-    "ns:user role:admin" : {
+    "ns:user" : {
       "_links" : {
-        "ns:user role:admin self" : {
+        "self" : {
           "href" : "https://example.com/user/11"
         }
       },

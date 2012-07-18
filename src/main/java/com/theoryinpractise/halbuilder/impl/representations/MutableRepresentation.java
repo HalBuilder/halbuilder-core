@@ -1,9 +1,11 @@
 package com.theoryinpractise.halbuilder.impl.representations;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.theoryinpractise.halbuilder.RepresentationFactory;
+import com.theoryinpractise.halbuilder.impl.api.Support;
 import com.theoryinpractise.halbuilder.spi.Link;
 import com.theoryinpractise.halbuilder.spi.ReadableRepresentation;
 import com.theoryinpractise.halbuilder.spi.Representation;
@@ -97,6 +99,9 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
      * @return
 	 */
 	public MutableRepresentation withLink(String rel, String href, Optional<Predicate<ReadableRepresentation>> predicate, Optional<String> name, Optional<String> title, Optional<String> hreflang) {
+
+        Support.checkRelType(rel);
+
         if (predicate.or(Predicates.<ReadableRepresentation>alwaysTrue()).apply(this)) {
             String resolvedHref = resolvableUri.matcher(href).matches() ? resolveRelativeHref(href) : href;
             for (String reltype : WHITESPACE_SPLITTER.split(rel)) {
@@ -192,8 +197,8 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
     }
 
     public MutableRepresentation withSubresource(String rel, Representation resource) {
-        resource.withLink(rel, resource.getResourceLink().getHref());
-        resources.add(resource);
+        Support.checkRelType(rel);
+        resources.put(rel, resource);
         // Propagate null property flag to parent.
         if(resource.hasNullProperties()) {
             hasNullProperties = true;
