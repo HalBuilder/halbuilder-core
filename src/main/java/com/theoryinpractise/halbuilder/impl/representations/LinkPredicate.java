@@ -1,4 +1,4 @@
-package com.theoryinpractise.halbuilder.impl.resources;
+package com.theoryinpractise.halbuilder.impl.representations;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;

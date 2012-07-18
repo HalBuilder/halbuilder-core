@@ -1,23 +1,19 @@
-package com.theoryinpractise.halbuilder.impl.resources;
+package com.theoryinpractise.halbuilder.impl.representations;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
-import com.theoryinpractise.halbuilder.ResourceFactory;
-import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceContract;
-import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceRenderer;
+import com.theoryinpractise.halbuilder.RepresentationFactory;
 import com.theoryinpractise.halbuilder.spi.Link;
-import com.theoryinpractise.halbuilder.spi.ReadableResource;
-import com.theoryinpractise.halbuilder.spi.Renderer;
-import com.theoryinpractise.halbuilder.spi.Resource;
-import com.theoryinpractise.halbuilder.spi.ResourceException;
+import com.theoryinpractise.halbuilder.spi.ReadableRepresentation;
+import com.theoryinpractise.halbuilder.spi.Representation;
+import com.theoryinpractise.halbuilder.spi.RepresentationException;
 import com.theoryinpractise.halbuilder.spi.Serializable;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
@@ -26,15 +22,15 @@ import java.net.URI;
 import static com.theoryinpractise.halbuilder.impl.api.Support.WHITESPACE_SPLITTER;
 import static java.lang.String.format;
 
-public class MutableResource extends BaseResource implements Resource {
+public class MutableRepresentation extends BaseRepresentation implements Representation {
 
-    public MutableResource(ResourceFactory resourceFactory, String href) {
-        super(resourceFactory);
-        this.links.add(new Link(resourceFactory, resolveRelativeHref(resourceFactory.getBaseHref(), href), "self"));
+    public MutableRepresentation(RepresentationFactory representationFactory, String href) {
+        super(representationFactory);
+        this.links.add(new Link(representationFactory, resolveRelativeHref(representationFactory.getBaseHref(), href), "self"));
     }
 
-    public MutableResource(ResourceFactory resourceFactory) {
-        super(resourceFactory);
+    public MutableRepresentation(RepresentationFactory representationFactory) {
+        super(representationFactory);
     }
 
     /**
@@ -43,9 +39,9 @@ public class MutableResource extends BaseResource implements Resource {
      * @param rel
      * @return
      */
-    public MutableResource withLink(String href, String rel) {
+    public MutableRepresentation withLink(String href, String rel) {
         withLink(href, rel,
-                Optional.of(Predicates.<ReadableResource>alwaysTrue()),
+                Optional.of(Predicates.<ReadableRepresentation>alwaysTrue()),
                 Optional.<String>absent(),
                 Optional.<String>absent(),
                 Optional.<String>absent());
@@ -59,7 +55,7 @@ public class MutableResource extends BaseResource implements Resource {
      * @param rel
      * @return
      */
-    public MutableResource withLink(URI uri, String rel) {
+    public MutableRepresentation withLink(URI uri, String rel) {
     	return withLink(uri.toASCIIString(), rel);
     }
 
@@ -69,7 +65,7 @@ public class MutableResource extends BaseResource implements Resource {
      * @param rel
      * @return
      */
-    public MutableResource withLink(String href, String rel, Predicate<ReadableResource> predicate) {
+    public MutableRepresentation withLink(String href, String rel, Predicate<ReadableRepresentation> predicate) {
         withLink(href, rel,
                 Optional.of(predicate),
                 Optional.<String>absent(),
@@ -85,7 +81,7 @@ public class MutableResource extends BaseResource implements Resource {
      * @param rel
      * @return
      */
-    public MutableResource withLink(URI uri, String rel, Predicate<ReadableResource> predicate) {
+    public MutableRepresentation withLink(URI uri, String rel, Predicate<ReadableRepresentation> predicate) {
     	return withLink(uri.toASCIIString(), rel, predicate);
     }
 
@@ -95,12 +91,12 @@ public class MutableResource extends BaseResource implements Resource {
 	 * @param rel
 	 * @return
 	 */
-	public MutableResource withLink(String href, String rel, Optional<Predicate<ReadableResource>> predicate, Optional<String> name, Optional<String> title, Optional<String> hreflang) {
-        if (predicate.or(Predicates.<ReadableResource>alwaysTrue()).apply(this)) {
+	public MutableRepresentation withLink(String href, String rel, Optional<Predicate<ReadableRepresentation>> predicate, Optional<String> name, Optional<String> title, Optional<String> hreflang) {
+        if (predicate.or(Predicates.<ReadableRepresentation>alwaysTrue()).apply(this)) {
             String resolvedHref = resolvableUri.matcher(href).matches() ? resolveRelativeHref(href) : href;
             for (String reltype : WHITESPACE_SPLITTER.split(rel)) {
                 String resolvedRelType = resolvableUri.matcher(reltype).matches() ? resolveRelativeHref(reltype) : reltype;
-                links.add(new Link(resourceFactory, resolvedHref, resolvedRelType, name, title, hreflang));
+                links.add(new Link(representationFactory, resolvedHref, resolvedRelType, name, title, hreflang));
             }
         }
 
@@ -114,13 +110,13 @@ public class MutableResource extends BaseResource implements Resource {
 	 * @param rel
 	 * @return
 	 */
-	public MutableResource withLink(URI uri, String rel, Optional<Predicate<ReadableResource>> predicate, Optional<String> name, Optional<String> title, Optional<String> hreflang) {
+	public MutableRepresentation withLink(URI uri, String rel, Optional<Predicate<ReadableRepresentation>> predicate, Optional<String> name, Optional<String> title, Optional<String> hreflang) {
 		return withLink(uri.toASCIIString(), rel, predicate, name, title, hreflang);
 	}
 
-    public Resource withProperty(String name, Object value) {
+    public Representation withProperty(String name, Object value) {
         if (properties.containsKey(name)) {
-            throw new ResourceException(format("Duplicate property '%s' found for resource", name));
+            throw new RepresentationException(format("Duplicate property '%s' found for resource", name));
         }
         if (null == value) {
             this.hasNullProperties = true;
@@ -129,7 +125,7 @@ public class MutableResource extends BaseResource implements Resource {
         return this;
     }
 
-    public Resource withBean(Object value) {
+    public Representation withBean(Object value) {
         try {
             BeanInfo beanInfo = Introspector.getBeanInfo(value.getClass());
             for (PropertyDescriptor pd : beanInfo.getPropertyDescriptors()) {
@@ -148,7 +144,7 @@ public class MutableResource extends BaseResource implements Resource {
         return this;
     }
 
-    public Resource withFields(Object value) {
+    public Representation withFields(Object value) {
         try {
             for (Field field : value.getClass().getDeclaredFields()) {
                 if (Modifier.isPublic(field.getModifiers())) {
@@ -162,17 +158,17 @@ public class MutableResource extends BaseResource implements Resource {
 
     }
 
-    public Resource withSerializable(Serializable serializable) {
+    public Representation withSerializable(Serializable serializable) {
         serializable.serializeResource(this);
         return this;
     }
 
-    public Resource withFieldBasedSubresource(String rel, String href, Object o) {
-        return withSubresource(rel, resourceFactory.newResource(href).withFields(o));
+    public Representation withFieldBasedSubresource(String rel, String href, Object o) {
+        return withSubresource(rel, representationFactory.newResource(href).withFields(o));
     }
 
-    public Resource withBeanBasedSubresource(String rel, String href, Object o) {
-        return withSubresource(rel, resourceFactory.newResource(href).withBean(o));
+    public Representation withBeanBasedSubresource(String rel, String href, Object o) {
+        return withSubresource(rel, representationFactory.newResource(href).withBean(o));
     }
 
     /**
@@ -181,15 +177,15 @@ public class MutableResource extends BaseResource implements Resource {
      * @param href The target href of the namespace being added. This may be relative to the resourceFactories baseref
      * @return
      */
-    public Resource withNamespace(String namespace, String href) {
+    public Representation withNamespace(String namespace, String href) {
         if (namespaces.containsKey(namespace)) {
-            throw new ResourceException(format("Duplicate namespace '%s' found for resource", namespace));
+            throw new RepresentationException(format("Duplicate namespace '%s' found for resource", namespace));
         }
-        namespaces.put(namespace, resolveRelativeHref(resourceFactory.getBaseHref(), href));
+        namespaces.put(namespace, resolveRelativeHref(representationFactory.getBaseHref(), href));
         return this;
     }
 
-    public MutableResource withSubresource(String rel, Resource resource) {
+    public MutableRepresentation withSubresource(String rel, Representation resource) {
         resource.withLink(resource.getResourceLink().getHref(), rel);
         resources.add(resource);
         // Propagate null property flag to parent.

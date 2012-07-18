@@ -2,8 +2,8 @@
   (:use [clojure.test]))
 
 (deftest haltest
-    (let [resource-factory (com.theoryinpractise.halbuilder.ResourceFactory.)
-          resource (doto (.newResource resource-factory "/foo")
+    (let [representation-factory (com.theoryinpractise.halbuilder.RepresentationFactory.)
+          representation (doto (.newResource representation-factory "/foo")
                          (.withProperty "name" "Mark")
                          (.withLink "/home" "home"))]
-         (println (.renderContent resource "application/hal+xml"))) )
+         (println (.renderContent representation "application/hal+xml"))) )

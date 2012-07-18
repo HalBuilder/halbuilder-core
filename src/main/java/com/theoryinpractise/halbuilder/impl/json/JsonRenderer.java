@@ -12,9 +12,9 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.theoryinpractise.halbuilder.spi.Link;
-import com.theoryinpractise.halbuilder.spi.ReadableResource;
+import com.theoryinpractise.halbuilder.spi.ReadableRepresentation;
 import com.theoryinpractise.halbuilder.spi.Renderer;
-import com.theoryinpractise.halbuilder.spi.Resource;
+import com.theoryinpractise.halbuilder.spi.Representation;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -37,7 +37,7 @@ import static com.theoryinpractise.halbuilder.impl.api.Support.WHITESPACE_SPLITT
 
 public class JsonRenderer<T> implements Renderer<T> {
 
-    public Optional<T> render(ReadableResource resource, Writer writer) {
+    public Optional<T> render(ReadableRepresentation representation, Writer writer) {
 
         JsonFactory f = new JsonFactory();
         f.enable(JsonGenerator.Feature.QUOTE_FIELD_NAMES);
@@ -46,7 +46,7 @@ public class JsonRenderer<T> implements Renderer<T> {
             JsonGenerator g = f.createJsonGenerator(writer);
             g.setPrettyPrinter(new DefaultPrettyPrinter());
             g.writeStartObject();
-            renderJson(g, resource, false);
+            renderJson(g, representation, false);
             g.writeEndObject();
             g.close();
         } catch (IOException e) {
@@ -55,27 +55,27 @@ public class JsonRenderer<T> implements Renderer<T> {
         return Optional.absent();
     }
 
-    private void renderJson(JsonGenerator g, ReadableResource resource, boolean embedded) throws IOException {
+    private void renderJson(JsonGenerator g, ReadableRepresentation representation, boolean embedded) throws IOException {
 
-        final Link resourceLink = resource.getResourceLink();
+        final Link resourceLink = representation.getResourceLink();
         final String href = resourceLink.getHref();
 
-        if (!resource.getCanonicalLinks().isEmpty() || (!embedded && !resource.getNamespaces().isEmpty())) {
+        if (!representation.getCanonicalLinks().isEmpty() || (!embedded && !representation.getNamespaces().isEmpty())) {
             g.writeObjectFieldStart(LINKS);
 
             List<Link> links = Lists.newArrayList();
 
             // Include namespaces as links when not embedded
             if (!embedded) {
-                for (Map.Entry<String, String> entry : resource.getNamespaces().entrySet()) {
+                for (Map.Entry<String, String> entry : representation.getNamespaces().entrySet()) {
                     links.add(new Link(null, entry.getValue(), CURIE, Optional.of(entry.getKey()), Optional.<String>absent(), Optional.<String>absent()));
                 }
             }
 
-            // Add resource links
-            links.addAll(resource.getLinks());
+            // Add representation links
+            links.addAll(representation.getLinks());
 
-            // Partition resource links by rel
+            // Partition representation links by rel
             Multimap<String, Link> linkMap = Multimaps.index(links, new Function<Link, String>() {
                 public String apply(@Nullable Link link) {
                     return link.getRel();
@@ -101,7 +101,7 @@ public class JsonRenderer<T> implements Renderer<T> {
             g.writeEndObject();
         }
 
-        for (Map.Entry<String, Optional<Object>> entry : resource.getProperties().entrySet()) {
+        for (Map.Entry<String, Optional<Object>> entry : representation.getProperties().entrySet()) {
             if(entry.getValue().isPresent()) {
                 g.writeObjectField(entry.getKey(), entry.getValue().get());
             }
@@ -110,11 +110,11 @@ public class JsonRenderer<T> implements Renderer<T> {
             }
         }
 
-        if (!resource.getResources().isEmpty()) {
+        if (!representation.getResources().isEmpty()) {
             g.writeObjectFieldStart(EMBEDDED);
 
-            Multimap<String, Resource> resourceMap = Multimaps.index(resource.getResources(), new Function<Resource, String>() {
-                public String apply(@Nullable Resource resource) {
+            Multimap<String, Representation> resourceMap = Multimaps.index(representation.getResources(), new Function<Representation, String>() {
+                public String apply(@Nullable Representation resource) {
                     List<String> relTypes = Lists.newArrayList(WHITESPACE_SPLITTER.split(resource.getResourceLink().getRel()));
 
                     Iterables.removeIf(relTypes, new Predicate<String>() {
@@ -127,17 +127,17 @@ public class JsonRenderer<T> implements Renderer<T> {
                 }
             });
 
-            for (Map.Entry<String, Collection<Resource>> resourceEntry : resourceMap.asMap().entrySet()) {
+            for (Map.Entry<String, Collection<Representation>> resourceEntry : resourceMap.asMap().entrySet()) {
                 if (resourceEntry.getValue().size() == 1) {
                     g.writeObjectFieldStart(resourceEntry.getKey());
-                    ReadableResource subResource = resourceEntry.getValue().iterator().next();
-                    renderJson(g, subResource, true);
+                    ReadableRepresentation subRepresentation = resourceEntry.getValue().iterator().next();
+                    renderJson(g, subRepresentation, true);
                     g.writeEndObject();
                 } else {
                     g.writeArrayFieldStart(resourceEntry.getKey());
-                    for (ReadableResource subResource : resourceEntry.getValue()) {
+                    for (ReadableRepresentation subRepresentation : resourceEntry.getValue()) {
                         g.writeStartObject();
-                        renderJson(g, subResource, true);
+                        renderJson(g, subRepresentation, true);
                         g.writeEndObject();
                     }
                     g.writeEndArray();

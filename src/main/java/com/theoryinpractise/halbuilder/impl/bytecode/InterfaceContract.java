@@ -2,7 +2,7 @@ package com.theoryinpractise.halbuilder.impl.bytecode;
 
 import com.google.common.base.Preconditions;
 import com.theoryinpractise.halbuilder.spi.Contract;
-import com.theoryinpractise.halbuilder.spi.ReadableResource;
+import com.theoryinpractise.halbuilder.spi.ReadableRepresentation;
 
 import java.lang.reflect.Method;
 
@@ -24,11 +24,11 @@ public class InterfaceContract<T> implements Contract {
         this.anInterface = anInterface;
     }
 
-    public boolean isSatisfiedBy(ReadableResource resource) {
+    public boolean isSatisfiedBy(ReadableRepresentation representation) {
 
         for (Method method : anInterface.getDeclaredMethods()) {
             String propertyName = derivePropertyNameFromMethod(method);
-            if (!"class".equals(propertyName) && !resource.getProperties().containsKey(propertyName)) {
+            if (!"class".equals(propertyName) && !representation.getProperties().containsKey(propertyName)) {
                 return false;
             }
         }

@@ -3,14 +3,14 @@ Halbuilder is a simple Java API for generating and consuming HAL documents confo
 
 ### Generating Local Resources
 
-    ResourceFactory resourceFactory = new ResourceFactory();
+    ResourceFactory representationFactory = new ResourceFactory();
 
-    Resource owner = resourceFactory.newResource("http://example.com/mike")
+    Resource owner = representationFactory.newResource("http://example.com/mike")
       .withLink("td:friend", "http://example.com/mamund")
       .withProperty("name", "Mike")
       .withProperty("age", "36");
 
-    Resource halResource = resourceFactory.newResource("http://example.com/todo-list")
+    Resource halResource = representationFactory.newResource("http://example.com/todo-list")
       .withNamespace("td", "http://example.com/todoapp/rels/")
       .withLink("/todo-list/search;{searchterm}", "td:search")
       .withLink("/todo-list/description", "td:description")
@@ -24,9 +24,9 @@ Halbuilder is a simple Java API for generating and consuming HAL documents confo
 
 ### Reading Local Resources
 
-    ResourceFactory resourceFactory = new ResourceFactory();
+    ResourceFactory representationFactory = new ResourceFactory();
 
-    Resource resource = resourceFactory.readResource(new InputStreamReader(Some.class.getResourceAsStream("/test.xml")));
+    Resource representation = representationFactory.readResource(new InputStreamReader(Some.class.getResourceAsStream("/test.xml")));
 
 ### Apache Maven
 

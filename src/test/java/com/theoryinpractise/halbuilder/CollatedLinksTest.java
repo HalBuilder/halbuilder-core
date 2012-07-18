@@ -1,7 +1,7 @@
 package com.theoryinpractise.halbuilder;
 
 import com.theoryinpractise.halbuilder.spi.Link;
-import com.theoryinpractise.halbuilder.spi.Resource;
+import com.theoryinpractise.halbuilder.spi.Representation;
 import org.fest.assertions.core.Condition;
 import org.testng.annotations.Test;
 
@@ -14,7 +14,7 @@ public class CollatedLinksTest {
     @Test
     public void testCollatedLinks() {
 
-        Resource resource = new ResourceFactory().newResource("/foo")
+        Representation resource = new RepresentationFactory().newResource("/foo")
                                                  .withLink("/bar", "bar")
                                                  .withLink("/bar", "foo");
 
@@ -34,7 +34,7 @@ public class CollatedLinksTest {
     @Test
     public void testSpacedRelsSeparateLinks() {
 
-        Resource resource = new ResourceFactory().newResource("/foo")
+        Representation resource = new RepresentationFactory().newResource("/foo")
                                                  .withLink("/bar", "bar foo");
 
         assertThat(resource.getCanonicalLinks())
@@ -48,7 +48,7 @@ public class CollatedLinksTest {
     @Test
     public void testMultiSpacedRelsSeparateLinks() {
 
-        Resource resource = new ResourceFactory().newResource("/foo")
+        Representation resource = new RepresentationFactory().newResource("/foo")
                                                  .withLink("/bar", "bar                  foo");
 
         assertThat(resource.getCanonicalLinks())
@@ -61,7 +61,7 @@ public class CollatedLinksTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testRelLookupsWithNullFail() {
-        Resource resource = new ResourceFactory().newResource("/foo")
+        Representation resource = new RepresentationFactory().newResource("/foo")
                                                  .withLink("/bar", "bar foo");
 
         resource.getLinkByRel(null);
@@ -69,7 +69,7 @@ public class CollatedLinksTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testRelLookupsWithEmptyRelFail() {
-        Resource resource = new ResourceFactory().newResource("/foo")
+        Representation resource = new RepresentationFactory().newResource("/foo")
                                                  .withLink("/bar", "bar foo");
 
         resource.getLinkByRel("");
@@ -77,7 +77,7 @@ public class CollatedLinksTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testRelLookupsWithSpacesFail() {
-        Resource resource = new ResourceFactory().newResource("/foo")
+        Representation resource = new RepresentationFactory().newResource("/foo")
                                                  .withLink("/bar", "bar foo");
 
         resource.getLinkByRel("test fail");
