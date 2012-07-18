@@ -7,17 +7,17 @@ import com.google.common.base.Predicate;
 
 public interface Representation extends ReadableRepresentation {
 
-    Representation withLink(String href, String rel);
+    Representation withLink(String rel, String href);
 
-    Representation withLink(URI uri, String rel);
+    Representation withLink(String rel, URI uri);
 
-    Representation withLink(String href, String rel, Predicate<ReadableRepresentation> predicate);
+    Representation withLink(String rel, String href, Predicate<ReadableRepresentation> predicate);
 
-    Representation withLink(URI uri, String rel, Predicate<ReadableRepresentation> predicate);
+    Representation withLink(String rel, URI uri, Predicate<ReadableRepresentation> predicate);
 
-    Representation withLink(String href, String rel, Optional<Predicate<ReadableRepresentation>> predicate, Optional<String> name, Optional<String> title, Optional<String> hreflang);
+    Representation withLink(String rel, String href, Optional<Predicate<ReadableRepresentation>> predicate, Optional<String> name, Optional<String> title, Optional<String> hreflang);
 
-    Representation withLink(URI uri, String rel, Optional<Predicate<ReadableRepresentation>> predicate, Optional<String> name, Optional<String> title, Optional<String> hreflang);
+    Representation withLink(String rel, URI uri, Optional<Predicate<ReadableRepresentation>> predicate, Optional<String> name, Optional<String> title, Optional<String> hreflang);
 
     Representation withProperty(String name, Object value);
 

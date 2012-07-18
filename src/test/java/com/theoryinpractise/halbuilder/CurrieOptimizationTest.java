@@ -12,7 +12,7 @@ public class CurrieOptimizationTest {
                                                            .withNamespace("rel", "/api/rels/");
 
     Representation resource = representationFactory.newResource("/api/1")
-                                       .withLink("/api/applications/app/1", "/api/rels/foo");
+                                       .withLink("/api/rels/foo", "/api/applications/app/1");
 
 
     @Test

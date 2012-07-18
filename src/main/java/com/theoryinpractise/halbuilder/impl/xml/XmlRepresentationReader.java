@@ -72,7 +72,7 @@ public class XmlRepresentationReader implements RepresentationReader {
             Optional<String> hreflang = optionalElementValueAsText(link, HREFLANG);
             Optional<Predicate<ReadableRepresentation>> predicate = Optional.<Predicate<ReadableRepresentation>>absent();
 
-            resource.withLink(href, rel, predicate, name, title, hreflang);
+            resource.withLink(rel, href, predicate, name, title, hreflang);
         }
 
     }

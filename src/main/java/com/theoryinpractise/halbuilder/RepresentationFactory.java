@@ -95,8 +95,8 @@ public class RepresentationFactory {
 
         // Add factory standard links
         for (Link link : links) {
-            resource.withLink(link.getHref(), link.getRel(),
-                    Optional.<Predicate<ReadableRepresentation>>absent(), link.getName(), link.getTitle(), link.getHreflang());
+            resource.withLink(link.getRel(), link.getHref(),
+                              Optional.<Predicate<ReadableRepresentation>>absent(), link.getName(), link.getTitle(), link.getHreflang());
         }
 
         return resource;

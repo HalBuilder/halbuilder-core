@@ -35,13 +35,14 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
 
     /**
      * Add a link to this resource
-     * @param href The target href for the link, relative to the href of this resource.
+     *
      * @param rel
+     * @param href The target href for the link, relative to the href of this resource.
      * @return
      */
-    public MutableRepresentation withLink(String href, String rel) {
-        withLink(href, rel,
-                Optional.of(Predicates.<ReadableRepresentation>alwaysTrue()),
+    public MutableRepresentation withLink(String rel, String href) {
+        withLink(rel, href,
+                 Optional.of(Predicates.<ReadableRepresentation>alwaysTrue()),
                 Optional.<String>absent(),
                 Optional.<String>absent(),
                 Optional.<String>absent());
@@ -50,24 +51,26 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
 
     /**
      * Add a link to this resource
+     *
+     * @param rel
      * @param uri The target URI for the link, possibly relative to the href of
      *            this resource.
-     * @param rel
      * @return
      */
-    public MutableRepresentation withLink(URI uri, String rel) {
-    	return withLink(uri.toASCIIString(), rel);
+    public MutableRepresentation withLink(String rel, URI uri) {
+    	return withLink(rel, uri.toASCIIString());
     }
 
     /**
      * Add a link to this resource
-     * @param href The target href for the link, relative to the href of this resource.
+     *
      * @param rel
+     * @param href The target href for the link, relative to the href of this resource.
      * @return
      */
-    public MutableRepresentation withLink(String href, String rel, Predicate<ReadableRepresentation> predicate) {
-        withLink(href, rel,
-                Optional.of(predicate),
+    public MutableRepresentation withLink(String rel, String href, Predicate<ReadableRepresentation> predicate) {
+        withLink(rel, href,
+                 Optional.of(predicate),
                 Optional.<String>absent(),
                 Optional.<String>absent(),
                 Optional.<String>absent());
@@ -76,22 +79,24 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
 
     /**
      * Add a link to this resource
+     *
+     * @param rel
      * @param uri The target URI for the link, possibly relative to the href of
      *            this resource.
-     * @param rel
      * @return
      */
-    public MutableRepresentation withLink(URI uri, String rel, Predicate<ReadableRepresentation> predicate) {
-    	return withLink(uri.toASCIIString(), rel, predicate);
+    public MutableRepresentation withLink(String rel, URI uri, Predicate<ReadableRepresentation> predicate) {
+    	return withLink(rel, uri.toASCIIString(), predicate);
     }
 
 	/**
 	 * Add a link to this resource
-	 * @param href The target href for the link, relative to the href of this resource.
-	 * @param rel
-	 * @return
+	 *
+     * @param rel
+     * @param href The target href for the link, relative to the href of this resource.
+     * @return
 	 */
-	public MutableRepresentation withLink(String href, String rel, Optional<Predicate<ReadableRepresentation>> predicate, Optional<String> name, Optional<String> title, Optional<String> hreflang) {
+	public MutableRepresentation withLink(String rel, String href, Optional<Predicate<ReadableRepresentation>> predicate, Optional<String> name, Optional<String> title, Optional<String> hreflang) {
         if (predicate.or(Predicates.<ReadableRepresentation>alwaysTrue()).apply(this)) {
             String resolvedHref = resolvableUri.matcher(href).matches() ? resolveRelativeHref(href) : href;
             for (String reltype : WHITESPACE_SPLITTER.split(rel)) {
@@ -105,13 +110,14 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
 
 	/**
 	 * Add a link to this resource
-	 * @param uri The target URI for the link, possibly relative to the href of
-	 *            this resource.
-	 * @param rel
-	 * @return
+	 *
+     * @param rel
+     * @param uri The target URI for the link, possibly relative to the href of
+     *            this resource.
+     * @return
 	 */
-	public MutableRepresentation withLink(URI uri, String rel, Optional<Predicate<ReadableRepresentation>> predicate, Optional<String> name, Optional<String> title, Optional<String> hreflang) {
-		return withLink(uri.toASCIIString(), rel, predicate, name, title, hreflang);
+	public MutableRepresentation withLink(String rel, URI uri, Optional<Predicate<ReadableRepresentation>> predicate, Optional<String> name, Optional<String> title, Optional<String> hreflang) {
+		return withLink(rel, uri.toASCIIString(), predicate, name, title, hreflang);
 	}
 
     public Representation withProperty(String name, Object value) {
@@ -186,7 +192,7 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
     }
 
     public MutableRepresentation withSubresource(String rel, Representation resource) {
-        resource.withLink(resource.getResourceLink().getHref(), rel);
+        resource.withLink(rel, resource.getResourceLink().getHref());
         resources.add(resource);
         // Propagate null property flag to parent.
         if(resource.hasNullProperties()) {

@@ -12,7 +12,7 @@ public class ResourceTest {
     @Test(expectedExceptions = RepresentationException.class)
     public void testUndeclaredLinkNamespace() {
         representationFactory.newResource("/test")
-                .withLink("http://localhost/test/2", "td:test")
+                .withLink("td:test", "http://localhost/test/2")
                 .renderContent(RepresentationFactory.HAL_XML);
     }
 
@@ -26,7 +26,7 @@ public class ResourceTest {
     @Test(expectedExceptions = RepresentationException.class)
     public void testUndeclaredResourceLinkNamespace() {
         representationFactory.newResource("http://localhost/test")
-                .withSubresource("test", representationFactory.newResource("/").withLink("/", "td:test"))
+                .withSubresource("test", representationFactory.newResource("/").withLink("td:test", "/"))
                 .renderContent(RepresentationFactory.HAL_XML);
     }
 
@@ -49,7 +49,7 @@ public class ResourceTest {
     @Test
     public void testRelativeLinksRenderFullyQualified() {
         String xml = representationFactory.newResource("/")
-                .withLink("/test", "test")
+                .withLink("test", "/test")
                 .renderContent(RepresentationFactory.HAL_XML);
 
         assertThat(xml).contains("http://localhost/test");
@@ -69,8 +69,8 @@ public class ResourceTest {
         String xml = representationFactory.newResource("/")
                 .withSubresource("test", representationFactory
                         .newResource("subresource/")
-                        .withLink("/sublink1", "sub")
-                        .withLink("~/sublink2", "sub2"))
+                        .withLink("sub", "/sublink1")
+                        .withLink("sub2", "~/sublink2"))
                 .renderContent(RepresentationFactory.HAL_XML);
 
         assertThat(xml).contains("http://localhost/sublink1");

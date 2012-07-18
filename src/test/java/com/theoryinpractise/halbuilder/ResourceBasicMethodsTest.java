@@ -26,7 +26,7 @@ public class ResourceBasicMethodsTest {
     private Representation createDefaultResource() {
         return representationFactory.newResource("/test")
                 .withNamespace("testns", "http://example.com/test")
-                .withLink("http://example.com/link", "testlink")
+                .withLink("testlink", "http://example.com/link")
                 .withProperty("testprop", "value")
                 .withProperty("nullprop", null)
                 .withSubresource("testsub", representationFactory.newResource("/subtest"));
@@ -45,7 +45,7 @@ public class ResourceBasicMethodsTest {
 
     @Test
     public void testHashCodeIsDependentOnLinks() {
-        resource.withLink("http://example.com/link2", "testlink2");
+        resource.withLink("testlink2", "http://example.com/link2");
         assertThat(resource.hashCode()).isNotEqualTo(resourceHashCode);
     }
 
@@ -75,7 +75,7 @@ public class ResourceBasicMethodsTest {
 
     @Test
     public void testEqualsIsDependentOnLinks() {
-        resource.withLink("http://example.com/link2", "testlink2");
+        resource.withLink("testlink2", "http://example.com/link2");
         assertThat(resource).isNotEqualTo(otherResource);
     }
 
