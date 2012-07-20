@@ -28,7 +28,9 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
 
     public MutableRepresentation(RepresentationFactory representationFactory, String href) {
         super(representationFactory);
-        this.links.add(new Link(representationFactory, resolveRelativeHref(representationFactory.getBaseHref(), href), "self"));
+        if (href != null) {
+            this.links.add(new Link(representationFactory, resolveRelativeHref(representationFactory.getBaseHref(), href), "self"));
+        }
     }
 
     public MutableRepresentation(RepresentationFactory representationFactory) {

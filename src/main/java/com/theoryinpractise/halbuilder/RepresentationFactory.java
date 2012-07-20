@@ -85,6 +85,10 @@ public class RepresentationFactory {
         return newResource(uri.toASCIIString());
     }
 
+    public Representation newResource() {
+        return newResource((String) null);
+    }
+
     public Representation newResource(String href) {
         MutableRepresentation resource = new MutableRepresentation(this, href);
 

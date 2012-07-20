@@ -28,6 +28,8 @@ public class RenderingTest {
 
     private String exampleXml;
     private String exampleJson;
+    private String exampleXmlWithoutHref;
+    private String exampleJsonWithoutHref;
     private String exampleWithSubresourceXml;
     private String exampleWithSubresourceJson;
     private String exampleWithSubresourceLinkingToItselfXml;
@@ -45,6 +47,10 @@ public class RenderingTest {
 
     @BeforeMethod
     public void setup() throws IOException {
+        exampleXmlWithoutHref = Resources.toString(RenderingTest.class.getResource("exampleWithoutHref.xml"), Charsets.UTF_8)
+                .trim().replaceAll("\n", "\r\n");
+        exampleJsonWithoutHref = Resources.toString(RenderingTest.class.getResource("exampleWithoutHref.json"), Charsets.UTF_8)
+                .trim();
         exampleXml = Resources.toString(RenderingTest.class.getResource("example.xml"), Charsets.UTF_8)
                 .trim().replaceAll("\n", "\r\n");
         exampleJson = Resources.toString(RenderingTest.class.getResource("example.json"), Charsets.UTF_8)
@@ -132,9 +138,21 @@ public class RenderingTest {
                 .withProperty("optional", Boolean.TRUE)
                 .withProperty("expired", Boolean.FALSE);
 
-        assertThat(party.getResourceLink().getHref()).isEqualTo("https://example.com/api/customer/123456");
+        assertThat(party.getResourceLink().get().getHref()).isEqualTo("https://example.com/api/customer/123456");
         assertThat(party.renderContent(RepresentationFactory.HAL_XML)).isEqualTo(exampleXml);
         assertThat(party.renderContent(RepresentationFactory.HAL_JSON)).isEqualTo(exampleJson);
+
+    }
+
+    @Test
+    public void testResourcesWithoutHref() {
+
+        ReadableRepresentation party = new RepresentationFactory().newResource()
+                .withProperty("name", "Example Resource");
+
+        assertThat(party.getResourceLink().isPresent()).isFalse();
+        assertThat(party.renderContent(RepresentationFactory.HAL_XML)).isEqualTo(exampleXmlWithoutHref);
+        assertThat(party.renderContent(RepresentationFactory.HAL_JSON)).isEqualTo(exampleJsonWithoutHref);
 
     }
 
@@ -149,7 +167,7 @@ public class RenderingTest {
                 .withProperty("optional", Boolean.TRUE)
                 .withProperty("expired", Boolean.FALSE);
 
-        assertThat(party.getResourceLink().getHref()).isEqualTo("https://example.com/api/customer/123456");
+        assertThat(party.getResourceLink().get().getHref()).isEqualTo("https://example.com/api/customer/123456");
         assertThat(party.renderContent(RepresentationFactory.HAL_XML)).isEqualTo(exampleXml);
         assertThat(party.renderContent(RepresentationFactory.HAL_JSON)).isEqualTo(exampleJson);
 
@@ -293,7 +311,7 @@ public class RenderingTest {
                 .withProperty("expired", Boolean.FALSE)
                 .withProperty("nullprop", null);
 
-        assertThat(party.getResourceLink().getHref()).isEqualTo("https://example.com/api/customer/123456");
+        assertThat(party.getResourceLink().get().getHref()).isEqualTo("https://example.com/api/customer/123456");
         assertThat(party.renderContent(RepresentationFactory.HAL_XML)).isEqualTo(exampleWithNullPropertyXml);
         assertThat(party.renderContent(RepresentationFactory.HAL_JSON)).isEqualTo(exampleWithNullPropertyJson);
     }
@@ -311,7 +329,7 @@ public class RenderingTest {
                 .withProperty("expired", Boolean.FALSE)
                 .withProperty("nullval", "null");
 
-        assertThat(party.getResourceLink().getHref()).isEqualTo("https://example.com/api/customer/123456");
+        assertThat(party.getResourceLink().get().getHref()).isEqualTo("https://example.com/api/customer/123456");
         assertThat(party.renderContent(RepresentationFactory.HAL_XML)).isEqualTo(exampleWithLiteralNullPropertyXml);
         assertThat(party.renderContent(RepresentationFactory.HAL_JSON)).isEqualTo(exampleWithLiteralNullPropertyJson);
     }

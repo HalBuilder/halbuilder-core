@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class ImmutableRepresentation extends BaseRepresentation {
 
-    private final Link resourceLink;
+    private final Optional<Link> resourceLink;
 
     public ImmutableRepresentation(RepresentationFactory representationFactory,
                                    Map<String, String> namespaces, List<Link> links, Map<String, Optional<Object>> properties, Multimap<String, Representation> resources, boolean hasNullProperties) {
@@ -26,7 +26,7 @@ public class ImmutableRepresentation extends BaseRepresentation {
         this.hasNullProperties = hasNullProperties;
     }
 
-    public Link getResourceLink() {
+    public Optional<Link> getResourceLink() {
         return resourceLink;
     }
 

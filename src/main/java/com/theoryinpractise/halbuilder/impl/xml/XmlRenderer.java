@@ -43,12 +43,14 @@ public class XmlRenderer<T> implements Renderer<T> {
 
     private Element renderElement(String rel, ReadableRepresentation representation, boolean embedded) {
 
-        final Link resourceLink = representation.getResourceLink();
-        final String href = resourceLink.getHref();
+        final Optional<Link> resourceLink = representation.getResourceLink();
 
         // Create the root element
         final Element resourceElement = new Element("resource");
-        resourceElement.setAttribute("href", href);
+        if (resourceLink.isPresent()) {
+            resourceElement.setAttribute("href", resourceLink.get().getHref());
+        }
+
         if (!rel.equals("self")) {
             resourceElement.setAttribute("rel", rel);
         }

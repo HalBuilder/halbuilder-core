@@ -69,12 +69,8 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
         this.representationFactory = representationFactory;
     }
 
-    public Link getResourceLink() {
-        try {
-            return Iterables.find(getLinks(), LinkPredicate.newLinkPredicate(Support.SELF));
-        } catch (NoSuchElementException e) {
-            throw new IllegalStateException("Resources MUST have a self link.");
-        }
+    public Optional<Link> getResourceLink() {
+        return Iterables.tryFind(getLinks(), LinkPredicate.newLinkPredicate(Support.SELF));
     }
 
     public Map<String, String> getNamespaces() {
@@ -263,7 +259,11 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
     }
 
     public String resolveRelativeHref(String href) {
-        return resolveRelativeHref(getResourceLink().getHref(), href);
+        if (getResourceLink().isPresent()) {
+            return resolveRelativeHref(getResourceLink().get().getHref(), href);
+        } else {
+            throw new IllegalStateException("Unable to resolve relative href with missing resource href.");
+        }
     }
 
     protected String resolveRelativeHref(final String baseHref, String href) {

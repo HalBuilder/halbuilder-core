@@ -40,9 +40,17 @@ public class ResourceReaderTest {
         };
     }
 
+    @DataProvider
+    public Object[][] provideResourcesWithouHref() {
+        return new Object[][] {
+                {representationFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("exampleWithoutHref.xml")))},
+                {representationFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("exampleWithoutHref.json")))},
+        };
+    }
+
     @Test(dataProvider = "provideResources")
     public void testReader(ReadableRepresentation representation) {
-        assertThat(representation.getResourceLink().getHref()).isEqualTo("https://example.com/api/customer/123456");
+        assertThat(representation.getResourceLink().get().getHref()).isEqualTo("https://example.com/api/customer/123456");
         assertThat(representation.getNamespaces()).hasSize(2);
         assertThat(representation.getProperties().get("name").get()).isEqualTo("Example Resource");
         assertThat(representation.get("name").get()).isEqualTo("Example Resource");
@@ -71,12 +79,20 @@ public class ResourceReaderTest {
 
     @Test(dataProvider = "provideSubResources")
     public void testSubReader(ReadableRepresentation representation) {
-        assertThat(representation.getResourceLink().getHref()).isEqualTo("https://example.com/api/customer/123456");
+        assertThat(representation.getResourceLink().get().getHref()).isEqualTo("https://example.com/api/customer/123456");
         assertThat(representation.getNamespaces()).hasSize(2);
         assertThat(representation.getCanonicalLinks()).hasSize(3);
         assertThat(representation.getResources().values()).hasSize(1);
         assertThat(representation.getResources().values().iterator().next().getProperties().get("name").get()).isEqualTo("Example User");
         assertThat(representation.getResourcesByRel("ns:user")).hasSize(1);
+    }
+
+    @Test(dataProvider = "provideResourcesWithouHref")
+    public void testResourcesWithoutHref(ReadableRepresentation representation) {
+        assertThat(representation.getResourceLink().isPresent()).isFalse();
+        assertThat(representation.getNamespaces()).hasSize(0);
+        assertThat(representation.getCanonicalLinks()).hasSize(0);
+        assertThat(representation.get("name").get()).isEqualTo("Example Resource");
     }
 
     @Test(expectedExceptions = RepresentationException.class)

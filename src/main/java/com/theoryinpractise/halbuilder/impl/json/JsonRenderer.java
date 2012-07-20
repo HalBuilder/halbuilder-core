@@ -57,9 +57,6 @@ public class JsonRenderer<T> implements Renderer<T> {
 
     private void renderJson(JsonGenerator g, ReadableRepresentation representation, boolean embedded) throws IOException {
 
-        final Link resourceLink = representation.getResourceLink();
-        final String href = resourceLink.getHref();
-
         if (!representation.getCanonicalLinks().isEmpty() || (!embedded && !representation.getNamespaces().isEmpty())) {
             g.writeObjectFieldStart(LINKS);
 

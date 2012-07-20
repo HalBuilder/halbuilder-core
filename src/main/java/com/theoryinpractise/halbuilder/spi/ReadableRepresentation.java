@@ -17,7 +17,7 @@ public interface ReadableRepresentation {
      * Returns a Link with a rel of "self".
      * @return A Link
      */
-    Link getResourceLink();
+    Optional<Link> getResourceLink();
 
     /**
      * Returns an ImmutableMap of the currently defined resource namespaces
