@@ -24,9 +24,9 @@
     }
   },
   "_embedded" : {
-    "ns:user role:admin" : [ {
+    "ns:user" : [ {
       "_links" : {
-        "ns:user role:admin self" : {
+        "self" : {
           "href" : "https://example.com/user/11"
         }
       },
@@ -36,9 +36,9 @@
       "name" : "Example User",
       "optional" : true,
       "_embedded" : {
-        "ns:user phone:cell role:admin" : {
+        "phone:cell" : {
           "_links" : {
-            "ns:user phone:cell role:admin self" : {
+            "self" : {
               "href" : "https://example.com/phone/1"
             }
           },
@@ -48,7 +48,7 @@
       }
     }, {
       "_links" : {
-        "ns:user role:admin self" : {
+        "self" : {
           "href" : "https://example.com/user/12"
         }
       },

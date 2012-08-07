@@ -2,7 +2,7 @@ package com.theoryinpractise.halbuilder.impl.bytecode;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.theoryinpractise.halbuilder.spi.ReadableResource;
+import com.theoryinpractise.halbuilder.spi.ReadableRepresentation;
 import com.theoryinpractise.halbuilder.spi.Renderer;
 
 import java.io.Writer;
@@ -28,21 +28,21 @@ public class InterfaceRenderer<T> implements Renderer<T> {
         this.anInterface = anInterface;
     }
 
-    public Optional<T> render(final ReadableResource resource, Writer writer) {
+    public Optional<T> render(final ReadableRepresentation representation, Writer writer) {
         Preconditions.checkArgument(writer == null, "Writer argument should be null for " + InterfaceRenderer.class.getName());
 
-        if (resource.isSatisfiedBy(InterfaceContract.newInterfaceContract(anInterface))) {
+        if (representation.isSatisfiedBy(InterfaceContract.newInterfaceContract(anInterface))) {
             T proxy = (T) Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{anInterface}, new InvocationHandler() {
                 public Object invoke(Object o, Method method, Object[] objects) throws Throwable {
 
                     String propertyName = derivePropertyNameFromMethod(method);
-                    
-                    Optional<Object> propertyOptional = resource.getProperties().get(propertyName);
-                    
+
+                    Optional<Object> propertyOptional = representation.getProperties().get(propertyName);
+
                     Class<?> returnType = method.getReturnType();
-                    
+
                     Object returnValue;
-                    
+
                     if(propertyOptional.isPresent()) {
                         Object propertyValue = propertyOptional.get();
                         returnValue = returnType.getConstructor(propertyValue.getClass()).newInstance(propertyValue);
@@ -51,7 +51,7 @@ public class InterfaceRenderer<T> implements Renderer<T> {
                         // In this case, we have a null property.
                         returnValue = null;
                     }
-                    
+
                     return returnValue;
                 }
             });

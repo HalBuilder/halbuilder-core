@@ -3,20 +3,21 @@ package com.theoryinpractise.halbuilder.spi;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.collect.Multimap;
 
 import java.util.List;
 import java.util.Map;
 
 /**
- * A ReadableResource is a read-only, immutable HAL Resource object.
+ * A ReadableRepresentation is a read-only, immutable HAL Representation object.
  */
-public interface ReadableResource {
+public interface ReadableRepresentation {
 
     /**
      * Returns a Link with a rel of "self".
      * @return A Link
      */
-    Link getResourceLink();
+    Optional<Link> getResourceLink();
 
     /**
      * Returns an ImmutableMap of the currently defined resource namespaces
@@ -61,31 +62,31 @@ public interface ReadableResource {
      * @param rel The rel type to search for.
      * @return An Immutable List of Resources
      */
-    List<? extends ReadableResource> getResourcesByRel(String rel);
+    List<? extends ReadableRepresentation> getResourcesByRel(String rel);
 
     /**
-     * Returns all embedded resources from the Resource that match the predicate
+     * Returns all embedded resources from the Representation that match the predicate
      * @param predicate The predicate to check against in the embedded resources
      * @return A List of matching objects (properties, links, resource)
      */
-    List<? extends ReadableResource> getResources(Predicate<Resource> predicate);
+    List<? extends ReadableRepresentation> getResources(Predicate<ReadableRepresentation> predicate);
 
     /**
-     * Returns a property from the Resource.
+     * Returns a property from the Representation.
      * @param name The property to return
      * @return A Guava Optional for the property
      */
     Optional<Object> get(String name);
 
     /**
-     * Returns a property from the Resource
+     * Returns a property from the Representation
      * @param name The property to return
      * @return An Object of the property value, or null if absent
      */
     Object getValue(String name);
 
     /**
-     * Returns a property from the Resource
+     * Returns a property from the Representation
      * @param name The property to return
      * @return An Object of the property value, or a user supplied default value
      */
@@ -106,10 +107,10 @@ public interface ReadableResource {
     boolean hasNullProperties();
 
     /**
-     * Returns an ImmutableList of the resources currently embedded resources.
+     * Returns an Immutable Multimap of the resources currently embedded resources.
      * @return A Map
      */
-    List<Resource> getResources();
+    Multimap<String, ReadableRepresentation> getResources();
 
     /**
      * Returns whether this resource is satisfied by the provided Contact.
@@ -137,7 +138,7 @@ public interface ReadableResource {
      * Returns an optional proxy to the given interface mirroring the resource.
      *
      * @param anInterface An interface to mirror
-     * @return A Guava Optional Resource Proxy
+     * @return A Guava Optional Representation Proxy
      */
     <T> Optional<T> renderClass(Class<T> anInterface);
 
@@ -145,7 +146,7 @@ public interface ReadableResource {
      * Returns the resource in the request content-type.
      *
      * application/hal+xml and application/hal+json are provided by default,
-     * additional Renderers can be added to a ResourceFactory.
+     * additional Renderers can be added to a RepresentationFactory.
      *
      * @param contentType The content type requested
      * @return A String
@@ -156,8 +157,8 @@ public interface ReadableResource {
      * Returns an optional proxy to the given interface mirroring the resource.
      *
      * @param anInterface An interface to mirror
-     * @return A Guava Optional Resource Proxy
+     * @return A Guava Optional Representation Proxy
      */
-    <T> Optional<T> resolveClass(Function<ReadableResource, Optional<T>> resolver);
+    <T> Optional<T> resolveClass(Function<ReadableRepresentation, Optional<T>> resolver);
 
 }

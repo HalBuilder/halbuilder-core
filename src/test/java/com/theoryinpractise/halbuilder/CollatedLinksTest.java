@@ -1,22 +1,23 @@
 package com.theoryinpractise.halbuilder;
 
 import com.theoryinpractise.halbuilder.spi.Link;
-import com.theoryinpractise.halbuilder.spi.Resource;
+import com.theoryinpractise.halbuilder.spi.Representation;
 import org.fest.assertions.core.Condition;
 import org.testng.annotations.Test;
 
 import java.util.List;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.fest.assertions.api.Assertions.fail;
 
 public class CollatedLinksTest {
 
     @Test
     public void testCollatedLinks() {
 
-        Resource resource = new ResourceFactory().newResource("/foo")
-                                                 .withLink("/bar", "bar")
-                                                 .withLink("/bar", "foo");
+        Representation resource = new RepresentationFactory().newResource("/foo")
+                                                 .withLink("bar", "/bar")
+                                                 .withLink("foo", "/bar");
 
         List<Link> collatedLinks = resource.getLinks();
 
@@ -34,51 +35,50 @@ public class CollatedLinksTest {
     @Test
     public void testSpacedRelsSeparateLinks() {
 
-        Resource resource = new ResourceFactory().newResource("/foo")
-                                                 .withLink("/bar", "bar foo");
+        Representation representation = new RepresentationFactory().newResource("/foo");
 
-        assertThat(resource.getCanonicalLinks())
-                .isNotEmpty()
-                .hasSize(3)
-                .has(new ContainsRelCondition("bar"))
-                .has(new ContainsRelCondition("foo"));
+        try {
+            Representation resource = representation.withLink("bar foo", "/bar");
+            fail("We should fail to add a space separated link rel.");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
 
     }
 
     @Test
     public void testMultiSpacedRelsSeparateLinks() {
 
-        Resource resource = new ResourceFactory().newResource("/foo")
-                                                 .withLink("/bar", "bar                  foo");
-
-        assertThat(resource.getCanonicalLinks())
-                .isNotEmpty()
-                .hasSize(3)
-                .has(new ContainsRelCondition("bar"))
-                .has(new ContainsRelCondition("foo"));
+        Representation representation = new RepresentationFactory().newResource("/foo");
+        try {
+            Representation resource = representation.withLink("bar                  foo", "/bar");
+            fail("We should fail to add a space separated link rel.");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
 
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testRelLookupsWithNullFail() {
-        Resource resource = new ResourceFactory().newResource("/foo")
-                                                 .withLink("/bar", "bar foo");
+        Representation resource = new RepresentationFactory().newResource("/foo")
+                                                 .withLink("bar foo", "/bar");
 
         resource.getLinkByRel(null);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testRelLookupsWithEmptyRelFail() {
-        Resource resource = new ResourceFactory().newResource("/foo")
-                                                 .withLink("/bar", "bar foo");
+        Representation resource = new RepresentationFactory().newResource("/foo")
+                                                 .withLink("bar", "/bar");
 
         resource.getLinkByRel("");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testRelLookupsWithSpacesFail() {
-        Resource resource = new ResourceFactory().newResource("/foo")
-                                                 .withLink("/bar", "bar foo");
+        Representation resource = new RepresentationFactory().newResource("/foo")
+                                                 .withLink("bar", "/bar");
 
         resource.getLinkByRel("test fail");
     }

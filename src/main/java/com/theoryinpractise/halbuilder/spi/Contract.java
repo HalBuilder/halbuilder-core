@@ -1,7 +1,7 @@
 package com.theoryinpractise.halbuilder.spi;
 
 /**
- * A Contract is used to assert that a given ReadableResource conforms
+ * A Contract is used to assert that a given ReadableRepresentation conforms
  * to a specific set of requirements.
  *
  * Implementing this interface allows an object to assert the validatity of a resources
@@ -11,9 +11,9 @@ package com.theoryinpractise.halbuilder.spi;
 public interface Contract {
 
     /**
-     * Returns whether the resource is satisfied by this contract.
-     * @param resource The resource needing satisfaction
+     * Returns whether the representation is satisfied by this contract.
+     * @param representation The representation needing satisfaction
      * @return A boolean.
      */
-    boolean isSatisfiedBy(ReadableResource resource);
+    boolean isSatisfiedBy(ReadableRepresentation representation);
 }

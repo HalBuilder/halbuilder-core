@@ -1,7 +1,7 @@
 package com.theoryinpractise.halbuilder.spi;
 
 import com.google.common.base.Optional;
-import com.theoryinpractise.halbuilder.ResourceFactory;
+import com.theoryinpractise.halbuilder.RepresentationFactory;
 import java.util.regex.Pattern;
 
 /**
@@ -10,8 +10,8 @@ import java.util.regex.Pattern;
 public class Link {
     /** Pattern that will hit an RFC 6570 URI template. */
     private static final Pattern URI_TEMPLATE_PATTERN = Pattern.compile("\\{.+\\}");
-    
-    private ResourceFactory resourceFactory;
+
+    private RepresentationFactory representationFactory;
 
     private String href;
     private String rel;
@@ -20,8 +20,8 @@ public class Link {
     private Optional<String> hreflang = Optional.absent();
     private boolean hasTemplate = false;
 
-    public Link(ResourceFactory resourceFactory, String href, String rel) {
-        this.resourceFactory = resourceFactory;
+    public Link(RepresentationFactory representationFactory, String href, String rel) {
+        this.representationFactory = representationFactory;
         this.href = href;
         this.rel = rel;
         if(hasTemplate(href)) {
@@ -29,8 +29,8 @@ public class Link {
         }
     }
 
-    public Link(ResourceFactory resourceFactory, String href, String rel, Optional<String> name, Optional<String> title, Optional<String> hreflang) {
-        this(resourceFactory, href, rel);
+    public Link(RepresentationFactory representationFactory, String href, String rel, Optional<String> name, Optional<String> title, Optional<String> hreflang) {
+        this(representationFactory, href, rel);
         this.name = name;
         this.title = title;
         this.hreflang = hreflang;
@@ -55,11 +55,11 @@ public class Link {
     public Optional<String> getHreflang() {
         return hreflang;
     }
-    
+
     public boolean hasTemplate() {
         return hasTemplate;
     }
-    
+
     /**
      * Determine whether the argument href contains at least one URI template,
      * as defined in RFC 6570.
@@ -73,7 +73,7 @@ public class Link {
         }
         return URI_TEMPLATE_PATTERN.matcher(href).find();
     }
-    
+
     @Override
     public int hashCode() {
         int h = href.hashCode();
@@ -83,7 +83,7 @@ public class Link {
         h += hreflang.hashCode();
         return h;
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {

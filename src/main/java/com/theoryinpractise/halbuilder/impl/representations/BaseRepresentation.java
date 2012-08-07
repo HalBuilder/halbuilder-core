@@ -1,28 +1,31 @@
-package com.theoryinpractise.halbuilder.impl.resources;
+package com.theoryinpractise.halbuilder.impl.representations;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Table;
-import com.theoryinpractise.halbuilder.ResourceFactory;
+import com.theoryinpractise.halbuilder.RepresentationFactory;
 import com.theoryinpractise.halbuilder.impl.api.Support;
 import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceContract;
 import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceRenderer;
 import com.theoryinpractise.halbuilder.spi.Contract;
 import com.theoryinpractise.halbuilder.spi.Link;
-import com.theoryinpractise.halbuilder.spi.ReadableResource;
+import com.theoryinpractise.halbuilder.spi.ReadableRepresentation;
 import com.theoryinpractise.halbuilder.spi.Renderer;
-import com.theoryinpractise.halbuilder.spi.Resource;
-import com.theoryinpractise.halbuilder.spi.ResourceException;
+import com.theoryinpractise.halbuilder.spi.Representation;
+import com.theoryinpractise.halbuilder.spi.RepresentationException;
 
 import javax.annotation.Nullable;
 import java.io.StringWriter;
@@ -41,10 +44,9 @@ import static com.google.common.base.Strings.emptyToNull;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Ordering.usingToString;
 import static com.theoryinpractise.halbuilder.impl.api.Support.WHITESPACE_SPLITTER;
-import static com.theoryinpractise.halbuilder.impl.resources.LinkPredicate.newLinkPredicate;
 import static java.lang.String.format;
 
-public abstract class BaseResource implements ReadableResource {
+public abstract class BaseRepresentation implements ReadableRepresentation {
 
     public static final Ordering<Link> RELATABLE_ORDERING = Ordering.from(new Comparator<Link>() {
         public int compare(Link l1, Link l2) {
@@ -57,21 +59,18 @@ public abstract class BaseResource implements ReadableResource {
     protected Map<String, String> namespaces = Maps.newTreeMap(usingToString());
     protected List<Link> links = Lists.newArrayList();
     protected Map<String, Optional<Object>> properties = Maps.newTreeMap(usingToString());
-    protected List<Resource> resources = Lists.newArrayList();
-    protected ResourceFactory resourceFactory;
+    protected Multimap<String,ReadableRepresentation> resources = ArrayListMultimap.create();
+
+    protected RepresentationFactory representationFactory;
     protected final Pattern resolvableUri = Pattern.compile("^[/|?|~].*");
     protected boolean hasNullProperties = false;
 
-    protected BaseResource(ResourceFactory resourceFactory) {
-        this.resourceFactory = resourceFactory;
+    protected BaseRepresentation(RepresentationFactory representationFactory) {
+        this.representationFactory = representationFactory;
     }
 
-    public Link getResourceLink() {
-        try {
-            return Iterables.find(getLinks(), newLinkPredicate(Support.SELF));
-        } catch (NoSuchElementException e) {
-            throw new IllegalStateException("Resources MUST have a self link.");
-        }
+    public Optional<Link> getResourceLink() {
+        return Iterables.tryFind(getLinks(), LinkPredicate.newLinkPredicate(Support.SELF));
     }
 
     public Map<String, String> getNamespaces() {
@@ -95,27 +94,23 @@ public abstract class BaseResource implements ReadableResource {
         final ImmutableList.Builder<Link> linkBuilder = ImmutableList.builder();
 
         linkBuilder.addAll(getLinksByRel(this, curiedRel));
-        for (Resource resource : resources) {
+        // TODO Should this check descendants? Should maybe be an overloaded method with a boolean check
+        for (ReadableRepresentation resource : resources.values()) {
             linkBuilder.addAll(getLinksByRel(resource, curiedRel));
         }
 
         return linkBuilder.build();
     }
 
-    public List<? extends ReadableResource> getResourcesByRel(final String rel) {
-        Preconditions.checkArgument(rel != null, "Provided rel should not be null.");
-        Preconditions.checkArgument(!"".equals(rel) && !rel.contains(" "), "Provided rel should not be empty or contain spaces.");
+    public List<? extends ReadableRepresentation> getResourcesByRel(final String rel) {
+        Support.checkRelType(rel);
 
-        return getResources(new Predicate<Resource>() {
-            public boolean apply(@Nullable Resource resource) {
-                return Iterables.contains(WHITESPACE_SPLITTER.split(resource.getResourceLink().getRel()), rel);
-            }
-        });
+        return ImmutableList.copyOf(resources.get(rel));
     }
 
-    public List<? extends ReadableResource> getResources(Predicate<Resource> predicate) {
+    public List<? extends ReadableRepresentation> getResources(Predicate<ReadableRepresentation> predicate) {
         Preconditions.checkArgument(predicate != null, "Provided findPredicate should not be null.");
-        return ImmutableList.copyOf(Iterables.filter(resources, predicate));
+        return ImmutableList.copyOf(Iterables.filter(resources.values(), predicate));
     }
 
     public Optional<Object> get(String name) {
@@ -139,8 +134,9 @@ public abstract class BaseResource implements ReadableResource {
         }
     }
 
-    private List<Link> getLinksByRel(ReadableResource resource, final String curiedRel) {
-        return ImmutableList.copyOf(Iterables.filter(resource.getLinks(), new Predicate<Link>() {
+    private List<Link> getLinksByRel(ReadableRepresentation representation, final String curiedRel) {
+        Support.checkRelType(curiedRel);
+        return ImmutableList.copyOf(Iterables.filter(representation.getLinks(), new Predicate<Link>() {
             public boolean apply(@Nullable Link relatable) {
                 return Iterables.contains(WHITESPACE_SPLITTER.split(relatable.getRel()), curiedRel);
             }
@@ -193,7 +189,7 @@ public abstract class BaseResource implements ReadableResource {
 
             String curiedHref = currieHref(href);
 
-            collatedLinks.add(new Link(resourceFactory, curiedHref, rels,
+            collatedLinks.add(new Link(representationFactory, curiedHref, rels,
                                               fromNullable(emptyToNull(names)),
                                               fromNullable(emptyToNull(titles)),
                                               fromNullable(emptyToNull(hreflangs))));
@@ -217,16 +213,17 @@ public abstract class BaseResource implements ReadableResource {
         return ImmutableMap.copyOf(properties);
     }
 
-    public List<Resource> getResources() {
-        return ImmutableList.copyOf(resources);
+    public Multimap<String, ReadableRepresentation> getResources() {
+        return ImmutableMultimap.copyOf(resources);
     }
 
-    protected  void validateNamespaces(ReadableResource resource) {
-        for (Link link : resource.getCanonicalLinks()) {
+    protected  void validateNamespaces(ReadableRepresentation representation) {
+        for (Link link : representation.getCanonicalLinks()) {
             validateNamespaces(link.getRel());
         }
-        for (Resource aResource : resource.getResources()) {
-            validateNamespaces(aResource);
+        for (Map.Entry<String, ReadableRepresentation> aResource : representation.getResources().entries()) {
+            validateNamespaces(aResource.getKey());
+            validateNamespaces(aResource.getValue());
         }
     }
 
@@ -235,17 +232,17 @@ public abstract class BaseResource implements ReadableResource {
             if (!rel.contains("://") && rel.contains(":")) {
                 String[] relPart = rel.split(":");
                 if (!namespaces.keySet().contains(relPart[0])) {
-                    throw new ResourceException(format("Undeclared namespace in rel %s for resource", rel));
+                    throw new RepresentationException(format("Undeclared namespace in rel %s for resource", rel));
                 }
             }
         }
     }
 
     /**
-     * Test whether the Resource in its current state satisfies the provided interface.
+     * Test whether the Representation in its current state satisfies the provided interface.
      *
      * @param anInterface The interface we wish to check
-     * @return Is that Resource structurally like the interface?
+     * @return Is that Representation structurally like the interface?
      */
     public boolean isSatisfiedBy(Contract contract) {
         return contract.isSatisfiedBy(this);
@@ -262,7 +259,11 @@ public abstract class BaseResource implements ReadableResource {
     }
 
     public String resolveRelativeHref(String href) {
-        return resolveRelativeHref(getResourceLink().getHref(), href);
+        if (getResourceLink().isPresent()) {
+            return resolveRelativeHref(getResourceLink().get().getHref(), href);
+        } else {
+            throw new IllegalStateException("Unable to resolve relative href with missing resource href.");
+        }
     }
 
     protected String resolveRelativeHref(final String baseHref, String href) {
@@ -280,7 +281,7 @@ public abstract class BaseResource implements ReadableResource {
                 return new URL(new URL(baseHref), href).toExternalForm();
             }
         } catch (MalformedURLException e) {
-            throw new ResourceException(e.getMessage());
+            throw new RepresentationException(e.getMessage());
         }
 
     }
@@ -289,13 +290,13 @@ public abstract class BaseResource implements ReadableResource {
         return hasNullProperties;
     }
 
-    public ImmutableResource toImmutableResource() {
-        return new ImmutableResource(resourceFactory, getNamespaces(), getCanonicalLinks(), getProperties(), getResources(), hasNullProperties);
+    public ImmutableRepresentation toImmutableResource() {
+        return new ImmutableRepresentation(representationFactory, getNamespaces(), getCanonicalLinks(), getProperties(), getResources(), hasNullProperties);
     }
 
 
     /**
-     * Renders the current Resource as a proxy to the provider interface
+     * Renders the current Representation as a proxy to the provider interface
      *
      * @param anInterface The interface we wish to proxy the resource as
      * @return A Guava Optional of the rendered class, this will be absent if the interface doesn't satisfy the interface
@@ -309,11 +310,11 @@ public abstract class BaseResource implements ReadableResource {
     }
 
     public String renderContent(String contentType) {
-        Renderer<String> renderer = resourceFactory.lookupRenderer(contentType);
+        Renderer<String> renderer = representationFactory.lookupRenderer(contentType);
         return renderAsString(renderer);
     }
 
-    public <T> Optional<T> resolveClass(Function<ReadableResource, Optional<T>> resolver) {
+    public <T> Optional<T> resolveClass(Function<ReadableRepresentation, Optional<T>> resolver) {
         return resolver.apply(this);
     }
 
@@ -341,10 +342,10 @@ public abstract class BaseResource implements ReadableResource {
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof BaseResource)) {
+        if (!(obj instanceof BaseRepresentation)) {
             return false;
         }
-        BaseResource that = (BaseResource) obj;
+        BaseRepresentation that = (BaseRepresentation) obj;
         boolean e = this.namespaces.equals(that.namespaces);
         e &= this.links.equals(that.links);
         e &= this.properties.equals(that.properties);
@@ -356,9 +357,9 @@ public abstract class BaseResource implements ReadableResource {
     public String toString() {
         Optional<Link> href = getLinkByRel("self");
         if (href.isPresent()) {
-            return "<Resource: " + href.get().getHref() + ">";
+            return "<Representation: " + href.get().getHref() + ">";
         } else {
-            return "<Resource: @" +  Integer.toHexString(hashCode()) + ">";
+            return "<Representation: @" +  Integer.toHexString(hashCode()) + ">";
         }
     }
 
