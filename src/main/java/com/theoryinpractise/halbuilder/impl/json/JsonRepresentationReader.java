@@ -14,13 +14,7 @@ import java.io.Reader;
 import java.util.Iterator;
 import java.util.Map;
 
-import static com.theoryinpractise.halbuilder.impl.api.Support.CURIE;
-import static com.theoryinpractise.halbuilder.impl.api.Support.EMBEDDED;
-import static com.theoryinpractise.halbuilder.impl.api.Support.HREF;
-import static com.theoryinpractise.halbuilder.impl.api.Support.HREFLANG;
-import static com.theoryinpractise.halbuilder.impl.api.Support.LINKS;
-import static com.theoryinpractise.halbuilder.impl.api.Support.NAME;
-import static com.theoryinpractise.halbuilder.impl.api.Support.TITLE;
+import static com.theoryinpractise.halbuilder.impl.api.Support.*;
 
 public class JsonRepresentationReader implements RepresentationReader {
     private RepresentationFactory representationFactory;
@@ -101,7 +95,7 @@ public class JsonRepresentationReader implements RepresentationReader {
         Optional<String> hreflang = optionalNodeValueAsText(valueNode, HREFLANG);
         Optional<Predicate<ReadableRepresentation>> predicate = Optional.<Predicate<ReadableRepresentation>>absent();
 
-        resource.withLink(rel, href, predicate, name, title, hreflang );
+        resource.withLink(rel, href, predicate, name, title, hreflang);
     }
 
     Optional<String> optionalNodeValueAsText(JsonNode node, String key) {
@@ -131,10 +125,10 @@ public class JsonRepresentationReader implements RepresentationReader {
                     Iterator<JsonNode> values = keyNode.getValue().elements();
                     while (values.hasNext()) {
                         JsonNode valueNode = values.next();
-                        resource.withSubresource(keyNode.getKey(), readResource(valueNode));
+                        resource.withRepresentation(keyNode.getKey(), readResource(valueNode));
                     }
                 } else {
-                    resource.withSubresource(keyNode.getKey(), readResource(keyNode.getValue()));
+                    resource.withRepresentation(keyNode.getKey(), readResource(keyNode.getValue()));
                 }
 
             }

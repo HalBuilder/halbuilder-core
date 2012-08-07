@@ -12,11 +12,7 @@ import com.theoryinpractise.halbuilder.impl.json.JsonRepresentationReader;
 import com.theoryinpractise.halbuilder.impl.representations.MutableRepresentation;
 import com.theoryinpractise.halbuilder.impl.xml.XmlRenderer;
 import com.theoryinpractise.halbuilder.impl.xml.XmlRepresentationReader;
-import com.theoryinpractise.halbuilder.spi.Link;
-import com.theoryinpractise.halbuilder.spi.ReadableRepresentation;
-import com.theoryinpractise.halbuilder.spi.Renderer;
-import com.theoryinpractise.halbuilder.spi.Representation;
-import com.theoryinpractise.halbuilder.spi.RepresentationException;
+import com.theoryinpractise.halbuilder.spi.*;
 
 import java.io.BufferedReader;
 import java.io.Reader;
@@ -33,7 +29,7 @@ public class RepresentationFactory {
     public static final String HAL_JSON = "application/hal+json";
 
     private Map<ContentType, Class<? extends Renderer>> contentRenderers = Maps.newHashMap();
-    private Map<ContentType, Class<? extends RepresentationReader>> resourceReaders = Maps.newHashMap();
+    private Map<ContentType, Class<? extends RepresentationReader>> representationReaders = Maps.newHashMap();
     private TreeMap<String, String> namespaces = Maps.newTreeMap(Ordering.usingToString());
     private List<Link> links = Lists.newArrayList();
     private String baseHref;
@@ -50,8 +46,8 @@ public class RepresentationFactory {
         this.baseHref = baseHref;
         this.contentRenderers.put(new ContentType(HAL_XML), XmlRenderer.class);
         this.contentRenderers.put(new ContentType(HAL_JSON), JsonRenderer.class);
-        this.resourceReaders.put(new ContentType(HAL_XML), XmlRepresentationReader.class);
-        this.resourceReaders.put(new ContentType(HAL_JSON), JsonRepresentationReader.class);
+        this.representationReaders.put(new ContentType(HAL_XML), XmlRepresentationReader.class);
+        this.representationReaders.put(new ContentType(HAL_JSON), JsonRepresentationReader.class);
     }
 
     public String getBaseHref() {
@@ -64,7 +60,7 @@ public class RepresentationFactory {
     }
 
     public RepresentationFactory withReader(String contentType, Class<? extends RepresentationReader> readerClass) {
-        resourceReaders.put(new ContentType(contentType), readerClass);
+        representationReaders.put(new ContentType(contentType), readerClass);
         return this;
     }
 
@@ -81,48 +77,48 @@ public class RepresentationFactory {
         return this;
     }
 
-    public Representation newResource(URI uri) {
-        return newResource(uri.toASCIIString());
+    public Representation newRepresentation(URI uri) {
+        return newRepresentation(uri.toASCIIString());
     }
 
-    public Representation newResource() {
-        return newResource((String) null);
+    public Representation newRepresentation() {
+        return newRepresentation((String) null);
     }
 
-    public Representation newResource(String href) {
-        MutableRepresentation resource = new MutableRepresentation(this, href);
+    public Representation newRepresentation(String href) {
+        MutableRepresentation representation = new MutableRepresentation(this, href);
 
         // Add factory standard namespaces
         for (Map.Entry<String, String> entry : namespaces.entrySet()) {
-            resource.withNamespace(entry.getKey(), entry.getValue());
+            representation.withNamespace(entry.getKey(), entry.getValue());
         }
 
         // Add factory standard links
         for (Link link : links) {
-            resource.withLink(link.getRel(), link.getHref(),
-                              Optional.<Predicate<ReadableRepresentation>>absent(), link.getName(), link.getTitle(), link.getHreflang());
+            representation.withLink(link.getRel(), link.getHref(),
+                    Optional.<Predicate<ReadableRepresentation>>absent(), link.getName(), link.getTitle(), link.getHreflang());
         }
 
-        return resource;
+        return representation;
     }
 
-    public ReadableRepresentation readResource(Reader reader) {
+    public ReadableRepresentation readRepresentation(Reader reader) {
         try {
-            Reader bufferedReader =  new BufferedReader(reader);
+            Reader bufferedReader = new BufferedReader(reader);
             bufferedReader.mark(1);
             char firstChar = (char) bufferedReader.read();
             bufferedReader.reset();
 
             Class<? extends RepresentationReader> readerClass;
             switch (firstChar) {
-            case '{':
-                readerClass = resourceReaders.get(new ContentType(HAL_JSON));
-                break;
-            case '<':
-                readerClass = resourceReaders.get(new ContentType(HAL_XML));
-                break;
-            default:
-                throw new RepresentationException("unrecognized initial character in stream: " + firstChar);
+                case '{':
+                    readerClass = representationReaders.get(new ContentType(HAL_JSON));
+                    break;
+                case '<':
+                    readerClass = representationReaders.get(new ContentType(HAL_XML));
+                    break;
+                default:
+                    throw new RepresentationException("unrecognized initial character in stream: " + firstChar);
             }
             Constructor<? extends RepresentationReader> readerConstructor = readerClass.getConstructor(RepresentationFactory.class);
             return readerConstructor.newInstance(this).read(bufferedReader);

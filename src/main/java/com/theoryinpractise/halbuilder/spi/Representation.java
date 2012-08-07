@@ -27,12 +27,12 @@ public interface Representation extends ReadableRepresentation {
 
     Representation withSerializable(Serializable serializable);
 
-    Representation withFieldBasedSubresource(String rel, String href, Object o);
+    Representation withFieldBasedRepresentation(String rel, String href, Object o);
 
-    Representation withBeanBasedSubresource(String rel, String href, Object o);
+    Representation withBeanBasedRepresentation(String rel, String href, Object o);
 
     Representation withNamespace(String namespace, String href);
 
-    Representation withSubresource(String rel, ReadableRepresentation resource);
+    Representation withRepresentation(String rel, ReadableRepresentation resource);
 
 }

@@ -89,19 +89,19 @@ public class RenderingTest {
 
     private Representation newBaseResource(final Representation resource) {
         return resource.withLink("ns:parent", "/api/customer/1234",
-                                 Optional.<Predicate<ReadableRepresentation>>absent(),
-                                 Optional.of("bob"),
-                                 Optional.of("The Parent"),
-                                 Optional.of("en"));
+                Optional.<Predicate<ReadableRepresentation>>absent(),
+                Optional.of("bob"),
+                Optional.of("The Parent"),
+                Optional.of("en"));
     }
 
     private Representation newBaseResource(final URI uri) {
-        return newBaseResource(representationFactory.newResource(uri));
+        return newBaseResource(representationFactory.newRepresentation(uri));
 
     }
 
     private Representation newBaseResource(final String href) {
-        return newBaseResource(representationFactory.newResource(href));
+        return newBaseResource(representationFactory.newRepresentation(href));
     }
 
     @Test
@@ -110,7 +110,7 @@ public class RenderingTest {
         RepresentationFactory representationFactory = new RepresentationFactory("https://example.com/api/")
                 .withLink("/home", "home");
 
-        Representation resource = representationFactory.newResource("/");
+        Representation resource = representationFactory.newRepresentation("/");
 
         assertThat(resource.getCanonicalLinks()).hasSize(2);
         assertThat(resource.getLinksByRel("home")).hasSize(1);
@@ -148,7 +148,7 @@ public class RenderingTest {
     @Test
     public void testResourcesWithoutHref() {
 
-        ReadableRepresentation party = new RepresentationFactory().newResource()
+        ReadableRepresentation party = new RepresentationFactory().newRepresentation()
                 .withProperty("name", "Example Resource");
 
         assertThat(party.getResourceLink().isPresent()).isFalse();
@@ -224,8 +224,8 @@ public class RenderingTest {
 
         ReadableRepresentation party = newBaseResource("customer/123456")
                 .withLink("ns:users", "?users")
-                .withSubresource("ns:user", representationFactory
-                        .newResource("/user/11")
+                .withRepresentation("ns:user", representationFactory
+                        .newRepresentation("/user/11")
                         .withProperty("id", 11)
                         .withProperty("name", "Example User")
                         .withProperty("expired", false)
@@ -242,8 +242,8 @@ public class RenderingTest {
 
         ReadableRepresentation party = newBaseResource("customer/123456")
                 .withLink("ns:users", "?users")
-                .withSubresource("ns:user", representationFactory
-                        .newResource("/user/11")
+                .withRepresentation("ns:user", representationFactory
+                        .newRepresentation("/user/11")
                         .withLink("role:admin", "/user/11")
                         .withProperty("id", 11)
                         .withProperty("name", "Example User")
@@ -261,7 +261,7 @@ public class RenderingTest {
 
         ReadableRepresentation party = newBaseResource("customer/123456")
                 .withLink("ns:users", "?users")
-                .withBeanBasedSubresource("ns:user", "/user/11", new Customer(11, "Example User", 32));
+                .withBeanBasedRepresentation("ns:user", "/user/11", new Customer(11, "Example User", 32));
 
         assertThat(party.renderContent(RepresentationFactory.HAL_XML)).isEqualTo(exampleWithSubresourceXml);
         assertThat(party.renderContent(RepresentationFactory.HAL_JSON)).isEqualTo(exampleWithSubresourceJson);
@@ -273,8 +273,8 @@ public class RenderingTest {
 
         ReadableRepresentation party = newBaseResource("customer/123456")
                 .withLink("ns:users", "?users")
-                .withBeanBasedSubresource("ns:user", "/user/11", new Customer(11, "Example User", 32))
-                .withBeanBasedSubresource("ns:user", "/user/12", new Customer(12, "Example User", 32));
+                .withBeanBasedRepresentation("ns:user", "/user/11", new Customer(11, "Example User", 32))
+                .withBeanBasedRepresentation("ns:user", "/user/12", new Customer(12, "Example User", 32));
 
         assertThat(party.renderContent(RepresentationFactory.HAL_XML)).isEqualTo(exampleWithMultipleSubresourcesXml);
         assertThat(party.renderContent(RepresentationFactory.HAL_JSON)).isEqualTo(exampleWithMultipleSubresourcesJson);
@@ -350,11 +350,11 @@ public class RenderingTest {
         ReadableRepresentation party = newBaseResource("customer/123456")
                 .withNamespace("phone", "https://example.com/apidocs/phones")
                 .withLink("ns:users", "?users")
-                .withBeanBasedSubresource("ns:user", "/user/11", new Customer(11, "Example User", 32))
-                .withBeanBasedSubresource("ns:user", "/user/12", new Customer(12, "Example User", 32));
+                .withBeanBasedRepresentation("ns:user", "/user/11", new Customer(11, "Example User", 32))
+                .withBeanBasedRepresentation("ns:user", "/user/12", new Customer(12, "Example User", 32));
 
         MutableRepresentation mutableRepresentation = (MutableRepresentation) Iterables.getFirst(party.getResources().values(), null);
-        mutableRepresentation.withBeanBasedSubresource("phone:cell", "/phone/1", new Phone(1, "555-666-7890"));
+        mutableRepresentation.withBeanBasedRepresentation("phone:cell", "/phone/1", new Phone(1, "555-666-7890"));
 
         assertThat(party.renderContent(RepresentationFactory.HAL_XML)).isEqualTo(exampleWithMultipleNestedSubresourcesXml);
         assertThat(party.renderContent(RepresentationFactory.HAL_JSON)).isEqualTo(exampleWithMultipleNestedSubresourcesJson);

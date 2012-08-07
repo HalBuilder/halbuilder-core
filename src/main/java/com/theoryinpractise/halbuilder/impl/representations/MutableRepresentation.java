@@ -1,16 +1,11 @@
 package com.theoryinpractise.halbuilder.impl.representations;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.theoryinpractise.halbuilder.RepresentationFactory;
 import com.theoryinpractise.halbuilder.impl.api.Support;
-import com.theoryinpractise.halbuilder.spi.Link;
-import com.theoryinpractise.halbuilder.spi.ReadableRepresentation;
-import com.theoryinpractise.halbuilder.spi.Representation;
-import com.theoryinpractise.halbuilder.spi.RepresentationException;
-import com.theoryinpractise.halbuilder.spi.Serializable;
+import com.theoryinpractise.halbuilder.spi.*;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -46,7 +41,7 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
      */
     public MutableRepresentation withLink(String rel, String href) {
         withLink(rel, href,
-                 Optional.of(Predicates.<ReadableRepresentation>alwaysTrue()),
+                Optional.of(Predicates.<ReadableRepresentation>alwaysTrue()),
                 Optional.<String>absent(),
                 Optional.<String>absent(),
                 Optional.<String>absent());
@@ -62,7 +57,7 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
      * @return
      */
     public MutableRepresentation withLink(String rel, URI uri) {
-    	return withLink(rel, uri.toASCIIString());
+        return withLink(rel, uri.toASCIIString());
     }
 
     /**
@@ -74,7 +69,7 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
      */
     public MutableRepresentation withLink(String rel, String href, Predicate<ReadableRepresentation> predicate) {
         withLink(rel, href,
-                 Optional.of(predicate),
+                Optional.of(predicate),
                 Optional.<String>absent(),
                 Optional.<String>absent(),
                 Optional.<String>absent());
@@ -90,17 +85,17 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
      * @return
      */
     public MutableRepresentation withLink(String rel, URI uri, Predicate<ReadableRepresentation> predicate) {
-    	return withLink(rel, uri.toASCIIString(), predicate);
+        return withLink(rel, uri.toASCIIString(), predicate);
     }
 
-	/**
-	 * Add a link to this resource
-	 *
+    /**
+     * Add a link to this resource
+     *
      * @param rel
      * @param href The target href for the link, relative to the href of this resource.
      * @return
-	 */
-	public MutableRepresentation withLink(String rel, String href, Optional<Predicate<ReadableRepresentation>> predicate, Optional<String> name, Optional<String> title, Optional<String> hreflang) {
+     */
+    public MutableRepresentation withLink(String rel, String href, Optional<Predicate<ReadableRepresentation>> predicate, Optional<String> name, Optional<String> title, Optional<String> hreflang) {
 
         Support.checkRelType(rel);
 
@@ -115,17 +110,17 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
         return this;
     }
 
-	/**
-	 * Add a link to this resource
-	 *
+    /**
+     * Add a link to this resource
+     *
      * @param rel
      * @param uri The target URI for the link, possibly relative to the href of
      *            this resource.
      * @return
-	 */
-	public MutableRepresentation withLink(String rel, URI uri, Optional<Predicate<ReadableRepresentation>> predicate, Optional<String> name, Optional<String> title, Optional<String> hreflang) {
-		return withLink(rel, uri.toASCIIString(), predicate, name, title, hreflang);
-	}
+     */
+    public MutableRepresentation withLink(String rel, URI uri, Optional<Predicate<ReadableRepresentation>> predicate, Optional<String> name, Optional<String> title, Optional<String> hreflang) {
+        return withLink(rel, uri.toASCIIString(), predicate, name, title, hreflang);
+    }
 
     public Representation withProperty(String name, Object value) {
         if (properties.containsKey(name)) {
@@ -176,18 +171,19 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
         return this;
     }
 
-    public Representation withFieldBasedSubresource(String rel, String href, Object o) {
-        return withSubresource(rel, representationFactory.newResource(href).withFields(o));
+    public Representation withFieldBasedRepresentation(String rel, String href, Object o) {
+        return withRepresentation(rel, representationFactory.newRepresentation(href).withFields(o));
     }
 
-    public Representation withBeanBasedSubresource(String rel, String href, Object o) {
-        return withSubresource(rel, representationFactory.newResource(href).withBean(o));
+    public Representation withBeanBasedRepresentation(String rel, String href, Object o) {
+        return withRepresentation(rel, representationFactory.newRepresentation(href).withBean(o));
     }
 
     /**
      * Adds a new namespace
+     *
      * @param namespace
-     * @param href The target href of the namespace being added. This may be relative to the resourceFactories baseref
+     * @param href      The target href of the namespace being added. This may be relative to the resourceFactories baseref
      * @return
      */
     public Representation withNamespace(String namespace, String href) {
@@ -198,11 +194,11 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
         return this;
     }
 
-    public MutableRepresentation withSubresource(String rel, ReadableRepresentation resource) {
+    public MutableRepresentation withRepresentation(String rel, ReadableRepresentation resource) {
         Support.checkRelType(rel);
         resources.put(rel, resource);
         // Propagate null property flag to parent.
-        if(resource.hasNullProperties()) {
+        if (resource.hasNullProperties()) {
             hasNullProperties = true;
         }
         return this;

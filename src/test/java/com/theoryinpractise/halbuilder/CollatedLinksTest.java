@@ -15,9 +15,9 @@ public class CollatedLinksTest {
     @Test
     public void testCollatedLinks() {
 
-        Representation resource = new RepresentationFactory().newResource("/foo")
-                                                 .withLink("bar", "/bar")
-                                                 .withLink("foo", "/bar");
+        Representation resource = new RepresentationFactory().newRepresentation("/foo")
+                .withLink("bar", "/bar")
+                .withLink("foo", "/bar");
 
         List<Link> collatedLinks = resource.getLinks();
 
@@ -35,7 +35,7 @@ public class CollatedLinksTest {
     @Test
     public void testSpacedRelsSeparateLinks() {
 
-        Representation representation = new RepresentationFactory().newResource("/foo");
+        Representation representation = new RepresentationFactory().newRepresentation("/foo");
 
         try {
             Representation resource = representation.withLink("bar foo", "/bar");
@@ -49,7 +49,7 @@ public class CollatedLinksTest {
     @Test
     public void testMultiSpacedRelsSeparateLinks() {
 
-        Representation representation = new RepresentationFactory().newResource("/foo");
+        Representation representation = new RepresentationFactory().newRepresentation("/foo");
         try {
             Representation resource = representation.withLink("bar                  foo", "/bar");
             fail("We should fail to add a space separated link rel.");
@@ -61,24 +61,24 @@ public class CollatedLinksTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testRelLookupsWithNullFail() {
-        Representation resource = new RepresentationFactory().newResource("/foo")
-                                                 .withLink("bar foo", "/bar");
+        Representation resource = new RepresentationFactory().newRepresentation("/foo")
+                .withLink("bar foo", "/bar");
 
         resource.getLinkByRel(null);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testRelLookupsWithEmptyRelFail() {
-        Representation resource = new RepresentationFactory().newResource("/foo")
-                                                 .withLink("bar", "/bar");
+        Representation resource = new RepresentationFactory().newRepresentation("/foo")
+                .withLink("bar", "/bar");
 
         resource.getLinkByRel("");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testRelLookupsWithSpacesFail() {
-        Representation resource = new RepresentationFactory().newResource("/foo")
-                                                 .withLink("bar", "/bar");
+        Representation resource = new RepresentationFactory().newRepresentation("/foo")
+                .withLink("bar", "/bar");
 
         resource.getLinkByRel("test fail");
     }
@@ -95,7 +95,9 @@ public class CollatedLinksTest {
         public boolean matches(List<?> objects) {
             for (Object object : objects) {
                 Link link = (Link) object;
-                if (link.getRel().equals(rel)) return true;
+                if (link.getRel().equals(rel)) {
+                    return true;
+                }
             }
             return false;
         }

@@ -18,10 +18,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.List;
 
-import static com.theoryinpractise.halbuilder.impl.api.Support.HREFLANG;
-import static com.theoryinpractise.halbuilder.impl.api.Support.NAME;
-import static com.theoryinpractise.halbuilder.impl.api.Support.TITLE;
-import static com.theoryinpractise.halbuilder.impl.api.Support.XSI_NAMESPACE;
+import static com.theoryinpractise.halbuilder.impl.api.Support.*;
 
 public class XmlRepresentationReader implements RepresentationReader {
     private RepresentationFactory representationFactory;
@@ -89,10 +86,10 @@ public class XmlRepresentationReader implements RepresentationReader {
                 if (property.getAttribute("nil", XSI_NAMESPACE) != null) {
                     resource.withProperty(property.getName(), null);
                 } else {
-                resource.withProperty(property.getName(), property.getValue());
+                    resource.withProperty(property.getName(), property.getValue());
+                }
             }
         }
-    }
     }
 
     private void readResources(Representation halResource, Element element) {
@@ -100,7 +97,7 @@ public class XmlRepresentationReader implements RepresentationReader {
         for (Element resource : resources) {
             String rel = resource.getAttributeValue("rel");
             Representation subResource = readRepresentation(resource);
-            halResource.withSubresource(rel, subResource);
+            halResource.withRepresentation(rel, subResource);
         }
     }
 }

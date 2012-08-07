@@ -9,10 +9,10 @@ import static org.fest.assertions.api.Assertions.assertThat;
 public class CurrieOptimizationTest {
 
     RepresentationFactory representationFactory = new RepresentationFactory().withNamespace("app", "/api/applications/")
-                                                           .withNamespace("rel", "/api/rels/");
+            .withNamespace("rel", "/api/rels/");
 
-    Representation resource = representationFactory.newResource("/api/1")
-                                       .withLink("/api/rels/foo", "/api/applications/app/1");
+    Representation resource = representationFactory.newRepresentation("/api/1")
+            .withLink("/api/rels/foo", "/api/applications/app/1");
 
 
     @Test

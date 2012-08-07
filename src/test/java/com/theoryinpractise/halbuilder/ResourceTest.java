@@ -11,28 +11,28 @@ public class ResourceTest {
 
     @Test(expectedExceptions = RepresentationException.class)
     public void testUndeclaredLinkNamespace() {
-        representationFactory.newResource("/test")
+        representationFactory.newRepresentation("/test")
                 .withLink("td:test", "http://localhost/test/2")
                 .renderContent(RepresentationFactory.HAL_XML);
     }
 
     @Test(expectedExceptions = RepresentationException.class)
     public void testUndeclaredResourceNamespace() {
-        representationFactory.newResource("http://localhost/test")
-                .withSubresource("td:test", representationFactory.newResource("/"))
+        representationFactory.newRepresentation("http://localhost/test")
+                .withRepresentation("td:test", representationFactory.newRepresentation("/"))
                 .renderContent(RepresentationFactory.HAL_XML);
     }
 
     @Test(expectedExceptions = RepresentationException.class)
     public void testUndeclaredResourceLinkNamespace() {
-        representationFactory.newResource("http://localhost/test")
-                .withSubresource("test", representationFactory.newResource("/").withLink("td:test", "/"))
+        representationFactory.newRepresentation("http://localhost/test")
+                .withRepresentation("test", representationFactory.newRepresentation("/").withLink("td:test", "/"))
                 .renderContent(RepresentationFactory.HAL_XML);
     }
 
     @Test(expectedExceptions = RepresentationException.class)
     public void testDuplicatePropertyDefinitions() {
-        representationFactory.newResource("http://localhost/test")
+        representationFactory.newRepresentation("http://localhost/test")
                 .withProperty("name", "Example User")
                 .withProperty("name", "Example User")
                 .renderContent(RepresentationFactory.HAL_XML);
@@ -40,7 +40,7 @@ public class ResourceTest {
 
     @Test
     public void testHalResourceHrefShouldBeFullyQualified() {
-        String xml = representationFactory.newResource("/test")
+        String xml = representationFactory.newRepresentation("/test")
                 .renderContent(RepresentationFactory.HAL_XML);
 
         assertThat(xml).contains("http://localhost/test");
@@ -48,7 +48,7 @@ public class ResourceTest {
 
     @Test
     public void testRelativeLinksRenderFullyQualified() {
-        String xml = representationFactory.newResource("/")
+        String xml = representationFactory.newRepresentation("/")
                 .withLink("test", "/test")
                 .renderContent(RepresentationFactory.HAL_XML);
 
@@ -57,8 +57,8 @@ public class ResourceTest {
 
     @Test
     public void testRelativeResourceRenderFullyQualified() {
-        String xml = representationFactory.newResource("/")
-                .withSubresource("test", representationFactory.newResource("subresource"))
+        String xml = representationFactory.newRepresentation("/")
+                .withRepresentation("test", representationFactory.newRepresentation("subresource"))
                 .renderContent(RepresentationFactory.HAL_XML);
 
         assertThat(xml).contains("http://localhost/subresource");
@@ -66,9 +66,9 @@ public class ResourceTest {
 
     @Test
     public void testRelativeResourceLinksRenderFullyQualified() {
-        String xml = representationFactory.newResource("/")
-                .withSubresource("test", representationFactory
-                        .newResource("subresource/")
+        String xml = representationFactory.newRepresentation("/")
+                .withRepresentation("test", representationFactory
+                        .newRepresentation("subresource/")
                         .withLink("sub", "/sublink1")
                         .withLink("sub2", "~/sublink2"))
                 .renderContent(RepresentationFactory.HAL_XML);

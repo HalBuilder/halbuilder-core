@@ -18,33 +18,33 @@ public class ResourceReaderTest {
 
     @DataProvider
     public Object[][] provideResources() {
-        return new Object[][] {
-                {representationFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("example.xml")))},
-                {representationFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("example.json")))},
+        return new Object[][]{
+                {representationFactory.readRepresentation(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("example.xml")))},
+                {representationFactory.readRepresentation(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("example.json")))},
         };
     }
 
     @DataProvider
     public Object[][] provideResourcesWithNulls() {
-        return new Object[][] {
-                {representationFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("exampleWithNullProperty.xml")))},
-                {representationFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("exampleWithNullProperty.json")))},
+        return new Object[][]{
+                {representationFactory.readRepresentation(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("exampleWithNullProperty.xml")))},
+                {representationFactory.readRepresentation(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("exampleWithNullProperty.json")))},
         };
     }
 
     @DataProvider
     public Object[][] provideSubResources() {
-        return new Object[][] {
-                {representationFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("exampleWithSubresource.xml")))},
-                {representationFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("exampleWithSubresource.json")))},
+        return new Object[][]{
+                {representationFactory.readRepresentation(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("exampleWithSubresource.xml")))},
+                {representationFactory.readRepresentation(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("exampleWithSubresource.json")))},
         };
     }
 
     @DataProvider
     public Object[][] provideResourcesWithouHref() {
-        return new Object[][] {
-                {representationFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("exampleWithoutHref.xml")))},
-                {representationFactory.readResource(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("exampleWithoutHref.json")))},
+        return new Object[][]{
+                {representationFactory.readRepresentation(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("exampleWithoutHref.xml")))},
+                {representationFactory.readRepresentation(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("exampleWithoutHref.json")))},
         };
     }
 
@@ -97,12 +97,12 @@ public class ResourceReaderTest {
 
     @Test(expectedExceptions = RepresentationException.class)
     public void testUnknownFormat() {
-        representationFactory.readResource(new StringReader("!!!"));
+        representationFactory.readRepresentation(new StringReader("!!!"));
     }
 
     @Test(expectedExceptions = RepresentationException.class)
     public void testNullReader() {
-        representationFactory.readResource((Reader) null);
+        representationFactory.readRepresentation((Reader) null);
     }
 
 }

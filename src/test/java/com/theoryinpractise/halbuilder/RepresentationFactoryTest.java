@@ -15,7 +15,7 @@ public class RepresentationFactoryTest {
     public void testWithXmlReader() {
         RepresentationFactory representationFactory = new RepresentationFactory()
                 .withReader(RepresentationFactory.HAL_XML, DummyRepresentationReader.class);
-        ReadableRepresentation representation = representationFactory.readResource(new InputStreamReader(
+        ReadableRepresentation representation = representationFactory.readRepresentation(new InputStreamReader(
                 RepresentationFactoryTest.class.getResourceAsStream("example.xml")));
         assertThat(representation.getProperties().get("name").get()).isEqualTo("dummy");
     }
@@ -24,7 +24,7 @@ public class RepresentationFactoryTest {
     public void testWithJsonReader() {
         RepresentationFactory representationFactory = new RepresentationFactory()
                 .withReader(RepresentationFactory.HAL_JSON, DummyRepresentationReader.class);
-        ReadableRepresentation representation = representationFactory.readResource(new InputStreamReader(
+        ReadableRepresentation representation = representationFactory.readRepresentation(new InputStreamReader(
                 RepresentationFactoryTest.class.getResourceAsStream("example.json")));
         assertThat(representation.getProperties().get("name").get()).isEqualTo("dummy");
     }
@@ -37,7 +37,7 @@ public class RepresentationFactoryTest {
         }
 
         public ReadableRepresentation read(Reader source) {
-            return representationFactory.newResource("/dummy").withProperty("name", "dummy");
+            return representationFactory.newRepresentation("/dummy").withProperty("name", "dummy");
         }
     }
 }
