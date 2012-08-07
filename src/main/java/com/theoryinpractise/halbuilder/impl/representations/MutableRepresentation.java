@@ -198,7 +198,7 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
         return this;
     }
 
-    public MutableRepresentation withSubresource(String rel, Representation resource) {
+    public MutableRepresentation withSubresource(String rel, ReadableRepresentation resource) {
         Support.checkRelType(rel);
         resources.put(rel, resource);
         // Propagate null property flag to parent.

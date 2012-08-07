@@ -1,9 +1,9 @@
 package com.theoryinpractise.halbuilder.spi;
 
-import java.net.URI;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+
+import java.net.URI;
 
 public interface Representation extends ReadableRepresentation {
 
@@ -31,8 +31,8 @@ public interface Representation extends ReadableRepresentation {
 
     Representation withBeanBasedSubresource(String rel, String href, Object o);
 
-    Representation withNamespace(String namespace, String url);
+    Representation withNamespace(String namespace, String href);
 
-    Representation withSubresource(String rel, Representation resource);
+    Representation withSubresource(String rel, ReadableRepresentation resource);
 
 }

@@ -4,17 +4,13 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.google.common.base.Function;
-import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.theoryinpractise.halbuilder.spi.Link;
 import com.theoryinpractise.halbuilder.spi.ReadableRepresentation;
 import com.theoryinpractise.halbuilder.spi.Renderer;
-import com.theoryinpractise.halbuilder.spi.Representation;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -29,10 +25,8 @@ import static com.theoryinpractise.halbuilder.impl.api.Support.HREF;
 import static com.theoryinpractise.halbuilder.impl.api.Support.HREFLANG;
 import static com.theoryinpractise.halbuilder.impl.api.Support.LINKS;
 import static com.theoryinpractise.halbuilder.impl.api.Support.NAME;
-import static com.theoryinpractise.halbuilder.impl.api.Support.SELF;
 import static com.theoryinpractise.halbuilder.impl.api.Support.TEMPLATED;
 import static com.theoryinpractise.halbuilder.impl.api.Support.TITLE;
-import static com.theoryinpractise.halbuilder.impl.api.Support.WHITESPACE_SPLITTER;
 
 
 public class JsonRenderer<T> implements Renderer<T> {
@@ -110,9 +104,9 @@ public class JsonRenderer<T> implements Renderer<T> {
         if (!representation.getResources().isEmpty()) {
             g.writeObjectFieldStart(EMBEDDED);
 
-            Multimap<String, Representation> resourceMap = representation.getResources();
+            Multimap<String, ReadableRepresentation> resourceMap = representation.getResources();
 
-            for (Map.Entry<String, Collection<Representation>> resourceEntry : resourceMap.asMap().entrySet()) {
+            for (Map.Entry<String, Collection<ReadableRepresentation>> resourceEntry : resourceMap.asMap().entrySet()) {
                 if (resourceEntry.getValue().size() == 1) {
                     g.writeObjectFieldStart(resourceEntry.getKey());
                     ReadableRepresentation subRepresentation = resourceEntry.getValue().iterator().next();

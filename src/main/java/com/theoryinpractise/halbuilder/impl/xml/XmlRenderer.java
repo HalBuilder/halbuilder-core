@@ -4,7 +4,6 @@ import com.google.common.base.Optional;
 import com.theoryinpractise.halbuilder.spi.Link;
 import com.theoryinpractise.halbuilder.spi.ReadableRepresentation;
 import com.theoryinpractise.halbuilder.spi.Renderer;
-import com.theoryinpractise.halbuilder.spi.Representation;
 import org.jdom.Element;
 import org.jdom.Namespace;
 import org.jdom.Text;
@@ -106,7 +105,7 @@ public class XmlRenderer<T> implements Renderer<T> {
         }
 
         // add subresources
-        for (Map.Entry<String, Representation> halResource : representation.getResources().entries()) {
+        for (Map.Entry<String, ReadableRepresentation> halResource : representation.getResources().entries()) {
             Element subResourceElement = renderElement(halResource.getKey(), halResource.getValue(), true);
             resourceElement.addContent(subResourceElement);
         }

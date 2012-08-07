@@ -7,6 +7,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.io.Resources;
+import com.theoryinpractise.halbuilder.impl.representations.MutableRepresentation;
 import com.theoryinpractise.halbuilder.spi.ReadableRepresentation;
 import com.theoryinpractise.halbuilder.spi.Representation;
 import com.theoryinpractise.halbuilder.spi.RepresentationException;
@@ -352,7 +353,8 @@ public class RenderingTest {
                 .withBeanBasedSubresource("ns:user", "/user/11", new Customer(11, "Example User", 32))
                 .withBeanBasedSubresource("ns:user", "/user/12", new Customer(12, "Example User", 32));
 
-        Iterables.getFirst(party.getResources().values(), null).withBeanBasedSubresource("phone:cell", "/phone/1", new Phone(1, "555-666-7890"));
+        MutableRepresentation mutableRepresentation = (MutableRepresentation) Iterables.getFirst(party.getResources().values(), null);
+        mutableRepresentation.withBeanBasedSubresource("phone:cell", "/phone/1", new Phone(1, "555-666-7890"));
 
         assertThat(party.renderContent(RepresentationFactory.HAL_XML)).isEqualTo(exampleWithMultipleNestedSubresourcesXml);
         assertThat(party.renderContent(RepresentationFactory.HAL_JSON)).isEqualTo(exampleWithMultipleNestedSubresourcesJson);

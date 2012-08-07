@@ -69,7 +69,7 @@ public interface ReadableRepresentation {
      * @param predicate The predicate to check against in the embedded resources
      * @return A List of matching objects (properties, links, resource)
      */
-    List<? extends ReadableRepresentation> getResources(Predicate<Representation> predicate);
+    List<? extends ReadableRepresentation> getResources(Predicate<ReadableRepresentation> predicate);
 
     /**
      * Returns a property from the Representation.
@@ -110,7 +110,7 @@ public interface ReadableRepresentation {
      * Returns an Immutable Multimap of the resources currently embedded resources.
      * @return A Map
      */
-    Multimap<String, Representation> getResources();
+    Multimap<String, ReadableRepresentation> getResources();
 
     /**
      * Returns whether this resource is satisfied by the provided Contact.

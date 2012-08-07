@@ -59,7 +59,7 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
     protected Map<String, String> namespaces = Maps.newTreeMap(usingToString());
     protected List<Link> links = Lists.newArrayList();
     protected Map<String, Optional<Object>> properties = Maps.newTreeMap(usingToString());
-    protected Multimap<String,Representation> resources = ArrayListMultimap.create();
+    protected Multimap<String,ReadableRepresentation> resources = ArrayListMultimap.create();
 
     protected RepresentationFactory representationFactory;
     protected final Pattern resolvableUri = Pattern.compile("^[/|?|~].*");
@@ -95,7 +95,7 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
 
         linkBuilder.addAll(getLinksByRel(this, curiedRel));
         // TODO Should this check descendants? Should maybe be an overloaded method with a boolean check
-        for (Representation resource : resources.values()) {
+        for (ReadableRepresentation resource : resources.values()) {
             linkBuilder.addAll(getLinksByRel(resource, curiedRel));
         }
 
@@ -108,7 +108,7 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
         return ImmutableList.copyOf(resources.get(rel));
     }
 
-    public List<? extends ReadableRepresentation> getResources(Predicate<Representation> predicate) {
+    public List<? extends ReadableRepresentation> getResources(Predicate<ReadableRepresentation> predicate) {
         Preconditions.checkArgument(predicate != null, "Provided findPredicate should not be null.");
         return ImmutableList.copyOf(Iterables.filter(resources.values(), predicate));
     }
@@ -213,7 +213,7 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
         return ImmutableMap.copyOf(properties);
     }
 
-    public Multimap<String, Representation> getResources() {
+    public Multimap<String, ReadableRepresentation> getResources() {
         return ImmutableMultimap.copyOf(resources);
     }
 
@@ -221,7 +221,7 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
         for (Link link : representation.getCanonicalLinks()) {
             validateNamespaces(link.getRel());
         }
-        for (Map.Entry<String, Representation> aResource : representation.getResources().entries()) {
+        for (Map.Entry<String, ReadableRepresentation> aResource : representation.getResources().entries()) {
             validateNamespaces(aResource.getKey());
             validateNamespaces(aResource.getValue());
         }
