@@ -1,11 +1,9 @@
 package com.theoryinpractise.halbuilder.impl.bytecode;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.theoryinpractise.halbuilder.spi.ReadableRepresentation;
-import com.theoryinpractise.halbuilder.spi.Renderer;
+import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
+import com.theoryinpractise.halbuilder.api.RepresentationException;
 
-import java.io.Writer;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -15,21 +13,20 @@ import static com.theoryinpractise.halbuilder.impl.bytecode.InterfaceSupport.der
 /**
  * Java Interface based "renderer", this will render the resource as a Proxy to a Java interface.
  */
-public class InterfaceRenderer<T> implements Renderer<T> {
+public class InterfaceRenderer<T> {
 
     private Class<T> anInterface;
 
-    public static InterfaceRenderer newInterfaceRenderer(Class<?> anInterface) {
-        return new InterfaceRenderer(anInterface);
+    public static <I> InterfaceRenderer<I> newInterfaceRenderer(Class<I> anInterface) {
+        return new InterfaceRenderer<I>(anInterface);
     }
 
     private InterfaceRenderer(Class<T> anInterface) {
-        Preconditions.checkArgument(anInterface.isInterface(), "Renderable class MUST be an interface.");
+        Preconditions.checkArgument(anInterface.isInterface(), "Provided class MUST be an interface.");
         this.anInterface = anInterface;
     }
 
-    public Optional<T> render(final ReadableRepresentation representation, Writer writer) {
-        Preconditions.checkArgument(writer == null, "Writer argument should be null for " + InterfaceRenderer.class.getName());
+    public T render(final ReadableRepresentation representation) {
 
         if (representation.isSatisfiedBy(InterfaceContract.newInterfaceContract(anInterface))) {
             T proxy = (T) Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{anInterface}, new InvocationHandler() {
@@ -37,17 +34,15 @@ public class InterfaceRenderer<T> implements Renderer<T> {
 
                     String propertyName = derivePropertyNameFromMethod(method);
 
-                    Optional<Object> propertyOptional = representation.getProperties().get(propertyName);
+                    Object propertyValue = representation.getProperties().get(propertyName);
 
                     Class<?> returnType = method.getReturnType();
 
                     Object returnValue;
 
-                    if(propertyOptional.isPresent()) {
-                        Object propertyValue = propertyOptional.get();
+                    if(propertyValue != null) {
                         returnValue = returnType.getConstructor(propertyValue.getClass()).newInstance(propertyValue);
-                    }
-                    else {
+                    } else {
                         // In this case, we have a null property.
                         returnValue = null;
                     }
@@ -55,9 +50,9 @@ public class InterfaceRenderer<T> implements Renderer<T> {
                     return returnValue;
                 }
             });
-            return Optional.of(proxy);
+            return proxy;
         } else {
-            return Optional.absent();
+            throw new RepresentationException("Unable to render representation to " + anInterface.getName());
         }
 
 

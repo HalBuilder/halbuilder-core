@@ -1,11 +1,12 @@
 package com.theoryinpractise.halbuilder.impl.representations;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
-import com.theoryinpractise.halbuilder.RepresentationFactory;
+import com.theoryinpractise.halbuilder.api.Link;
+import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
+import com.theoryinpractise.halbuilder.api.Representation;
+import com.theoryinpractise.halbuilder.api.RepresentationException;
+import com.theoryinpractise.halbuilder.api.RepresentationFactory;
+import com.theoryinpractise.halbuilder.api.Serializable;
 import com.theoryinpractise.halbuilder.impl.api.Support;
-import com.theoryinpractise.halbuilder.spi.*;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -40,11 +41,27 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
      * @return
      */
     public MutableRepresentation withLink(String rel, String href) {
-        withLink(rel, href,
-                Optional.of(Predicates.<ReadableRepresentation>alwaysTrue()),
-                Optional.<String>absent(),
-                Optional.<String>absent(),
-                Optional.<String>absent());
+        withLink(rel, href, null, null, null);
+        return this;
+    }
+
+    /**
+     * Add a link to this resource
+     *
+     * @param rel
+     * @param href The target href for the link, relative to the href of this resource.
+     */
+    public MutableRepresentation withLink(String rel, String href, String name, String title, String hreflang) {
+
+        Support.checkRelType(rel);
+
+        String resolvedHref = resolvableUri.matcher(href).matches() ? resolveRelativeHref(href) : href;
+        for (String reltype : WHITESPACE_SPLITTER.split(rel)) {
+            String resolvedRelType = resolvableUri.matcher(reltype).matches() ? resolveRelativeHref(reltype) : reltype;
+
+            links.add(new Link(representationFactory, resolvedHref, resolvedRelType, name, title, hreflang));
+        }
+
         return this;
     }
 
@@ -60,68 +77,6 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
         return withLink(rel, uri.toASCIIString());
     }
 
-    /**
-     * Add a link to this resource
-     *
-     * @param rel
-     * @param href The target href for the link, relative to the href of this resource.
-     * @return
-     */
-    public MutableRepresentation withLink(String rel, String href, Predicate<ReadableRepresentation> predicate) {
-        withLink(rel, href,
-                Optional.of(predicate),
-                Optional.<String>absent(),
-                Optional.<String>absent(),
-                Optional.<String>absent());
-        return this;
-    }
-
-    /**
-     * Add a link to this resource
-     *
-     * @param rel
-     * @param uri The target URI for the link, possibly relative to the href of
-     *            this resource.
-     * @return
-     */
-    public MutableRepresentation withLink(String rel, URI uri, Predicate<ReadableRepresentation> predicate) {
-        return withLink(rel, uri.toASCIIString(), predicate);
-    }
-
-    /**
-     * Add a link to this resource
-     *
-     * @param rel
-     * @param href The target href for the link, relative to the href of this resource.
-     * @return
-     */
-    public MutableRepresentation withLink(String rel, String href, Optional<Predicate<ReadableRepresentation>> predicate, Optional<String> name, Optional<String> title, Optional<String> hreflang) {
-
-        Support.checkRelType(rel);
-
-        if (predicate.or(Predicates.<ReadableRepresentation>alwaysTrue()).apply(this)) {
-            String resolvedHref = resolvableUri.matcher(href).matches() ? resolveRelativeHref(href) : href;
-            for (String reltype : WHITESPACE_SPLITTER.split(rel)) {
-                String resolvedRelType = resolvableUri.matcher(reltype).matches() ? resolveRelativeHref(reltype) : reltype;
-                links.add(new Link(representationFactory, resolvedHref, resolvedRelType, name, title, hreflang));
-            }
-        }
-
-        return this;
-    }
-
-    /**
-     * Add a link to this resource
-     *
-     * @param rel
-     * @param uri The target URI for the link, possibly relative to the href of
-     *            this resource.
-     * @return
-     */
-    public MutableRepresentation withLink(String rel, URI uri, Optional<Predicate<ReadableRepresentation>> predicate, Optional<String> name, Optional<String> title, Optional<String> hreflang) {
-        return withLink(rel, uri.toASCIIString(), predicate, name, title, hreflang);
-    }
-
     public Representation withProperty(String name, Object value) {
         if (properties.containsKey(name)) {
             throw new RepresentationException(format("Duplicate property '%s' found for resource", name));
@@ -129,7 +84,7 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
         if (null == value) {
             this.hasNullProperties = true;
         }
-        properties.put(name, Optional.fromNullable(value));
+        properties.put(name, value);
         return this;
     }
 

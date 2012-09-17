@@ -1,8 +1,8 @@
 package com.theoryinpractise.halbuilder.impl.bytecode;
 
 import com.google.common.base.Preconditions;
-import com.theoryinpractise.halbuilder.spi.Contract;
-import com.theoryinpractise.halbuilder.spi.ReadableRepresentation;
+import com.theoryinpractise.halbuilder.api.Contract;
+import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
 
 import java.lang.reflect.Method;
 

@@ -1,9 +1,9 @@
 package com.theoryinpractise.halbuilder.impl.xml;
 
-import com.google.common.base.Optional;
-import com.theoryinpractise.halbuilder.spi.Link;
-import com.theoryinpractise.halbuilder.spi.ReadableRepresentation;
-import com.theoryinpractise.halbuilder.spi.Renderer;
+import com.google.common.base.Strings;
+import com.theoryinpractise.halbuilder.api.Link;
+import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
+import com.theoryinpractise.halbuilder.api.Renderer;
 import org.jdom.Element;
 import org.jdom.Namespace;
 import org.jdom.Text;
@@ -28,7 +28,7 @@ import static com.theoryinpractise.halbuilder.impl.api.Support.XSI_NAMESPACE;
 
 public class XmlRenderer<T> implements Renderer<T> {
 
-    public Optional<T> render(ReadableRepresentation representation, Writer writer) {
+    public void render(ReadableRepresentation representation, Writer writer) {
         final Element element = renderElement("self", representation, false);
         final XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
         try {
@@ -37,17 +37,16 @@ public class XmlRenderer<T> implements Renderer<T> {
             throw new RuntimeException(e);
         }
 
-        return Optional.absent();
     }
 
     private Element renderElement(String rel, ReadableRepresentation representation, boolean embedded) {
 
-        final Optional<Link> resourceLink = representation.getResourceLink();
+        final Link resourceLink = representation.getResourceLink();
 
         // Create the root element
         final Element resourceElement = new Element("resource");
-        if (resourceLink.isPresent()) {
-            resourceElement.setAttribute("href", resourceLink.get().getHref());
+        if (resourceLink != null) {
+            resourceElement.setAttribute("href", resourceLink.getHref());
         }
 
         if (!rel.equals("self")) {
@@ -77,14 +76,14 @@ public class XmlRenderer<T> implements Renderer<T> {
             if (!link.getRel().equals(SELF)) {
                 linkElement.setAttribute(REL, link.getRel());
                 linkElement.setAttribute(HREF, link.getHref());
-                if (link.getName().isPresent()) {
-                    linkElement.setAttribute(NAME, link.getName().get());
+                if (!Strings.isNullOrEmpty(link.getName())) {
+                    linkElement.setAttribute(NAME, link.getName());
                 }
-                if (link.getTitle().isPresent()) {
-                    linkElement.setAttribute(TITLE, link.getTitle().get());
+                if (!Strings.isNullOrEmpty(link.getTitle())) {
+                    linkElement.setAttribute(TITLE, link.getTitle());
                 }
-                if (link.getHreflang().isPresent()) {
-                    linkElement.setAttribute(HREFLANG, link.getHreflang().get());
+                if (!Strings.isNullOrEmpty(link.getHreflang())) {
+                    linkElement.setAttribute(HREFLANG, link.getHreflang());
                 }
                 if (link.hasTemplate()) {
                     linkElement.setAttribute(TEMPLATED, "true");
@@ -94,10 +93,10 @@ public class XmlRenderer<T> implements Renderer<T> {
         }
 
         // add properties
-        for (Map.Entry<String, Optional<Object>> entry : representation.getProperties().entrySet()) {
+        for (Map.Entry<String, Object> entry : representation.getProperties().entrySet()) {
             Element propertyElement = new Element(entry.getKey());
-            if (entry.getValue().isPresent()) {
-                propertyElement.setContent(new Text(entry.getValue().get().toString()));
+            if (entry.getValue() != null) {
+                propertyElement.setContent(new Text(entry.getValue().toString()));
             } else {
                 propertyElement.setAttribute("nil", "true", XSI_NAMESPACE);
             }
@@ -105,7 +104,7 @@ public class XmlRenderer<T> implements Renderer<T> {
         }
 
         // add subresources
-        for (Map.Entry<String, ReadableRepresentation> halResource : representation.getResources().entries()) {
+        for (Map.Entry<String, ReadableRepresentation> halResource : representation.getResources()) {
             Element subResourceElement = renderElement(halResource.getKey(), halResource.getValue(), true);
             resourceElement.addContent(subResourceElement);
         }

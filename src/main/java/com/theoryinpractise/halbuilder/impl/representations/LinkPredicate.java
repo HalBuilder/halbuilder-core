@@ -2,7 +2,7 @@ package com.theoryinpractise.halbuilder.impl.representations;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
-import com.theoryinpractise.halbuilder.spi.Link;
+import com.theoryinpractise.halbuilder.api.Link;
 
 import javax.annotation.Nullable;
 

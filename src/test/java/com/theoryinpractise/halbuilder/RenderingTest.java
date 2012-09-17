@@ -2,16 +2,15 @@ package com.theoryinpractise.halbuilder;
 
 import com.damnhandy.uri.template.UriTemplate;
 import com.google.common.base.Charsets;
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.io.Resources;
+import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
+import com.theoryinpractise.halbuilder.api.Representation;
+import com.theoryinpractise.halbuilder.api.RepresentationException;
+import com.theoryinpractise.halbuilder.api.RepresentationFactory;
+import com.theoryinpractise.halbuilder.api.Serializable;
 import com.theoryinpractise.halbuilder.impl.representations.MutableRepresentation;
-import com.theoryinpractise.halbuilder.spi.ReadableRepresentation;
-import com.theoryinpractise.halbuilder.spi.Representation;
-import com.theoryinpractise.halbuilder.spi.RepresentationException;
-import com.theoryinpractise.halbuilder.spi.Serializable;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -23,7 +22,7 @@ import static org.fest.assertions.api.Assertions.assertThat;
 
 public class RenderingTest {
 
-    private RepresentationFactory representationFactory = new RepresentationFactory("https://example.com/api/")
+    private RepresentationFactory representationFactory = new DefaultRepresentationFactory("https://example.com/api/")
             .withNamespace("ns", "/apidocs/accounts")
             .withNamespace("role", "/apidocs/roles");
 
@@ -48,51 +47,47 @@ public class RenderingTest {
 
     @BeforeMethod
     public void setup() throws IOException {
-        exampleXmlWithoutHref = Resources.toString(RenderingTest.class.getResource("exampleWithoutHref.xml"), Charsets.UTF_8)
+        exampleXmlWithoutHref = Resources.toString(RenderingTest.class.getResource("/exampleWithoutHref.xml"), Charsets.UTF_8)
                 .trim().replaceAll("\n", "\r\n");
-        exampleJsonWithoutHref = Resources.toString(RenderingTest.class.getResource("exampleWithoutHref.json"), Charsets.UTF_8)
+        exampleJsonWithoutHref = Resources.toString(RenderingTest.class.getResource("/exampleWithoutHref.json"), Charsets.UTF_8)
                 .trim();
-        exampleXml = Resources.toString(RenderingTest.class.getResource("example.xml"), Charsets.UTF_8)
+        exampleXml = Resources.toString(RenderingTest.class.getResource("/example.xml"), Charsets.UTF_8)
                 .trim().replaceAll("\n", "\r\n");
-        exampleJson = Resources.toString(RenderingTest.class.getResource("example.json"), Charsets.UTF_8)
+        exampleJson = Resources.toString(RenderingTest.class.getResource("/example.json"), Charsets.UTF_8)
                 .trim();
-        exampleWithSubresourceXml = Resources.toString(RenderingTest.class.getResource("exampleWithSubresource.xml"), Charsets.UTF_8)
+        exampleWithSubresourceXml = Resources.toString(RenderingTest.class.getResource("/exampleWithSubresource.xml"), Charsets.UTF_8)
                 .trim().replaceAll("\n", "\r\n");
-        exampleWithSubresourceJson = Resources.toString(RenderingTest.class.getResource("exampleWithSubresource.json"), Charsets.UTF_8)
+        exampleWithSubresourceJson = Resources.toString(RenderingTest.class.getResource("/exampleWithSubresource.json"), Charsets.UTF_8)
                 .trim();
-        exampleWithSubresourceLinkingToItselfXml = Resources.toString(RenderingTest.class.getResource("exampleWithSubresourceLinkingToItself.xml"), Charsets.UTF_8)
+        exampleWithSubresourceLinkingToItselfXml = Resources.toString(RenderingTest.class.getResource("/exampleWithSubresourceLinkingToItself.xml"), Charsets.UTF_8)
                 .trim().replaceAll("\n", "\r\n");
-        exampleWithSubresourceLinkingToItselfJson = Resources.toString(RenderingTest.class.getResource("exampleWithSubresourceLinkingToItself.json"), Charsets.UTF_8)
+        exampleWithSubresourceLinkingToItselfJson = Resources.toString(RenderingTest.class.getResource("/exampleWithSubresourceLinkingToItself.json"), Charsets.UTF_8)
                 .trim();
-        exampleWithMultipleSubresourcesXml = Resources.toString(RenderingTest.class.getResource("exampleWithMultipleSubresources.xml"), Charsets.UTF_8)
+        exampleWithMultipleSubresourcesXml = Resources.toString(RenderingTest.class.getResource("/exampleWithMultipleSubresources.xml"), Charsets.UTF_8)
                 .trim().replaceAll("\n", "\r\n");
-        exampleWithMultipleSubresourcesJson = Resources.toString(RenderingTest.class.getResource("exampleWithMultipleSubresources.json"), Charsets.UTF_8)
+        exampleWithMultipleSubresourcesJson = Resources.toString(RenderingTest.class.getResource("/exampleWithMultipleSubresources.json"), Charsets.UTF_8)
                 .trim();
-        exampleWithNullPropertyXml = Resources.toString(RenderingTest.class.getResource("exampleWithNullProperty.xml"), Charsets.UTF_8)
+        exampleWithNullPropertyXml = Resources.toString(RenderingTest.class.getResource("/exampleWithNullProperty.xml"), Charsets.UTF_8)
                 .trim().replaceAll("\n", "\r\n");
-        exampleWithNullPropertyJson = Resources.toString(RenderingTest.class.getResource("exampleWithNullProperty.json"), Charsets.UTF_8)
+        exampleWithNullPropertyJson = Resources.toString(RenderingTest.class.getResource("/exampleWithNullProperty.json"), Charsets.UTF_8)
                 .trim();
-        exampleWithLiteralNullPropertyXml = Resources.toString(RenderingTest.class.getResource("exampleWithLiteralNullProperty.xml"), Charsets.UTF_8)
+        exampleWithLiteralNullPropertyXml = Resources.toString(RenderingTest.class.getResource("/exampleWithLiteralNullProperty.xml"), Charsets.UTF_8)
                 .trim().replaceAll("\n", "\r\n");
-        exampleWithLiteralNullPropertyJson = Resources.toString(RenderingTest.class.getResource("exampleWithLiteralNullProperty.json"), Charsets.UTF_8)
+        exampleWithLiteralNullPropertyJson = Resources.toString(RenderingTest.class.getResource("/exampleWithLiteralNullProperty.json"), Charsets.UTF_8)
                 .trim();
-        exampleWithMultipleNestedSubresourcesXml = Resources.toString(RenderingTest.class.getResource("exampleWithMultipleNestedSubresources.xml"), Charsets.UTF_8)
+        exampleWithMultipleNestedSubresourcesXml = Resources.toString(RenderingTest.class.getResource("/exampleWithMultipleNestedSubresources.xml"), Charsets.UTF_8)
                 .trim().replaceAll("\n", "\r\n");
-        exampleWithMultipleNestedSubresourcesJson = Resources.toString(RenderingTest.class.getResource("exampleWithMultipleNestedSubresources.json"), Charsets.UTF_8)
+        exampleWithMultipleNestedSubresourcesJson = Resources.toString(RenderingTest.class.getResource("/exampleWithMultipleNestedSubresources.json"), Charsets.UTF_8)
                 .trim();
-        exampleWithTemplateXml = Resources.toString(RenderingTest.class.getResource("exampleWithTemplate.xml"), Charsets.UTF_8)
+        exampleWithTemplateXml = Resources.toString(RenderingTest.class.getResource("/exampleWithTemplate.xml"), Charsets.UTF_8)
                 .trim().replaceAll("\n", "\r\n");
-        exampleWithTemplateJson = Resources.toString(RenderingTest.class.getResource("exampleWithTemplate.json"), Charsets.UTF_8)
+        exampleWithTemplateJson = Resources.toString(RenderingTest.class.getResource("/exampleWithTemplate.json"), Charsets.UTF_8)
                 .trim();
     }
 
 
     private Representation newBaseResource(final Representation resource) {
-        return resource.withLink("ns:parent", "/api/customer/1234",
-                Optional.<Predicate<ReadableRepresentation>>absent(),
-                Optional.of("bob"),
-                Optional.of("The Parent"),
-                Optional.of("en"));
+        return resource.withLink("ns:parent", "/api/customer/1234", "bob", "The Parent", "en");
     }
 
     private Representation newBaseResource(final URI uri) {
@@ -107,7 +102,7 @@ public class RenderingTest {
     @Test
     public void testFactoryWithLinks() {
 
-        RepresentationFactory representationFactory = new RepresentationFactory("https://example.com/api/")
+        RepresentationFactory representationFactory = new DefaultRepresentationFactory("https://example.com/api/")
                 .withLink("/home", "home");
 
         Representation resource = representationFactory.newRepresentation("/");
@@ -120,7 +115,7 @@ public class RenderingTest {
 
     @Test(expectedExceptions = RepresentationException.class)
     public void testFactoryWithDuplicateNamespaces() {
-        new RepresentationFactory()
+        new DefaultRepresentationFactory()
                 .withNamespace("home", "https://example.com/api/")
                 .withNamespace("home", "https://example.com/api/");
     }
@@ -139,7 +134,7 @@ public class RenderingTest {
                 .withProperty("optional", Boolean.TRUE)
                 .withProperty("expired", Boolean.FALSE);
 
-        assertThat(party.getResourceLink().get().getHref()).isEqualTo("https://example.com/api/customer/123456");
+        assertThat(party.getResourceLink().getHref()).isEqualTo("https://example.com/api/customer/123456");
         assertThat(party.renderContent(RepresentationFactory.HAL_XML)).isEqualTo(exampleXml);
         assertThat(party.renderContent(RepresentationFactory.HAL_JSON)).isEqualTo(exampleJson);
 
@@ -148,10 +143,10 @@ public class RenderingTest {
     @Test
     public void testResourcesWithoutHref() {
 
-        ReadableRepresentation party = new RepresentationFactory().newRepresentation()
+        ReadableRepresentation party = new DefaultRepresentationFactory().newRepresentation()
                 .withProperty("name", "Example Resource");
 
-        assertThat(party.getResourceLink().isPresent()).isFalse();
+        assertThat(party.getResourceLink()).isNull();
         assertThat(party.renderContent(RepresentationFactory.HAL_XML)).isEqualTo(exampleXmlWithoutHref);
         assertThat(party.renderContent(RepresentationFactory.HAL_JSON)).isEqualTo(exampleJsonWithoutHref);
 
@@ -168,7 +163,7 @@ public class RenderingTest {
                 .withProperty("optional", Boolean.TRUE)
                 .withProperty("expired", Boolean.FALSE);
 
-        assertThat(party.getResourceLink().get().getHref()).isEqualTo("https://example.com/api/customer/123456");
+        assertThat(party.getResourceLink().getHref()).isEqualTo("https://example.com/api/customer/123456");
         assertThat(party.renderContent(RepresentationFactory.HAL_XML)).isEqualTo(exampleXml);
         assertThat(party.renderContent(RepresentationFactory.HAL_JSON)).isEqualTo(exampleJson);
 
@@ -294,7 +289,7 @@ public class RenderingTest {
         ReadableRepresentation representation = newBaseResource("/test").withLink("phone", uri);
 
 
-        assertThat(representation.getLinkByRel("phone").get().getHref()).isEqualTo("https://example.com" + uri);
+        assertThat(representation.getLinkByRel("phone").getHref()).isEqualTo("https://example.com" + uri);
 
     }
 
@@ -312,7 +307,7 @@ public class RenderingTest {
                 .withProperty("expired", Boolean.FALSE)
                 .withProperty("nullprop", null);
 
-        assertThat(party.getResourceLink().get().getHref()).isEqualTo("https://example.com/api/customer/123456");
+        assertThat(party.getResourceLink().getHref()).isEqualTo("https://example.com/api/customer/123456");
         assertThat(party.renderContent(RepresentationFactory.HAL_XML)).isEqualTo(exampleWithNullPropertyXml);
         assertThat(party.renderContent(RepresentationFactory.HAL_JSON)).isEqualTo(exampleWithNullPropertyJson);
     }
@@ -330,7 +325,7 @@ public class RenderingTest {
                 .withProperty("expired", Boolean.FALSE)
                 .withProperty("nullval", "null");
 
-        assertThat(party.getResourceLink().get().getHref()).isEqualTo("https://example.com/api/customer/123456");
+        assertThat(party.getResourceLink().getHref()).isEqualTo("https://example.com/api/customer/123456");
         assertThat(party.renderContent(RepresentationFactory.HAL_XML)).isEqualTo(exampleWithLiteralNullPropertyXml);
         assertThat(party.renderContent(RepresentationFactory.HAL_JSON)).isEqualTo(exampleWithLiteralNullPropertyJson);
     }
@@ -353,7 +348,7 @@ public class RenderingTest {
                 .withBeanBasedRepresentation("ns:user", "/user/11", new Customer(11, "Example User", 32))
                 .withBeanBasedRepresentation("ns:user", "/user/12", new Customer(12, "Example User", 32));
 
-        MutableRepresentation mutableRepresentation = (MutableRepresentation) Iterables.getFirst(party.getResources().values(), null);
+        MutableRepresentation mutableRepresentation = (MutableRepresentation) Iterables.getFirst(party.getResources(), null).getValue();
         mutableRepresentation.withBeanBasedRepresentation("phone:cell", "/phone/1", new Phone(1, "555-666-7890"));
 
         assertThat(party.renderContent(RepresentationFactory.HAL_XML)).isEqualTo(exampleWithMultipleNestedSubresourcesXml);

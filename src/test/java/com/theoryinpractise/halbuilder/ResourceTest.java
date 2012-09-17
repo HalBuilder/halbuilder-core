@@ -1,13 +1,14 @@
 package com.theoryinpractise.halbuilder;
 
-import com.theoryinpractise.halbuilder.spi.RepresentationException;
+import com.theoryinpractise.halbuilder.api.RepresentationException;
+import com.theoryinpractise.halbuilder.api.RepresentationFactory;
 import org.testng.annotations.Test;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
 public class ResourceTest {
 
-    private RepresentationFactory representationFactory = new RepresentationFactory("http://localhost/test");
+    private RepresentationFactory representationFactory = new DefaultRepresentationFactory("http://localhost/test");
 
     @Test(expectedExceptions = RepresentationException.class)
     public void testUndeclaredLinkNamespace() {

@@ -1,7 +1,7 @@
 package com.theoryinpractise.halbuilder;
 
 import com.theoryinpractise.halbuilder.impl.representations.MutableRepresentation;
-import com.theoryinpractise.halbuilder.spi.Representation;
+import com.theoryinpractise.halbuilder.api.Representation;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -9,7 +9,7 @@ import static org.fest.assertions.api.Assertions.assertThat;
 
 public class ResourceBasicMethodsTest {
 
-    private RepresentationFactory representationFactory = new RepresentationFactory("http://localhost/");
+    private DefaultRepresentationFactory representationFactory = new DefaultRepresentationFactory("http://localhost/");
 
     private Representation resource;
     private Representation otherResource;

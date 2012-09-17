@@ -1,91 +1,79 @@
-package com.theoryinpractise.halbuilder.spi;
+package com.theoryinpractise.halbuilder;
 
-import com.google.common.base.Optional;
-import com.theoryinpractise.halbuilder.RepresentationFactory;
+import com.theoryinpractise.halbuilder.api.Link;
+import com.theoryinpractise.halbuilder.api.RepresentationFactory;
 import org.testng.annotations.Test;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
 public class LinkTest {
-    private RepresentationFactory representationFactory = new RepresentationFactory("http://localhost/");
+    private RepresentationFactory representationFactory = new DefaultRepresentationFactory("http://localhost/");
 
-    private Link link = new Link(representationFactory, "http://example.com/", "rel", Optional.of("name"),
-            Optional.of("title"), Optional.of("hreflang"));
+    private Link link = new Link(representationFactory, "http://example.com/", "rel", "name", "title", "hreflang");
 
     @Test
     public void equalLinksHaveEqualHashCodes() {
-        Link otherLink = new Link(representationFactory, "http://example.com/", "rel", Optional.of("name"),
-                Optional.of("title"), Optional.of("hreflang"));
+        Link otherLink = new Link(representationFactory, "http://example.com/", "rel", "name", "title", "hreflang");
         assertThat(link.hashCode()).isEqualTo(otherLink.hashCode());
     }
 
     @Test
     public void testHashCodeIsDependentOnHref() {
-        Link otherLink = new Link(representationFactory, "http://example.com/other", "rel", Optional.of("name"),
-                Optional.of("title"), Optional.of("hreflang"));
+        Link otherLink = new Link(representationFactory, "http://example.com/other", "rel", "name", "title", "hreflang");
         assertThat(otherLink.hashCode()).isNotEqualTo(link.hashCode());
     }
 
     @Test
     public void testHashCodeIsDependentOnRel() {
-        Link otherLink = new Link(representationFactory, "http://example.com/", "otherrel", Optional.of("name"),
-                Optional.of("title"), Optional.of("hreflang"));
+        Link otherLink = new Link(representationFactory, "http://example.com/", "otherrel", "name", "title", "hreflang");
         assertThat(otherLink.hashCode()).isNotEqualTo(link.hashCode());
     }
 
     @Test
     public void testHashCodeIsDependentOnName() {
-        Link otherLink = new Link(representationFactory, "http://example.com/", "rel", Optional.of("othername"),
-                Optional.of("title"), Optional.of("hreflang"));
+        Link otherLink = new Link(representationFactory, "http://example.com/", "rel", "othername", "title", "hreflang");
         assertThat(otherLink.hashCode()).isNotEqualTo(link.hashCode());
     }
 
     @Test
     public void testHashCodeIsDependentOnTitle() {
-        Link otherLink = new Link(representationFactory, "http://example.com/", "rel", Optional.of("name"),
-                Optional.of("othertitle"), Optional.of("hreflang"));
+        Link otherLink = new Link(representationFactory, "http://example.com/", "rel", "name", "othertitle", "hreflang");
         assertThat(otherLink.hashCode()).isNotEqualTo(link.hashCode());
     }
 
     @Test
     public void testHashCodeIsDependentOnHreflang() {
-        Link otherLink = new Link(representationFactory, "http://example.com/other", "rel", Optional.of("name"),
-                Optional.of("title"), Optional.of("hreflang"));
+        Link otherLink = new Link(representationFactory, "http://example.com/other", "rel", "name", "title", "hreflang");
         assertThat(otherLink.hashCode()).isNotEqualTo(link.hashCode());
     }
 
     @Test
     public void testEqualsIsDependentOnHref() {
-        Link otherLink = new Link(representationFactory, "http://example.com/other", "rel", Optional.of("name"),
-                Optional.of("title"), Optional.of("hreflang"));
+        Link otherLink = new Link(representationFactory, "http://example.com/other", "rel", "name", "title", "hreflang");
         assertThat(otherLink).isNotEqualTo(link);
     }
 
     @Test
     public void testEqualsIsDependentOnRel() {
-        Link otherLink = new Link(representationFactory, "http://example.com/", "otherrel", Optional.of("name"),
-                Optional.of("title"), Optional.of("hreflang"));
+        Link otherLink = new Link(representationFactory, "http://example.com/", "otherrel", "name", "title", "hreflang");
         assertThat(otherLink).isNotEqualTo(link);
     }
 
     @Test
     public void testEqualsIsDependentOnName() {
-        Link otherLink = new Link(representationFactory, "http://example.com/", "rel", Optional.of("othername"),
-                Optional.of("title"), Optional.of("hreflang"));
+        Link otherLink = new Link(representationFactory, "http://example.com/", "rel", "othername", "title", "hreflang");
         assertThat(otherLink).isNotEqualTo(link);
     }
 
     @Test
     public void testEqualsIsDependentOnTitle() {
-        Link otherLink = new Link(representationFactory, "http://example.com/", "rel", Optional.of("name"),
-                Optional.of("othertitle"), Optional.of("hreflang"));
+        Link otherLink = new Link(representationFactory, "http://example.com/", "rel", "name", "othertitle", "hreflang");
         assertThat(otherLink).isNotEqualTo(link);
     }
 
     @Test
     public void testEqualsIsDependentOnHreflang() {
-        Link otherLink = new Link(representationFactory, "http://example.com/other", "rel", Optional.of("name"),
-                Optional.of("title"), Optional.of("hreflang"));
+        Link otherLink = new Link(representationFactory, "http://example.com/other", "rel", "name", "title", "hreflang");
         assertThat(otherLink).isNotEqualTo(link);
     }
 
