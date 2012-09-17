@@ -1,13 +1,11 @@
 package com.theoryinpractise.halbuilder.impl.xml;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.theoryinpractise.halbuilder.RepresentationFactory;
+import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
+import com.theoryinpractise.halbuilder.api.Representation;
+import com.theoryinpractise.halbuilder.api.RepresentationException;
+import com.theoryinpractise.halbuilder.api.RepresentationFactory;
 import com.theoryinpractise.halbuilder.impl.api.RepresentationReader;
 import com.theoryinpractise.halbuilder.impl.representations.MutableRepresentation;
-import com.theoryinpractise.halbuilder.spi.ReadableRepresentation;
-import com.theoryinpractise.halbuilder.spi.Representation;
-import com.theoryinpractise.halbuilder.spi.RepresentationException;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -18,7 +16,10 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.List;
 
-import static com.theoryinpractise.halbuilder.impl.api.Support.*;
+import static com.theoryinpractise.halbuilder.impl.api.Support.HREFLANG;
+import static com.theoryinpractise.halbuilder.impl.api.Support.NAME;
+import static com.theoryinpractise.halbuilder.impl.api.Support.TITLE;
+import static com.theoryinpractise.halbuilder.impl.api.Support.XSI_NAMESPACE;
 
 public class XmlRepresentationReader implements RepresentationReader {
     private RepresentationFactory representationFactory;
@@ -64,19 +65,13 @@ public class XmlRepresentationReader implements RepresentationReader {
         for (Element link : links) {
             String rel = link.getAttributeValue("rel");
             String href = link.getAttributeValue("href");
-            Optional<String> name = optionalElementValueAsText(link, NAME);
-            Optional<String> title = optionalElementValueAsText(link, TITLE);
-            Optional<String> hreflang = optionalElementValueAsText(link, HREFLANG);
-            Optional<Predicate<ReadableRepresentation>> predicate = Optional.<Predicate<ReadableRepresentation>>absent();
+            String name = link.getAttributeValue( NAME);
+            String title = link.getAttributeValue( TITLE);
+            String hreflang = link.getAttributeValue( HREFLANG);
 
-            resource.withLink(rel, href, predicate, name, title, hreflang);
+            resource.withLink(rel, href, name, title, hreflang);
         }
 
-    }
-
-    Optional<String> optionalElementValueAsText(Element node, String key) {
-        String value = node.getAttributeValue(key);
-        return value != null ? Optional.of(value) : Optional.<String>absent();
     }
 
     private void readProperties(Representation resource, Element element) {

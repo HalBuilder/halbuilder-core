@@ -2,19 +2,23 @@ package com.theoryinpractise.halbuilder.impl.json;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.theoryinpractise.halbuilder.RepresentationFactory;
+import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
+import com.theoryinpractise.halbuilder.api.RepresentationException;
+import com.theoryinpractise.halbuilder.api.RepresentationFactory;
 import com.theoryinpractise.halbuilder.impl.api.RepresentationReader;
 import com.theoryinpractise.halbuilder.impl.representations.MutableRepresentation;
-import com.theoryinpractise.halbuilder.spi.ReadableRepresentation;
-import com.theoryinpractise.halbuilder.spi.RepresentationException;
 
 import java.io.Reader;
 import java.util.Iterator;
 import java.util.Map;
 
-import static com.theoryinpractise.halbuilder.impl.api.Support.*;
+import static com.theoryinpractise.halbuilder.impl.api.Support.CURIE;
+import static com.theoryinpractise.halbuilder.impl.api.Support.EMBEDDED;
+import static com.theoryinpractise.halbuilder.impl.api.Support.HREF;
+import static com.theoryinpractise.halbuilder.impl.api.Support.HREFLANG;
+import static com.theoryinpractise.halbuilder.impl.api.Support.LINKS;
+import static com.theoryinpractise.halbuilder.impl.api.Support.NAME;
+import static com.theoryinpractise.halbuilder.impl.api.Support.TITLE;
 
 public class JsonRepresentationReader implements RepresentationReader {
     private RepresentationFactory representationFactory;
@@ -90,17 +94,16 @@ public class JsonRepresentationReader implements RepresentationReader {
     private void withJsonLink(MutableRepresentation resource, Map.Entry<String, JsonNode> keyNode, JsonNode valueNode) {
         String rel = keyNode.getKey();
         String href = valueNode.get(HREF).asText();
-        Optional<String> name = optionalNodeValueAsText(valueNode, NAME);
-        Optional<String> title = optionalNodeValueAsText(valueNode, TITLE);
-        Optional<String> hreflang = optionalNodeValueAsText(valueNode, HREFLANG);
-        Optional<Predicate<ReadableRepresentation>> predicate = Optional.<Predicate<ReadableRepresentation>>absent();
+        String name = optionalNodeValueAsText(valueNode, NAME);
+        String title = optionalNodeValueAsText(valueNode, TITLE);
+        String hreflang = optionalNodeValueAsText(valueNode, HREFLANG);
 
-        resource.withLink(rel, href, predicate, name, title, hreflang);
+        resource.withLink(rel, href, name, title, hreflang);
     }
 
-    Optional<String> optionalNodeValueAsText(JsonNode node, String key) {
+    String optionalNodeValueAsText(JsonNode node, String key) {
         JsonNode value = node.get(key);
-        return value != null ? Optional.of(value.asText()) : Optional.<String>absent();
+        return value != null ? value.asText() : null;
     }
 
     private void readProperties(MutableRepresentation resource, JsonNode rootNode) {

@@ -4,13 +4,13 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-import com.theoryinpractise.halbuilder.spi.Link;
-import com.theoryinpractise.halbuilder.spi.ReadableRepresentation;
-import com.theoryinpractise.halbuilder.spi.Renderer;
+import com.theoryinpractise.halbuilder.api.Link;
+import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
+import com.theoryinpractise.halbuilder.api.Renderer;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -31,7 +31,7 @@ import static com.theoryinpractise.halbuilder.impl.api.Support.TITLE;
 
 public class JsonRenderer<T> implements Renderer<T> {
 
-    public Optional<T> render(ReadableRepresentation representation, Writer writer) {
+    public void render(ReadableRepresentation representation, Writer writer) {
 
         JsonFactory f = new JsonFactory();
         f.enable(JsonGenerator.Feature.QUOTE_FIELD_NAMES);
@@ -46,7 +46,7 @@ public class JsonRenderer<T> implements Renderer<T> {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return Optional.absent();
+
     }
 
     private void renderJson(JsonGenerator g, ReadableRepresentation representation, boolean embedded) throws IOException {
@@ -59,7 +59,7 @@ public class JsonRenderer<T> implements Renderer<T> {
             // Include namespaces as links when not embedded
             if (!embedded) {
                 for (Map.Entry<String, String> entry : representation.getNamespaces().entrySet()) {
-                    links.add(new Link(null, entry.getValue(), CURIE, Optional.of(entry.getKey()), Optional.<String>absent(), Optional.<String>absent()));
+                    links.add(new Link(null, entry.getValue(), CURIE, entry.getKey(), null, null));
                 }
             }
 
@@ -92,9 +92,9 @@ public class JsonRenderer<T> implements Renderer<T> {
             g.writeEndObject();
         }
 
-        for (Map.Entry<String, Optional<Object>> entry : representation.getProperties().entrySet()) {
-            if(entry.getValue().isPresent()) {
-                g.writeObjectField(entry.getKey(), entry.getValue().get());
+        for (Map.Entry<String, Object> entry : representation.getProperties().entrySet()) {
+            if(entry.getValue() != null) {
+                g.writeObjectField(entry.getKey(), entry.getValue());
             }
             else {
                 g.writeNullField(entry.getKey());
@@ -104,9 +104,9 @@ public class JsonRenderer<T> implements Renderer<T> {
         if (!representation.getResources().isEmpty()) {
             g.writeObjectFieldStart(EMBEDDED);
 
-            Multimap<String, ReadableRepresentation> resourceMap = representation.getResources();
+            Map<String, Collection<ReadableRepresentation>> resourceMap = representation.getResourceMap();
 
-            for (Map.Entry<String, Collection<ReadableRepresentation>> resourceEntry : resourceMap.asMap().entrySet()) {
+            for (Map.Entry<String, Collection<ReadableRepresentation>> resourceEntry : resourceMap.entrySet()) {
                 if (resourceEntry.getValue().size() == 1) {
                     g.writeObjectFieldStart(resourceEntry.getKey());
                     ReadableRepresentation subRepresentation = resourceEntry.getValue().iterator().next();
@@ -128,14 +128,14 @@ public class JsonRenderer<T> implements Renderer<T> {
 
     private void writeJsonLinkContent(JsonGenerator g, Link link) throws IOException {
         g.writeStringField(HREF, link.getHref());
-        if (link.getName().isPresent()) {
-            g.writeStringField(NAME, link.getName().get());
+        if (!Strings.isNullOrEmpty(link.getName())) {
+            g.writeStringField(NAME, link.getName());
         }
-        if (link.getTitle().isPresent()) {
-            g.writeStringField(TITLE, link.getTitle().get());
+        if (!Strings.isNullOrEmpty(link.getTitle())) {
+            g.writeStringField(TITLE, link.getTitle());
         }
-        if (link.getHreflang().isPresent()) {
-            g.writeStringField(HREFLANG, link.getHreflang().get());
+        if (!Strings.isNullOrEmpty(link.getHreflang())) {
+            g.writeStringField(HREFLANG, link.getHreflang());
         }
         if (link.hasTemplate()) {
             g.writeBooleanField(TEMPLATED, true);

@@ -1,12 +1,10 @@
 package com.theoryinpractise.halbuilder;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.theoryinpractise.halbuilder.spi.Contract;
-import com.theoryinpractise.halbuilder.spi.ReadableRepresentation;
+import com.theoryinpractise.halbuilder.api.Contract;
+import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
+import com.theoryinpractise.halbuilder.api.RepresentationFactory;
 import org.testng.annotations.Test;
 
-import javax.annotation.Nullable;
 import java.io.InputStreamReader;
 
 import static org.fest.assertions.api.Assertions.assertThat;
@@ -14,10 +12,10 @@ import static org.fest.assertions.api.Assertions.assertThat;
 public class ValidationTest {
 
 
-    RepresentationFactory representationFactory = new RepresentationFactory();
+    RepresentationFactory representationFactory = new DefaultRepresentationFactory();
 
     ReadableRepresentation representation = representationFactory.readRepresentation(
-            new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("example.xml")));
+            new InputStreamReader(ValidationTest.class.getResourceAsStream("/example.xml")));
 
 
     public static interface Namable {
@@ -30,27 +28,18 @@ public class ValidationTest {
 
         Contract noWhiteSpaceInName = new Contract() {
             public boolean isSatisfiedBy(ReadableRepresentation resource) {
-                return (((String) resource.get("name").or("")).matches("\\W*"));
+                return (((String) resource.getValue("name", "")).matches("\\W*"));
             }
         };
 
         Contract anyCharsInName = new Contract() {
             public boolean isSatisfiedBy(ReadableRepresentation resource) {
-                return (((String) resource.get("name").or("")).matches(".*"));
+                return (((String) resource.getValue("name", "")).matches(".*"));
             }
         };
 
         assertThat(representation.isSatisfiedBy(noWhiteSpaceInName)).isFalse();
         assertThat(representation.isSatisfiedBy(anyCharsInName)).isTrue();
-
-        Optional<Integer> length = representation.ifSatisfiedBy(Namable.class, new Function<Namable, Integer>() {
-            public Integer apply(@Nullable Namable input) {
-                System.out.println(input.getName());
-                return input.getName().length();
-            }
-        });
-
-        assertThat(length.get()).isEqualTo(16);
 
     }
 
