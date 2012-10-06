@@ -6,4 +6,4 @@
           representation (doto (.newRepresentation representation-factory "/foo")
                          (.withProperty "name" "Mark")
                          (.withLink "home" "/home"))]
-         (println (.renderContent representation "application/hal+xml"))) )
+         (println (.toString representation "application/hal+xml"))) )

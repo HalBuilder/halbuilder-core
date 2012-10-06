@@ -4,6 +4,8 @@ import com.google.common.base.Strings;
 import com.theoryinpractise.halbuilder.api.Link;
 import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
 import com.theoryinpractise.halbuilder.api.Renderer;
+import com.theoryinpractise.halbuilder.api.RepresentationException;
+import com.theoryinpractise.halbuilder.api.RepresentationFactory;
 import org.jdom.Element;
 import org.jdom.Namespace;
 import org.jdom.Text;
@@ -12,8 +14,10 @@ import org.jdom.output.XMLOutputter;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.theoryinpractise.halbuilder.impl.api.Support.HREF;
 import static com.theoryinpractise.halbuilder.impl.api.Support.HREFLANG;
@@ -28,15 +32,18 @@ import static com.theoryinpractise.halbuilder.impl.api.Support.XSI_NAMESPACE;
 
 public class XmlRenderer<T> implements Renderer<T> {
 
-    public void render(ReadableRepresentation representation, Writer writer) {
+    public void render(ReadableRepresentation representation, Set<URI> flags, Writer writer) {
         final Element element = renderElement("self", representation, false);
-        final XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
         try {
+            Format prettyFormat = flags.contains(RepresentationFactory.PRETTY_PRINT)
+                    ? Format.getPrettyFormat()
+                    : Format.getCompactFormat();
+
+            final XMLOutputter outputter = new XMLOutputter(prettyFormat);
             outputter.output(element, writer);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RepresentationException(e);
         }
-
     }
 
     private Element renderElement(String rel, ReadableRepresentation representation, boolean embedded) {

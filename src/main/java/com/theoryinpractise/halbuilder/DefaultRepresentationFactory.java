@@ -1,8 +1,10 @@
 package com.theoryinpractise.halbuilder;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
+import com.google.common.collect.Sets;
 import com.theoryinpractise.halbuilder.api.Link;
 import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
 import com.theoryinpractise.halbuilder.api.Renderer;
@@ -23,20 +25,22 @@ import java.lang.reflect.Constructor;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import static java.lang.String.format;
 
-public class DefaultRepresentationFactory implements RepresentationFactory {
+public class DefaultRepresentationFactory extends RepresentationFactory {
 
     private Map<ContentType, Class<? extends Renderer>> contentRenderers = Maps.newHashMap();
     private Map<ContentType, Class<? extends RepresentationReader>> representationReaders = Maps.newHashMap();
     private TreeMap<String, String> namespaces = Maps.newTreeMap(Ordering.usingToString());
     private List<Link> links = Lists.newArrayList();
+    private Set<URI> flags = Sets.newHashSet();
     private String baseHref;
 
     public DefaultRepresentationFactory() {
-        this("http://localhost");
+        this(makeUri("urn:halbuilder:"));
     }
 
     public DefaultRepresentationFactory(URI baseUri) {
@@ -78,6 +82,12 @@ public class DefaultRepresentationFactory implements RepresentationFactory {
     @Override
     public DefaultRepresentationFactory withLink(String url, String rel) {
         links.add(new Link(this, url, rel));
+        return this;
+    }
+
+    @Override
+    public RepresentationFactory withFlag(URI flag) {
+        flags.add(flag);
         return this;
     }
 
@@ -152,5 +162,8 @@ public class DefaultRepresentationFactory implements RepresentationFactory {
 
     }
 
+    public Set<URI> getFlags() {
+        return ImmutableSet.copyOf(flags);
+    }
 
 }

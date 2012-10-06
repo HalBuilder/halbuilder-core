@@ -9,6 +9,7 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -27,8 +28,9 @@ import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceRenderer;
 
 import javax.annotation.Nullable;
 import java.io.StringWriter;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.io.Writer;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -256,17 +258,17 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
 
         try {
             if (href.startsWith("?")) {
-                return new URL(baseHref + href).toExternalForm();
+                return new URI(baseHref + href).toString();
             } else if (href.startsWith("~/")) {
                 if (baseHref.endsWith("/")) {
-                    return new URL(baseHref + href.substring(2)).toExternalForm();
+                    return new URI(baseHref + href.substring(2)).toString();
                 } else {
-                    return new URL(baseHref + href.substring(1)).toExternalForm();
+                    return new URI(baseHref + href.substring(1)).toString();
                 }
             } else {
-                return new URL(new URL(baseHref), href).toExternalForm();
+                return new URI(baseHref + "/" + href).toString();
             }
-        } catch (MalformedURLException e) {
+        } catch (URISyntaxException e) {
             throw new RepresentationException(e.getMessage());
         }
 
@@ -295,17 +297,24 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
         }
     }
 
-    public String renderContent(String contentType) {
-        Renderer<String> renderer = representationFactory.lookupRenderer(contentType);
-        return renderAsString(renderer);
+    public String toString(String contentType) {
+        return toString(contentType, null);
     }
 
-    private String renderAsString(final Renderer renderer) {
-        validateNamespaces(this);
+    public String toString(String contentType, final Set<URI> flags) {
         StringWriter sw = new StringWriter();
-        renderer.render(this, sw);
+        toString(contentType, flags, sw);
         return sw.toString();
     }
+
+    public void toString(String contentType, Set<URI> flags, Writer writer) {
+        validateNamespaces(this);
+        Renderer<String> renderer = representationFactory.lookupRenderer(contentType);
+        ImmutableSet.Builder<URI> uriBuilder = ImmutableSet.<URI>builder().addAll(representationFactory.getFlags());
+        if (flags != null) uriBuilder.addAll(flags);
+        renderer.render(this, uriBuilder.build(), writer);
+    }
+
 
     @Override
     public int hashCode() {

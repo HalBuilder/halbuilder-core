@@ -11,13 +11,17 @@ import com.google.common.collect.Multimaps;
 import com.theoryinpractise.halbuilder.api.Link;
 import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
 import com.theoryinpractise.halbuilder.api.Renderer;
+import com.theoryinpractise.halbuilder.api.RepresentationException;
+import com.theoryinpractise.halbuilder.api.RepresentationFactory;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.Writer;
+import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.theoryinpractise.halbuilder.impl.api.Support.CURIE;
 import static com.theoryinpractise.halbuilder.impl.api.Support.EMBEDDED;
@@ -31,20 +35,22 @@ import static com.theoryinpractise.halbuilder.impl.api.Support.TITLE;
 
 public class JsonRenderer<T> implements Renderer<T> {
 
-    public void render(ReadableRepresentation representation, Writer writer) {
+    public void render(ReadableRepresentation representation, Set<URI> flags, Writer writer) {
 
         JsonFactory f = new JsonFactory();
         f.enable(JsonGenerator.Feature.QUOTE_FIELD_NAMES);
 
         try {
             JsonGenerator g = f.createJsonGenerator(writer);
-            g.setPrettyPrinter(new DefaultPrettyPrinter());
+            if (flags.contains(RepresentationFactory.PRETTY_PRINT)) {
+                g.setPrettyPrinter(new DefaultPrettyPrinter());
+            }
             g.writeStartObject();
             renderJson(g, representation, false);
             g.writeEndObject();
             g.close();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RepresentationException(e);
         }
 
     }
