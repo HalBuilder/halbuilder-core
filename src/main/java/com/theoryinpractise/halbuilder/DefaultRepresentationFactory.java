@@ -37,27 +37,12 @@ public class DefaultRepresentationFactory extends RepresentationFactory {
     private TreeMap<String, String> namespaces = Maps.newTreeMap(Ordering.usingToString());
     private List<Link> links = Lists.newArrayList();
     private Set<URI> flags = Sets.newHashSet();
-    private String baseHref;
 
     public DefaultRepresentationFactory() {
-        this(makeUri("urn:halbuilder:"));
-    }
-
-    public DefaultRepresentationFactory(URI baseUri) {
-        this(baseUri.toASCIIString());
-    }
-
-    public DefaultRepresentationFactory(String baseHref) {
-        this.baseHref = baseHref;
         this.contentRenderers.put(new ContentType(HAL_XML), XmlRenderer.class);
         this.contentRenderers.put(new ContentType(HAL_JSON), JsonRenderer.class);
         this.representationReaders.put(new ContentType(HAL_XML), XmlRepresentationReader.class);
         this.representationReaders.put(new ContentType(HAL_JSON), JsonRepresentationReader.class);
-    }
-
-    @Override
-    public String getBaseHref() {
-        return baseHref;
     }
 
     public DefaultRepresentationFactory withRenderer(String contentType, Class<? extends Renderer<String>> rendererClass) {
@@ -80,7 +65,7 @@ public class DefaultRepresentationFactory extends RepresentationFactory {
     }
 
     @Override
-    public DefaultRepresentationFactory withLink(String url, String rel) {
+    public DefaultRepresentationFactory withLink(String rel, String url) {
         links.add(new Link(this, url, rel));
         return this;
     }
@@ -93,7 +78,7 @@ public class DefaultRepresentationFactory extends RepresentationFactory {
 
     @Override
     public Representation newRepresentation(URI uri) {
-        return newRepresentation(uri.toASCIIString());
+        return newRepresentation(uri.toString());
     }
 
     @Override

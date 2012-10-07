@@ -2,10 +2,10 @@ package com.theoryinpractise.halbuilder.impl.representations;
 
 import com.theoryinpractise.halbuilder.api.Link;
 import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
+import com.theoryinpractise.halbuilder.api.Representable;
 import com.theoryinpractise.halbuilder.api.Representation;
 import com.theoryinpractise.halbuilder.api.RepresentationException;
 import com.theoryinpractise.halbuilder.api.RepresentationFactory;
-import com.theoryinpractise.halbuilder.api.Serializable;
 import com.theoryinpractise.halbuilder.impl.api.Support;
 
 import java.beans.BeanInfo;
@@ -17,7 +17,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.net.URI;
 
-import static com.theoryinpractise.halbuilder.impl.api.Support.WHITESPACE_SPLITTER;
 import static java.lang.String.format;
 
 public class MutableRepresentation extends BaseRepresentation implements Representation {
@@ -25,7 +24,7 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
     public MutableRepresentation(RepresentationFactory representationFactory, String href) {
         super(representationFactory);
         if (href != null) {
-            this.links.add(new Link(representationFactory, resolveRelativeHref(representationFactory.getBaseHref(), href), "self"));
+            this.links.add(new Link(representationFactory, href, "self"));
         }
     }
 
@@ -52,16 +51,8 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
      * @param href The target href for the link, relative to the href of this resource.
      */
     public MutableRepresentation withLink(String rel, String href, String name, String title, String hreflang) {
-
         Support.checkRelType(rel);
-
-        String resolvedHref = resolvableUri.matcher(href).matches() ? resolveRelativeHref(href) : href;
-        for (String reltype : WHITESPACE_SPLITTER.split(rel)) {
-            String resolvedRelType = resolvableUri.matcher(reltype).matches() ? resolveRelativeHref(reltype) : reltype;
-
-            links.add(new Link(representationFactory, resolvedHref, resolvedRelType, name, title, hreflang));
-        }
-
+        links.add(new Link(representationFactory, href, rel, name, title, hreflang));
         return this;
     }
 
@@ -121,8 +112,8 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
 
     }
 
-    public Representation withSerializable(Serializable serializable) {
-        serializable.serializeResource(this);
+    public Representation withRepresentable(Representable representable) {
+        representable.representResource(this);
         return this;
     }
 
@@ -145,7 +136,7 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
         if (namespaces.containsKey(namespace)) {
             throw new RepresentationException(format("Duplicate namespace '%s' found for resource", namespace));
         }
-        namespaces.put(namespace, resolveRelativeHref(representationFactory.getBaseHref(), href));
+        namespaces.put(namespace, href);
         return this;
     }
 

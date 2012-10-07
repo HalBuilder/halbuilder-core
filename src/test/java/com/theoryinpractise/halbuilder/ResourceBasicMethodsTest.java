@@ -9,7 +9,7 @@ import static org.fest.assertions.api.Assertions.assertThat;
 
 public class ResourceBasicMethodsTest {
 
-    private DefaultRepresentationFactory representationFactory = new DefaultRepresentationFactory("http://localhost/");
+    private DefaultRepresentationFactory representationFactory = new DefaultRepresentationFactory();
 
     private Representation resource;
     private Representation otherResource;
@@ -24,7 +24,7 @@ public class ResourceBasicMethodsTest {
 
 
     private Representation createDefaultResource() {
-        return representationFactory.newRepresentation("/test")
+        return representationFactory.newRepresentation("http://localhost/test")
                 .withNamespace("testns", "http://example.com/test")
                 .withLink("testlink", "http://example.com/link")
                 .withProperty("testprop", "value")
@@ -99,7 +99,7 @@ public class ResourceBasicMethodsTest {
 
     @Test
     public void testToStringRendersSelfHref() {
-        String toString = new MutableRepresentation(representationFactory, "/test").toString();
+        String toString = new MutableRepresentation(representationFactory, "http://localhost/test").toString();
         assertThat(toString).isEqualTo("<Representation: http://localhost/test>");
     }
 

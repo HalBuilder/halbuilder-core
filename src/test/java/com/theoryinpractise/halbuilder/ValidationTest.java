@@ -17,12 +17,6 @@ public class ValidationTest {
     ReadableRepresentation representation = representationFactory.readRepresentation(
             new InputStreamReader(ValidationTest.class.getResourceAsStream("/example.xml")));
 
-
-    public static interface Namable {
-        String getName();
-    }
-
-
     @Test
     public void testValidation() {
 

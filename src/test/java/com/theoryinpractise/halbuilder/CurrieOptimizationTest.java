@@ -9,11 +9,11 @@ import static org.fest.assertions.api.Assertions.assertThat;
 
 public class CurrieOptimizationTest {
 
-    RepresentationFactory representationFactory = new DefaultRepresentationFactory().withNamespace("app", "/api/applications/")
-            .withNamespace("rel", "/api/rels/");
+    RepresentationFactory representationFactory = new DefaultRepresentationFactory().withNamespace("app", "http://localhost/api/applications/")
+            .withNamespace("rel", "http://localhost/api/rels/");
 
     Representation resource = representationFactory.newRepresentation("/api/1")
-            .withLink("/api/rels/foo", "/api/applications/app/1");
+            .withLink("http://localhost/api/rels/foo", "http://localhost/api/applications/app/1");
 
 
     @Test
@@ -39,7 +39,7 @@ public class CurrieOptimizationTest {
     @Test
     public void testLinkLookupByAbsoluteRel() {
 
-        Link link2 = resource.getLinksByRel("/api/rels/foo").get(0);
+        Link link2 = resource.getLinksByRel("http://localhost/api/rels/foo").get(0);
 
         assertThat(link2.getRel()).isEqualTo("rel:foo");
         assertThat(link2.getHref()).isEqualTo("app:app/1");

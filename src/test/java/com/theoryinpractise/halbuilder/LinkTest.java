@@ -7,7 +7,7 @@ import org.testng.annotations.Test;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 public class LinkTest {
-    private RepresentationFactory representationFactory = new DefaultRepresentationFactory("http://localhost/");
+    private RepresentationFactory representationFactory = new DefaultRepresentationFactory();
 
     private Link link = new Link(representationFactory, "http://example.com/", "rel", "name", "title", "hreflang");
 

@@ -1,11 +1,9 @@
 package com.theoryinpractise.halbuilder.impl.representations;
 
 import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
@@ -15,7 +13,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
-import com.google.common.collect.Table;
 import com.theoryinpractise.halbuilder.api.Contract;
 import com.theoryinpractise.halbuilder.api.Link;
 import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
@@ -30,17 +27,13 @@ import javax.annotation.Nullable;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 
-import static com.google.common.base.Strings.emptyToNull;
-import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Ordering.usingToString;
 import static com.theoryinpractise.halbuilder.impl.api.Support.WHITESPACE_SPLITTER;
 import static java.lang.String.format;
@@ -58,10 +51,9 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
     protected Map<String, String> namespaces = Maps.newTreeMap(usingToString());
     protected List<Link> links = Lists.newArrayList();
     protected Map<String, Object> properties = Maps.newTreeMap(usingToString());
-    protected Multimap<String,ReadableRepresentation> resources = ArrayListMultimap.create();
+    protected Multimap<String, ReadableRepresentation> resources = ArrayListMultimap.create();
 
     protected RepresentationFactory representationFactory;
-    protected final Pattern resolvableUri = Pattern.compile("^[/|?|~].*");
     protected boolean hasNullProperties = false;
 
     protected BaseRepresentation(RepresentationFactory representationFactory) {
@@ -85,11 +77,9 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
     }
 
     public List<Link> getLinksByRel(final String rel) {
-        Preconditions.checkArgument(rel != null, "Provided rel should not be null.");
-        Preconditions.checkArgument(!"".equals(rel) && !rel.contains(" "), "Provided rel should not be empty or contain spaces.");
+        Support.checkRelType(rel);
 
-        final String resolvedRelType = resolvableUri.matcher(rel).matches() ? resolveRelativeHref(rel) : rel;
-        final String curiedRel = currieHref(resolvedRelType);
+        final String curiedRel = currieHref(rel);
         final ImmutableList.Builder<Link> linkBuilder = ImmutableList.builder();
 
         linkBuilder.addAll(getLinksByRel(this, curiedRel));
@@ -105,11 +95,6 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
         Support.checkRelType(rel);
 
         return ImmutableList.copyOf(resources.get(rel));
-    }
-
-    public List<? extends ReadableRepresentation> getResources(Predicate<ReadableRepresentation> predicate) {
-        Preconditions.checkArgument(predicate != null, "Provided findPredicate should not be null.");
-        return ImmutableList.copyOf(Iterables.filter(resources.values(), predicate));
     }
 
     public Object getValue(String name) {
@@ -128,11 +113,11 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
         }
     }
 
-    private List<Link> getLinksByRel(ReadableRepresentation representation, final String curiedRel) {
-        Support.checkRelType(curiedRel);
+    private List<Link> getLinksByRel(ReadableRepresentation representation, final String rel) {
+        Support.checkRelType(rel);
         return ImmutableList.copyOf(Iterables.filter(representation.getLinks(), new Predicate<Link>() {
             public boolean apply(@Nullable Link relatable) {
-                return Iterables.contains(WHITESPACE_SPLITTER.split(relatable.getRel()), curiedRel);
+                return rel.equals(relatable.getRel());
             }
         }));
     }
@@ -169,7 +154,7 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
         return ImmutableMap.copyOf(resources.asMap());
     }
 
-    protected  void validateNamespaces(ReadableRepresentation representation) {
+    protected void validateNamespaces(ReadableRepresentation representation) {
         for (Link link : representation.getCanonicalLinks()) {
             validateNamespaces(link.getRel());
         }
@@ -198,34 +183,6 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
      */
     public boolean isSatisfiedBy(Contract contract) {
         return contract.isSatisfiedBy(this);
-    }
-
-    public String resolveRelativeHref(String href) {
-        if (getResourceLink() != null) {
-            return resolveRelativeHref(getResourceLink().getHref(), href);
-        } else {
-            throw new IllegalStateException("Unable to resolve relative href with missing resource href.");
-        }
-    }
-
-    protected String resolveRelativeHref(final String baseHref, String href) {
-
-        try {
-            if (href.startsWith("?")) {
-                return new URI(baseHref + href).toString();
-            } else if (href.startsWith("~/")) {
-                if (baseHref.endsWith("/")) {
-                    return new URI(baseHref + href.substring(2)).toString();
-                } else {
-                    return new URI(baseHref + href.substring(1)).toString();
-                }
-            } else {
-                return new URI(baseHref + "/" + href).toString();
-            }
-        } catch (URISyntaxException e) {
-            throw new RepresentationException(e.getMessage());
-        }
-
     }
 
     public boolean hasNullProperties() {
@@ -304,7 +261,7 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
         if (href != null) {
             return "<Representation: " + href.getHref() + ">";
         } else {
-            return "<Representation: @" +  Integer.toHexString(hashCode()) + ">";
+            return "<Representation: @" + Integer.toHexString(hashCode()) + ">";
         }
     }
 
