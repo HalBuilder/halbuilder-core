@@ -92,7 +92,7 @@
                         </goals>
                         <configuration>
                             <resourceBundles>
-                                <resourceBundle>com.theoryinpractise:halbuilder-test-resources:2.0.1</resourceBundle>
+                                <resourceBundle>com.theoryinpractise:halbuilder-test-resources:2.0.2-SNAPSHOT</resourceBundle>
                             </resourceBundles>
                         </configuration>
                     </execution>

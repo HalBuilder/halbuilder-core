@@ -19,17 +19,15 @@ public class CollatedLinksTest {
                 .withLink("bar", "/bar")
                 .withLink("foo", "/bar");
 
-        List<Link> collatedLinks = resource.getLinks();
-
-        assertThat(collatedLinks)
+        assertThat(resource.getLinks())
                 .isNotEmpty()
-                .has(new ContainsRelCondition("bar foo"));
+                .has(new ContainsRelCondition("bar"))
+                .has(new ContainsRelCondition("foo"));
 
         assertThat(resource.getLinksByRel("bar"))
                 .isNotNull()
-                .has(new ContainsRelCondition("bar foo"));
-
-
+                .has(new ContainsRelCondition("bar"))
+                .doesNotHave(new ContainsRelCondition("foo"));
     }
 
     @Test
@@ -38,7 +36,7 @@ public class CollatedLinksTest {
         Representation representation = new DefaultRepresentationFactory().newRepresentation("/foo");
 
         try {
-            Representation resource = representation.withLink("bar foo", "/bar");
+            representation.withLink("bar foo", "/bar");
             fail("We should fail to add a space separated link rel.");
         } catch (IllegalArgumentException e) {
             // expected
@@ -93,13 +91,14 @@ public class CollatedLinksTest {
 
         @Override
         public boolean matches(List<?> objects) {
+            boolean hasMatch = false;
             for (Object object : objects) {
                 Link link = (Link) object;
                 if (link.getRel().equals(rel)) {
-                    return true;
+                    hasMatch = true;
                 }
             }
-            return false;
+            return hasMatch;
         }
     }
 }

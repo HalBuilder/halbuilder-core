@@ -138,66 +138,20 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
     }
 
     public List<Link> getLinks() {
-        List<Link> collatedLinks = Lists.newArrayList();
+        return FluentIterable.from(links).transform(new Function<Link, Link>() {
+            @Nullable
+            @Override
+            public Link apply(@Nullable Link link) {
+                return new Link(representationFactory, currieHref(link.getHref()), currieHref(link.getRel()), link.getName(), link.getTitle(), link.getHreflang());
+            }
+        }).toSortedImmutableList(RELATABLE_ORDERING);
 
-        // href, rel, link
-        Table<String, String, Link> linkTable = HashBasedTable.create();
-
-        for (Link link : links) {
-            linkTable.put(link.getHref(), link.getRel(), link);
-        }
-
-        for (String href : linkTable.rowKeySet()) {
-            Set<String> relTypes = linkTable.row(href).keySet();
-            Collection<Link> hrefLinks = linkTable.row(href).values();
-
-            // TODO I'm not sure I like this - when collating links we 'lose' the titles, names, and lang - so we
-            // combine them - it feels iki tho.
-            String rels = Joiner.on(" ").skipNulls().join(usingToString().sortedCopy(transform(relTypes, new Function<String, String>() {
-                public String apply(@Nullable String relType) {
-                    return currieHref(relType);
-                }
-            })));
-
-            Ordering<Object> ordering = usingToString().nullsFirst();
-            Joiner joiner = Joiner.on(", ").skipNulls();
-
-            String titles = joiner.join(ordering.sortedCopy(transform(hrefLinks, new Function<Link, Object>() {
-                public Object apply(@Nullable Link link) {
-                    return link.getTitle();
-                }
-            })));
-
-            String names = joiner.join(ordering.sortedCopy(transform(hrefLinks, new Function<Link, Object>() {
-                public Object apply(@Nullable Link link) {
-                    return link.getName();
-                }
-            })));
-
-            String hreflangs = joiner.join(ordering.sortedCopy(transform(hrefLinks, new Function<Link, Object>() {
-                public Object apply(@Nullable Link link) {
-                    return link.getHreflang();
-                }
-            })));
-
-
-            String curiedHref = currieHref(href);
-
-            collatedLinks.add(new Link(representationFactory, curiedHref, rels,
-                                              emptyToNull(names),
-                                              emptyToNull(titles),
-                                              emptyToNull(hreflangs)));
-        }
-
-        return RELATABLE_ORDERING.sortedCopy(collatedLinks);
     }
 
     private String currieHref(String href) {
-        if (href.contains("://")) {
-            for (Map.Entry<String, String> entry : namespaces.entrySet()) {
-                if (href.startsWith(entry.getValue())) {
-                    return href.replace(entry.getValue(), entry.getKey() + ":");
-                }
+        for (Map.Entry<String, String> entry : namespaces.entrySet()) {
+            if (href.startsWith(entry.getValue())) {
+                return href.replace(entry.getValue(), entry.getKey() + ":");
             }
         }
         return href;
