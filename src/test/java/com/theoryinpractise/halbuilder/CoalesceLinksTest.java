@@ -1,19 +1,22 @@
 package com.theoryinpractise.halbuilder;
 
+import com.google.common.collect.Iterables;
 import com.theoryinpractise.halbuilder.api.Link;
 import com.theoryinpractise.halbuilder.api.Representation;
+import com.theoryinpractise.halbuilder.api.RepresentationFactory;
 import org.fest.assertions.core.Condition;
 import org.testng.annotations.Test;
 
 import java.util.List;
 
+import static com.theoryinpractise.halbuilder.impl.api.Support.WHITESPACE_SPLITTER;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.fest.assertions.api.Assertions.fail;
 
-public class CollatedLinksTest {
+public class CoalesceLinksTest {
 
     @Test
-    public void testCollatedLinks() {
+    public void testNonCoalesceLinks() {
 
         Representation resource = new DefaultRepresentationFactory().newRepresentation("/foo")
                 .withLink("bar", "/bar")
@@ -28,6 +31,38 @@ public class CollatedLinksTest {
                 .isNotNull()
                 .has(new ContainsRelCondition("bar"))
                 .doesNotHave(new ContainsRelCondition("foo"));
+
+        assertThat(resource.getLinksByRel("foo"))
+                .isNotNull()
+                .doesNotHave(new ContainsRelCondition("bar"))
+                .has(new ContainsRelCondition("foo"));
+
+    }
+
+    @Test
+    public void testCoalesceLinks() {
+
+        Representation resource = new DefaultRepresentationFactory()
+                .withFlag(RepresentationFactory.COALESCE_LINKS)
+                .newRepresentation("/foo")
+                .withLink("bar", "/bar")
+                .withLink("foo", "/bar");
+
+        assertThat(resource.getLinks())
+                .isNotEmpty()
+                .has(new ContainsRelCondition("bar foo"))
+                .has(new ContainsRelCondition("bar"))
+                .has(new ContainsRelCondition("foo"));
+
+        assertThat(resource.getLinksByRel("bar"))
+                .isNotNull()
+                .has(new ContainsRelCondition("bar"))
+                .doesNotHave(new ContainsRelCondition("foo"));
+
+        assertThat(resource.getLinksByRel("foo"))
+                .isNotNull()
+                .doesNotHave(new ContainsRelCondition("bar"))
+                .has(new ContainsRelCondition("foo"));
     }
 
     @Test
@@ -94,7 +129,7 @@ public class CollatedLinksTest {
             boolean hasMatch = false;
             for (Object object : objects) {
                 Link link = (Link) object;
-                if (link.getRel().equals(rel)) {
+                if (rel.equals(link.getRel()) || Iterables.contains(WHITESPACE_SPLITTER.split(link.getRel()), rel)) {
                     hasMatch = true;
                 }
             }

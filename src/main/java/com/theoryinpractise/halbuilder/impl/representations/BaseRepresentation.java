@@ -1,9 +1,11 @@
 package com.theoryinpractise.halbuilder.impl.representations;
 
 import com.google.common.base.Function;
+import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
@@ -13,6 +15,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
+import com.google.common.collect.Table;
 import com.theoryinpractise.halbuilder.api.Contract;
 import com.theoryinpractise.halbuilder.api.Link;
 import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
@@ -34,7 +37,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.base.Strings.emptyToNull;
+import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Ordering.usingToString;
+import static com.google.common.collect.Sets.newHashSet;
 import static com.theoryinpractise.halbuilder.impl.api.Support.WHITESPACE_SPLITTER;
 import static java.lang.String.format;
 
@@ -69,7 +75,7 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
     }
 
     public List<Link> getCanonicalLinks() {
-        return ImmutableList.copyOf(links);
+        return ImmutableList.copyOf(getNaturalLinks());
     }
 
     public Link getLinkByRel(String rel) {
@@ -115,14 +121,22 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
 
     private List<Link> getLinksByRel(ReadableRepresentation representation, final String rel) {
         Support.checkRelType(rel);
-        return ImmutableList.copyOf(Iterables.filter(representation.getLinks(), new Predicate<Link>() {
+        return ImmutableList.copyOf(Iterables.filter(representation.getCanonicalLinks(), new Predicate<Link>() {
             public boolean apply(@Nullable Link relatable) {
-                return rel.equals(relatable.getRel());
+                return rel.equals(relatable.getRel()) || Iterables.contains(WHITESPACE_SPLITTER.split(relatable.getRel()), rel);
             }
         }));
     }
 
     public List<Link> getLinks() {
+        if (representationFactory.getFlags().contains(RepresentationFactory.COALESCE_LINKS)) {
+            return getCollatedLinks();
+        } else {
+            return getNaturalLinks();
+        }
+    }
+
+    private List<Link> getNaturalLinks() {
         return FluentIterable.from(links).transform(new Function<Link, Link>() {
             @Nullable
             @Override
@@ -132,6 +146,73 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
         }).toSortedImmutableList(RELATABLE_ORDERING);
 
     }
+
+
+    private List<Link> getCollatedLinks() {
+        List<Link> collatedLinks = Lists.newArrayList();
+
+        // href, rel, link
+        Table<String, String, Link> linkTable = HashBasedTable.create();
+
+        for (Link link : links) {
+            linkTable.put(link.getHref(), link.getRel(), link);
+        }
+
+        for (String href : linkTable.rowKeySet()) {
+            Set<String> relTypes = linkTable.row(href).keySet();
+            Collection<Link> hrefLinks = linkTable.row(href).values();
+
+            String rels = mkSortableJoinerForIterable(" ", relTypes).apply(new Function<String, String>() {
+                public String apply(@Nullable String relType) {
+                    return currieHref(relType);
+                }
+            });
+
+            Function<Function<Link, String>, String> nameFunc = mkSortableJoinerForIterable(", ", hrefLinks);
+
+
+            String titles = nameFunc.apply(new Function<Link, String>() {
+                public String apply(@Nullable Link link) {
+                    return link.getTitle();
+                }
+            });
+
+            String names = nameFunc.apply(new Function<Link, String>() {
+                public String apply(@Nullable Link link) {
+                    return link.getName();
+                }
+            });
+
+
+            String hreflangs = nameFunc.apply(new Function<Link, String>() {
+                public String apply(@Nullable Link link) {
+                    return link.getHreflang();
+                }
+            });
+
+
+
+            String curiedHref = currieHref(href);
+
+            collatedLinks.add(new Link(representationFactory, curiedHref, rels,
+                                       emptyToNull(names),
+                                       emptyToNull(titles),
+                                       emptyToNull(hreflangs)));
+        }
+
+        return RELATABLE_ORDERING.sortedCopy(collatedLinks);
+    }
+
+    private <T>  Function<Function<T, String>, String> mkSortableJoinerForIterable(final String join, final Iterable<T> ts) {
+        return new Function<Function<T, String>, String>() {
+            @Nullable
+            @Override
+            public String apply(Function<T, String>f ) {
+                return Joiner.on(join).skipNulls().join(usingToString().nullsFirst().sortedCopy(newHashSet(transform(ts, f))));
+            }
+        };
+    }
+
 
     private String currieHref(String href) {
         for (Map.Entry<String, String> entry : namespaces.entrySet()) {
@@ -209,13 +290,17 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
     }
 
     public String toString(String contentType) {
-        return toString(contentType, null);
+        return toString(contentType, Collections.<URI>emptySet());
     }
 
     public String toString(String contentType, final Set<URI> flags) {
         StringWriter sw = new StringWriter();
         toString(contentType, flags, sw);
         return sw.toString();
+    }
+
+    public void toString(String contentType, Writer writer) {
+        toString(contentType, Collections.<URI>emptySet(), writer);
     }
 
     public void toString(String contentType, Set<URI> flags, Writer writer) {
