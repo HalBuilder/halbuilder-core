@@ -8,11 +8,8 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-import com.theoryinpractise.halbuilder.api.Link;
-import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
-import com.theoryinpractise.halbuilder.api.Renderer;
-import com.theoryinpractise.halbuilder.api.RepresentationException;
-import com.theoryinpractise.halbuilder.api.RepresentationFactory;
+import com.theoryinpractise.halbuilder.api.*;
+import com.theoryinpractise.halbuilder.api.RepresentationWriter;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -33,9 +30,9 @@ import static com.theoryinpractise.halbuilder.impl.api.Support.TEMPLATED;
 import static com.theoryinpractise.halbuilder.impl.api.Support.TITLE;
 
 
-public class JsonRenderer<T> implements Renderer<T> {
+public class JsonRepresentationWriter<T> implements RepresentationWriter<T> {
 
-    public void render(ReadableRepresentation representation, Set<URI> flags, Writer writer) {
+    public void write(ReadableRepresentation representation, Set<URI> flags, Writer writer) {
 
         JsonFactory f = new JsonFactory();
         f.enable(JsonGenerator.Feature.QUOTE_FIELD_NAMES);

@@ -1,11 +1,8 @@
 package com.theoryinpractise.halbuilder.impl.xml;
 
 import com.google.common.base.Strings;
-import com.theoryinpractise.halbuilder.api.Link;
-import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
-import com.theoryinpractise.halbuilder.api.Renderer;
-import com.theoryinpractise.halbuilder.api.RepresentationException;
-import com.theoryinpractise.halbuilder.api.RepresentationFactory;
+import com.theoryinpractise.halbuilder.api.*;
+import com.theoryinpractise.halbuilder.api.RepresentationWriter;
 import org.jdom.Element;
 import org.jdom.Namespace;
 import org.jdom.Text;
@@ -30,9 +27,9 @@ import static com.theoryinpractise.halbuilder.impl.api.Support.TITLE;
 import static com.theoryinpractise.halbuilder.impl.api.Support.XSI_NAMESPACE;
 
 
-public class XmlRenderer<T> implements Renderer<T> {
+public class XmlRepresentationWriter<T> implements RepresentationWriter<T> {
 
-    public void render(ReadableRepresentation representation, Set<URI> flags, Writer writer) {
+    public void write(ReadableRepresentation representation, Set<URI> flags, Writer writer) {
         final Element element = renderElement("self", representation, false);
         try {
             Format prettyFormat = flags.contains(RepresentationFactory.PRETTY_PRINT)

@@ -7,16 +7,16 @@ import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
 import com.theoryinpractise.halbuilder.api.Link;
 import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
-import com.theoryinpractise.halbuilder.api.Renderer;
+import com.theoryinpractise.halbuilder.api.RepresentationWriter;
 import com.theoryinpractise.halbuilder.api.Representation;
 import com.theoryinpractise.halbuilder.api.RepresentationException;
 import com.theoryinpractise.halbuilder.api.RepresentationFactory;
 import com.theoryinpractise.halbuilder.impl.ContentType;
-import com.theoryinpractise.halbuilder.impl.api.RepresentationReader;
-import com.theoryinpractise.halbuilder.impl.json.JsonRenderer;
+import com.theoryinpractise.halbuilder.api.RepresentationReader;
+import com.theoryinpractise.halbuilder.impl.json.JsonRepresentationWriter;
 import com.theoryinpractise.halbuilder.impl.json.JsonRepresentationReader;
 import com.theoryinpractise.halbuilder.impl.representations.MutableRepresentation;
-import com.theoryinpractise.halbuilder.impl.xml.XmlRenderer;
+import com.theoryinpractise.halbuilder.impl.xml.XmlRepresentationWriter;
 import com.theoryinpractise.halbuilder.impl.xml.XmlRepresentationReader;
 
 import java.io.BufferedReader;
@@ -32,20 +32,20 @@ import static java.lang.String.format;
 
 public class DefaultRepresentationFactory extends RepresentationFactory {
 
-    private Map<ContentType, Class<? extends Renderer>> contentRenderers = Maps.newHashMap();
+    private Map<ContentType, Class<? extends RepresentationWriter>> contentRenderers = Maps.newHashMap();
     private Map<ContentType, Class<? extends RepresentationReader>> representationReaders = Maps.newHashMap();
     private TreeMap<String, String> namespaces = Maps.newTreeMap(Ordering.usingToString());
     private List<Link> links = Lists.newArrayList();
     private Set<URI> flags = Sets.newHashSet();
 
     public DefaultRepresentationFactory() {
-        this.contentRenderers.put(new ContentType(HAL_XML), XmlRenderer.class);
-        this.contentRenderers.put(new ContentType(HAL_JSON), JsonRenderer.class);
+        this.contentRenderers.put(new ContentType(HAL_XML), XmlRepresentationWriter.class);
+        this.contentRenderers.put(new ContentType(HAL_JSON), JsonRepresentationWriter.class);
         this.representationReaders.put(new ContentType(HAL_XML), XmlRepresentationReader.class);
         this.representationReaders.put(new ContentType(HAL_JSON), JsonRepresentationReader.class);
     }
 
-    public DefaultRepresentationFactory withRenderer(String contentType, Class<? extends Renderer<String>> rendererClass) {
+    public DefaultRepresentationFactory withRenderer(String contentType, Class<? extends RepresentationWriter<String>> rendererClass) {
         contentRenderers.put(new ContentType(contentType), rendererClass);
         return this;
     }
@@ -129,9 +129,9 @@ public class DefaultRepresentationFactory extends RepresentationFactory {
         }
     }
 
-    public Renderer<String> lookupRenderer(String contentType) {
+    public RepresentationWriter<String> lookupRenderer(String contentType) {
 
-        for (Map.Entry<ContentType, Class<? extends Renderer>> entry : contentRenderers.entrySet()) {
+        for (Map.Entry<ContentType, Class<? extends RepresentationWriter>> entry : contentRenderers.entrySet()) {
             if (entry.getKey().matches(contentType)) {
                 try {
                     return entry.getValue().newInstance();

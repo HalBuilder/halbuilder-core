@@ -19,7 +19,7 @@ import com.google.common.collect.Table;
 import com.theoryinpractise.halbuilder.api.Contract;
 import com.theoryinpractise.halbuilder.api.Link;
 import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
-import com.theoryinpractise.halbuilder.api.Renderer;
+import com.theoryinpractise.halbuilder.api.RepresentationWriter;
 import com.theoryinpractise.halbuilder.api.RepresentationException;
 import com.theoryinpractise.halbuilder.api.RepresentationFactory;
 import com.theoryinpractise.halbuilder.impl.api.Support;
@@ -285,7 +285,7 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
         if (InterfaceContract.newInterfaceContract(anInterface).isSatisfiedBy(this)) {
             return InterfaceRenderer.newInterfaceRenderer(anInterface).render(this);
         } else {
-            throw new RepresentationException("Unable to render representation to " + anInterface.getName());
+            throw new RepresentationException("Unable to write representation to " + anInterface.getName());
         }
     }
 
@@ -305,10 +305,10 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
 
     public void toString(String contentType, Set<URI> flags, Writer writer) {
         validateNamespaces(this);
-        Renderer<String> renderer = representationFactory.lookupRenderer(contentType);
+        RepresentationWriter<String> representationWriter = representationFactory.lookupRenderer(contentType);
         ImmutableSet.Builder<URI> uriBuilder = ImmutableSet.<URI>builder().addAll(representationFactory.getFlags());
         if (flags != null) uriBuilder.addAll(flags);
-        renderer.render(this, uriBuilder.build(), writer);
+        representationWriter.write(this, uriBuilder.build(), writer);
     }
 
 

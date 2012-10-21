@@ -11,7 +11,7 @@ import java.lang.reflect.Proxy;
 import static com.theoryinpractise.halbuilder.impl.bytecode.InterfaceSupport.derivePropertyNameFromMethod;
 
 /**
- * Java Interface based "renderer", this will render the resource as a Proxy to a Java interface.
+ * Java Interface based "renderer", this will write the resource as a Proxy to a Java interface.
  */
 public class InterfaceRenderer<T> {
 
@@ -52,7 +52,7 @@ public class InterfaceRenderer<T> {
             });
             return proxy;
         } else {
-            throw new RepresentationException("Unable to render representation to " + anInterface.getName());
+            throw new RepresentationException("Unable to write representation to " + anInterface.getName());
         }
 
 

@@ -1,7 +1,7 @@
 package com.theoryinpractise.halbuilder;
 
 import com.theoryinpractise.halbuilder.api.RepresentationFactory;
-import com.theoryinpractise.halbuilder.impl.api.RepresentationReader;
+import com.theoryinpractise.halbuilder.api.RepresentationReader;
 import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
 import org.testng.annotations.Test;
 
