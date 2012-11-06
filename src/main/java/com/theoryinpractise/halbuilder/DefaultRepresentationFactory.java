@@ -87,7 +87,7 @@ public class DefaultRepresentationFactory extends RepresentationFactory {
 
         // Add factory standard links
         for (Link link : links) {
-            representation.withLink(link.getRel(), link.getHref(), link.getName(), link.getTitle(), link.getHreflang());
+            representation.withLink(link.getRel(), link.getHref(), link.getName(), link.getTitle(), link.getHreflang(), link.getProfile());
         }
 
         return representation;

@@ -1,10 +1,6 @@
 package com.theoryinpractise.halbuilder.impl.xml;
 
-import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
-import com.theoryinpractise.halbuilder.api.Representation;
-import com.theoryinpractise.halbuilder.api.RepresentationException;
-import com.theoryinpractise.halbuilder.api.RepresentationFactory;
-import com.theoryinpractise.halbuilder.api.RepresentationReader;
+import com.theoryinpractise.halbuilder.api.*;
 import com.theoryinpractise.halbuilder.impl.representations.MutableRepresentation;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -16,10 +12,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.List;
 
-import static com.theoryinpractise.halbuilder.impl.api.Support.HREFLANG;
-import static com.theoryinpractise.halbuilder.impl.api.Support.NAME;
-import static com.theoryinpractise.halbuilder.impl.api.Support.TITLE;
-import static com.theoryinpractise.halbuilder.impl.api.Support.XSI_NAMESPACE;
+import static com.theoryinpractise.halbuilder.impl.api.Support.*;
 
 public class XmlRepresentationReader implements RepresentationReader {
     private RepresentationFactory representationFactory;
@@ -63,13 +56,14 @@ public class XmlRepresentationReader implements RepresentationReader {
 
         List<Element> links = element.getChildren("link");
         for (Element link : links) {
-            String rel = link.getAttributeValue("rel");
-            String href = link.getAttributeValue("href");
-            String name = link.getAttributeValue( NAME);
-            String title = link.getAttributeValue( TITLE);
-            String hreflang = link.getAttributeValue( HREFLANG);
+            String rel = link.getAttributeValue(REL);
+            String href = link.getAttributeValue(HREF);
+            String name = link.getAttributeValue(NAME);
+            String title = link.getAttributeValue(TITLE);
+            String hreflang = link.getAttributeValue(HREFLANG);
+            String profile = link.getAttributeValue(PROFILE);
 
-            resource.withLink(rel, href, name, title, hreflang);
+            resource.withLink(rel, href, name, title, hreflang, profile);
         }
 
     }

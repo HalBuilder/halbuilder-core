@@ -2,15 +2,12 @@ package com.theoryinpractise.halbuilder;
 
 import com.damnhandy.uri.template.UriTemplate;
 import com.google.common.base.Charsets;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.io.Resources;
-import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
-import com.theoryinpractise.halbuilder.api.Representable;
-import com.theoryinpractise.halbuilder.api.Representation;
-import com.theoryinpractise.halbuilder.api.RepresentationException;
-import com.theoryinpractise.halbuilder.api.RepresentationFactory;
+import com.theoryinpractise.halbuilder.api.*;
 import com.theoryinpractise.halbuilder.impl.representations.MutableRepresentation;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -48,6 +45,7 @@ public class RenderingTest {
     private String exampleWithMultipleNestedSubresourcesJson;
     private String exampleWithTemplateXml;
     private String exampleWithTemplateJson;
+    private String exampleWithArray;
 
     @BeforeMethod
     public void setup() throws IOException {
@@ -87,11 +85,13 @@ public class RenderingTest {
                 .trim().replaceAll("\n", "\r\n");
         exampleWithTemplateJson = Resources.toString(RenderingTest.class.getResource("/exampleWithTemplate.json"), Charsets.UTF_8)
                 .trim();
+        exampleWithArray = Resources.toString(RenderingTest.class.getResource("/exampleWithArray.json"), Charsets.UTF_8)
+                .trim();
     }
 
 
     private Representation newBaseResource(final Representation resource) {
-        return resource.withLink("ns:parent", BASE_URL + "customer/1234", "bob", "The Parent", "en");
+        return resource.withLink("ns:parent", BASE_URL + "customer/1234", "bob", "The Parent", "en", "customer");
     }
 
     private Representation newBaseResource(final URI uri) {
@@ -367,6 +367,20 @@ public class RenderingTest {
 
         assertThat(party.toString(RepresentationFactory.HAL_XML)).isEqualTo(exampleWithMultipleNestedSubresourcesXml);
         assertThat(party.toString(RepresentationFactory.HAL_JSON)).isEqualTo(exampleWithMultipleNestedSubresourcesJson);
+    }
+
+    @Test
+    public void testHalWithArray() {
+
+        String representation = new DefaultRepresentationFactory()
+                .withFlag(RepresentationFactory.PRETTY_PRINT)
+                .newRepresentation()
+                .withProperty("name", "Example Resource")
+                .withProperty("array", ImmutableList.of("one", "two", "three"))
+                .toString(RepresentationFactory.HAL_JSON);
+
+        assertThat(representation).isEqualTo(exampleWithArray);
+
     }
 
     public static class Phone {

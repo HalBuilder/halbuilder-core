@@ -3,25 +3,8 @@ package com.theoryinpractise.halbuilder.impl.representations;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Ordering;
-import com.google.common.collect.Table;
-import com.theoryinpractise.halbuilder.api.Contract;
-import com.theoryinpractise.halbuilder.api.Link;
-import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
-import com.theoryinpractise.halbuilder.api.RepresentationWriter;
-import com.theoryinpractise.halbuilder.api.RepresentationException;
-import com.theoryinpractise.halbuilder.api.RepresentationFactory;
+import com.google.common.collect.*;
+import com.theoryinpractise.halbuilder.api.*;
 import com.theoryinpractise.halbuilder.impl.api.Support;
 import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceContract;
 import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceRenderer;
@@ -30,12 +13,7 @@ import javax.annotation.Nullable;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static com.google.common.base.Strings.emptyToNull;
 import static com.google.common.collect.Iterables.transform;
@@ -141,7 +119,7 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
             @Nullable
             @Override
             public Link apply(@Nullable Link link) {
-                return new Link(representationFactory, currieHref(link.getHref()), currieHref(link.getRel()), link.getName(), link.getTitle(), link.getHreflang());
+                return new Link(representationFactory, currieHref(link.getRel()), currieHref(link.getHref()), link.getName(), link.getTitle(), link.getHreflang(), link.getProfile());
             }
         }).toSortedImmutableList(RELATABLE_ORDERING);
 
@@ -170,7 +148,6 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
 
             Function<Function<Link, String>, String> nameFunc = mkSortableJoinerForIterable(", ", hrefLinks);
 
-
             String titles = nameFunc.apply(new Function<Link, String>() {
                 public String apply(@Nullable Link link) {
                     return link.getTitle();
@@ -183,36 +160,40 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
                 }
             });
 
-
             String hreflangs = nameFunc.apply(new Function<Link, String>() {
                 public String apply(@Nullable Link link) {
                     return link.getHreflang();
                 }
             });
 
-
+            String profile = nameFunc.apply(new Function<Link, String>() {
+                public String apply(@Nullable Link link) {
+                    return link.getProfile();
+                }
+            });
 
             String curiedHref = currieHref(href);
 
-            collatedLinks.add(new Link(representationFactory, curiedHref, rels,
-                                       emptyToNull(names),
-                                       emptyToNull(titles),
-                                       emptyToNull(hreflangs)));
+            collatedLinks.add(new Link(representationFactory, rels, curiedHref,
+                    emptyToNull(names),
+                    emptyToNull(titles),
+                    emptyToNull(hreflangs),
+                    emptyToNull(profile)
+            ));
         }
 
         return RELATABLE_ORDERING.sortedCopy(collatedLinks);
     }
 
-    private <T>  Function<Function<T, String>, String> mkSortableJoinerForIterable(final String join, final Iterable<T> ts) {
+    private <T> Function<Function<T, String>, String> mkSortableJoinerForIterable(final String join, final Iterable<T> ts) {
         return new Function<Function<T, String>, String>() {
             @Nullable
             @Override
-            public String apply(Function<T, String>f ) {
+            public String apply(Function<T, String> f) {
                 return Joiner.on(join).skipNulls().join(usingToString().nullsFirst().sortedCopy(newHashSet(transform(ts, f))));
             }
         };
     }
-
 
     private String currieHref(String href) {
         for (Map.Entry<String, String> entry : namespaces.entrySet()) {

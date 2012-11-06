@@ -12,13 +12,7 @@ import java.io.Reader;
 import java.util.Iterator;
 import java.util.Map;
 
-import static com.theoryinpractise.halbuilder.impl.api.Support.CURIE;
-import static com.theoryinpractise.halbuilder.impl.api.Support.EMBEDDED;
-import static com.theoryinpractise.halbuilder.impl.api.Support.HREF;
-import static com.theoryinpractise.halbuilder.impl.api.Support.HREFLANG;
-import static com.theoryinpractise.halbuilder.impl.api.Support.LINKS;
-import static com.theoryinpractise.halbuilder.impl.api.Support.NAME;
-import static com.theoryinpractise.halbuilder.impl.api.Support.TITLE;
+import static com.theoryinpractise.halbuilder.impl.api.Support.*;
 
 public class JsonRepresentationReader implements RepresentationReader {
     private RepresentationFactory representationFactory;
@@ -97,8 +91,9 @@ public class JsonRepresentationReader implements RepresentationReader {
         String name = optionalNodeValueAsText(valueNode, NAME);
         String title = optionalNodeValueAsText(valueNode, TITLE);
         String hreflang = optionalNodeValueAsText(valueNode, HREFLANG);
+        String profile = optionalNodeValueAsText(valueNode, PROFILE);
 
-        resource.withLink(rel, href, name, title, hreflang);
+        resource.withLink(rel, href, name, title, hreflang, profile);
     }
 
     String optionalNodeValueAsText(JsonNode node, String key) {

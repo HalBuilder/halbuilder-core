@@ -3,13 +3,13 @@ package com.theoryinpractise.halbuilder.impl.json;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Function;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.theoryinpractise.halbuilder.api.*;
-import com.theoryinpractise.halbuilder.api.RepresentationWriter;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -20,14 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static com.theoryinpractise.halbuilder.impl.api.Support.CURIE;
-import static com.theoryinpractise.halbuilder.impl.api.Support.EMBEDDED;
-import static com.theoryinpractise.halbuilder.impl.api.Support.HREF;
-import static com.theoryinpractise.halbuilder.impl.api.Support.HREFLANG;
-import static com.theoryinpractise.halbuilder.impl.api.Support.LINKS;
-import static com.theoryinpractise.halbuilder.impl.api.Support.NAME;
-import static com.theoryinpractise.halbuilder.impl.api.Support.TEMPLATED;
-import static com.theoryinpractise.halbuilder.impl.api.Support.TITLE;
+import static com.theoryinpractise.halbuilder.impl.api.Support.*;
 
 
 public class JsonRepresentationWriter<T> implements RepresentationWriter<T> {
@@ -35,6 +28,7 @@ public class JsonRepresentationWriter<T> implements RepresentationWriter<T> {
     public void write(ReadableRepresentation representation, Set<URI> flags, Writer writer) {
 
         JsonFactory f = new JsonFactory();
+        f.setCodec(new ObjectMapper());
         f.enable(JsonGenerator.Feature.QUOTE_FIELD_NAMES);
 
         try {
@@ -62,7 +56,7 @@ public class JsonRepresentationWriter<T> implements RepresentationWriter<T> {
             // Include namespaces as links when not embedded
             if (!embedded) {
                 for (Map.Entry<String, String> entry : representation.getNamespaces().entrySet()) {
-                    links.add(new Link(null, entry.getValue(), CURIE, entry.getKey(), null, null));
+                    links.add(new Link(null, CURIE, entry.getValue(), entry.getKey(), null, null, null));
                 }
             }
 
@@ -96,10 +90,9 @@ public class JsonRepresentationWriter<T> implements RepresentationWriter<T> {
         }
 
         for (Map.Entry<String, Object> entry : representation.getProperties().entrySet()) {
-            if(entry.getValue() != null) {
+            if (entry.getValue() != null) {
                 g.writeObjectField(entry.getKey(), entry.getValue());
-            }
-            else {
+            } else {
                 g.writeNullField(entry.getKey());
             }
         }

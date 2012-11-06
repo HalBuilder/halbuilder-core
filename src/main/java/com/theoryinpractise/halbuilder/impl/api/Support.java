@@ -7,7 +7,7 @@ import org.jdom.Namespace;
 public class Support {
 
     public static final Splitter WHITESPACE_SPLITTER = Splitter.onPattern("\\s")
-                                                               .omitEmptyStrings();
+            .omitEmptyStrings();
 
 
     public static final String REL = "rel";
@@ -28,6 +28,7 @@ public class Support {
      */
     public static final Namespace XSI_NAMESPACE = Namespace.getNamespace(
             "xsi", "http://www.w3.org/2001/XMLSchema-instance");
+    public static final String PROFILE = "profile";
 
     public static void checkRelType(String rel) {
         Preconditions.checkArgument(rel != null, "Provided rel should not be null.");

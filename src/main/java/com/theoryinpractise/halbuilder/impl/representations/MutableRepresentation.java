@@ -35,7 +35,7 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
      * @return
      */
     public MutableRepresentation withLink(String rel, String href) {
-        withLink(rel, href, null, null, null);
+        withLink(rel, href, null, null, null, null);
         return this;
     }
 
@@ -45,9 +45,9 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
      * @param rel
      * @param href The target href for the link, relative to the href of this resource.
      */
-    public MutableRepresentation withLink(String rel, String href, String name, String title, String hreflang) {
+    public MutableRepresentation withLink(String rel, String href, String name, String title, String hreflang, String profile) {
         Support.checkRelType(rel);
-        links.add(new Link(representationFactory, href, rel, name, title, hreflang));
+        links.add(new Link(representationFactory, rel, href, name, title, hreflang, profile));
         return this;
     }
 
