@@ -46,17 +46,17 @@ public class DefaultRepresentationFactory extends RepresentationFactory {
     }
 
     @Override
-    public DefaultRepresentationFactory withNamespace(String namespace, String url) {
+    public DefaultRepresentationFactory withNamespace(String namespace, String href) {
         if (namespaces.containsKey(namespace)) {
             throw new RepresentationException(format("Duplicate namespace '%s' found for representation factory", namespace));
         }
-        namespaces.put(namespace, url);
+        namespaces.put(namespace, href);
         return this;
     }
 
     @Override
-    public DefaultRepresentationFactory withLink(String rel, String url) {
-        links.add(new Link(this, rel, url));
+    public DefaultRepresentationFactory withLink(String rel, String href) {
+        links.add(new Link(this, rel, href));
         return this;
     }
 
