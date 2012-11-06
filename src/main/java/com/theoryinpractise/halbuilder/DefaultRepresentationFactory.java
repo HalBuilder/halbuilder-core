@@ -1,23 +1,13 @@
 package com.theoryinpractise.halbuilder;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Ordering;
-import com.google.common.collect.Sets;
-import com.theoryinpractise.halbuilder.api.Link;
-import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
-import com.theoryinpractise.halbuilder.api.RepresentationWriter;
-import com.theoryinpractise.halbuilder.api.Representation;
-import com.theoryinpractise.halbuilder.api.RepresentationException;
-import com.theoryinpractise.halbuilder.api.RepresentationFactory;
+import com.google.common.collect.*;
+import com.theoryinpractise.halbuilder.api.*;
 import com.theoryinpractise.halbuilder.impl.ContentType;
-import com.theoryinpractise.halbuilder.api.RepresentationReader;
-import com.theoryinpractise.halbuilder.impl.json.JsonRepresentationWriter;
 import com.theoryinpractise.halbuilder.impl.json.JsonRepresentationReader;
+import com.theoryinpractise.halbuilder.impl.json.JsonRepresentationWriter;
 import com.theoryinpractise.halbuilder.impl.representations.MutableRepresentation;
-import com.theoryinpractise.halbuilder.impl.xml.XmlRepresentationWriter;
 import com.theoryinpractise.halbuilder.impl.xml.XmlRepresentationReader;
+import com.theoryinpractise.halbuilder.impl.xml.XmlRepresentationWriter;
 
 import java.io.BufferedReader;
 import java.io.Reader;
@@ -66,7 +56,7 @@ public class DefaultRepresentationFactory extends RepresentationFactory {
 
     @Override
     public DefaultRepresentationFactory withLink(String rel, String url) {
-        links.add(new Link(this, url, rel));
+        links.add(new Link(this, rel, url));
         return this;
     }
 

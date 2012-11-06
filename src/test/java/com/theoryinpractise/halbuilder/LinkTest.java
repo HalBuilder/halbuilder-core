@@ -79,7 +79,7 @@ public class LinkTest {
 
     @Test
     public void testToStringRendersHrefRel() {
-        String toString = new Link(representationFactory, "http://example.com/other", "rel").toString();
+        String toString = new Link(representationFactory, "rel", "http://example.com/other").toString();
         assertThat(toString).isEqualTo("<link rel=\"rel\" href=\"http://example.com/other\"/>");
     }
 
@@ -91,13 +91,13 @@ public class LinkTest {
 
     @Test
     public void testHasTemplate() {
-        Link templateLink = new Link(representationFactory, "http://example.com/search{?customerId}", "customerSearch");
+        Link templateLink = new Link(representationFactory, "customerSearch", "http://example.com/search{?customerId}");
         assertThat(templateLink.hasTemplate()).isTrue();
     }
 
     @Test
     public void testDoesNotHaveTemplate() {
-        Link nonTemplateLink = new Link(representationFactory, "http://example.com/other", "rel");
+        Link nonTemplateLink = new Link(representationFactory, "rel", "http://example.com/other");
         assertThat(nonTemplateLink.hasTemplate()).isFalse();
     }
 }

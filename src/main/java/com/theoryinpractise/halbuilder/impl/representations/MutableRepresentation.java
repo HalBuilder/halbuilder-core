@@ -1,11 +1,6 @@
 package com.theoryinpractise.halbuilder.impl.representations;
 
-import com.theoryinpractise.halbuilder.api.Link;
-import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
-import com.theoryinpractise.halbuilder.api.Representable;
-import com.theoryinpractise.halbuilder.api.Representation;
-import com.theoryinpractise.halbuilder.api.RepresentationException;
-import com.theoryinpractise.halbuilder.api.RepresentationFactory;
+import com.theoryinpractise.halbuilder.api.*;
 import com.theoryinpractise.halbuilder.impl.api.Support;
 
 import java.beans.BeanInfo;
@@ -24,7 +19,7 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
     public MutableRepresentation(RepresentationFactory representationFactory, String href) {
         super(representationFactory);
         if (href != null) {
-            this.links.add(new Link(representationFactory, href, "self"));
+            this.links.add(new Link(representationFactory, "self", href));
         }
     }
 
