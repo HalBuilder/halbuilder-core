@@ -1,12 +1,13 @@
 package com.theoryinpractise.halbuilder.impl.api;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import org.jdom.Namespace;
 
 public class Support {
 
     public static final Splitter WHITESPACE_SPLITTER = Splitter.onPattern("\\s")
-                                                               .omitEmptyStrings();
+            .omitEmptyStrings();
 
 
     public static final String REL = "rel";
@@ -21,11 +22,17 @@ public class Support {
     public static final String HREFLANG = "hreflang";
     public static final String TEMPLATED = "templated";
 
-    /** 
+    /**
      * Define the XML schema instance namespace, so we can use it when
      * rendering nil elements.
      */
     public static final Namespace XSI_NAMESPACE = Namespace.getNamespace(
             "xsi", "http://www.w3.org/2001/XMLSchema-instance");
+    public static final String PROFILE = "profile";
+
+    public static void checkRelType(String rel) {
+        Preconditions.checkArgument(rel != null, "Provided rel should not be null.");
+        Preconditions.checkArgument(!"".equals(rel) && !rel.contains(" "), "Provided rel value should be a single rel type, as defined by http://tools.ietf.org/html/rfc5988");
+    }
 
 }

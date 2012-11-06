@@ -2,50 +2,42 @@ package com.theoryinpractise.halbuilder.impl.json;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.theoryinpractise.halbuilder.ResourceFactory;
-import com.theoryinpractise.halbuilder.impl.api.ResourceReader;
-import com.theoryinpractise.halbuilder.impl.resources.MutableResource;
-import com.theoryinpractise.halbuilder.spi.ReadableResource;
-import com.theoryinpractise.halbuilder.spi.ResourceException;
+import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
+import com.theoryinpractise.halbuilder.api.RepresentationException;
+import com.theoryinpractise.halbuilder.api.RepresentationFactory;
+import com.theoryinpractise.halbuilder.api.RepresentationReader;
+import com.theoryinpractise.halbuilder.impl.representations.MutableRepresentation;
 
 import java.io.Reader;
 import java.util.Iterator;
 import java.util.Map;
 
-import static com.theoryinpractise.halbuilder.impl.api.Support.CURIE;
-import static com.theoryinpractise.halbuilder.impl.api.Support.EMBEDDED;
-import static com.theoryinpractise.halbuilder.impl.api.Support.HREF;
-import static com.theoryinpractise.halbuilder.impl.api.Support.HREFLANG;
-import static com.theoryinpractise.halbuilder.impl.api.Support.LINKS;
-import static com.theoryinpractise.halbuilder.impl.api.Support.NAME;
-import static com.theoryinpractise.halbuilder.impl.api.Support.TITLE;
+import static com.theoryinpractise.halbuilder.impl.api.Support.*;
 
-public class JsonResourceReader implements ResourceReader {
-    private ResourceFactory resourceFactory;
+public class JsonRepresentationReader implements RepresentationReader {
+    private RepresentationFactory representationFactory;
 
-    public JsonResourceReader(ResourceFactory resourceFactory) {
-        this.resourceFactory = resourceFactory;
+    public JsonRepresentationReader(RepresentationFactory representationFactory) {
+        this.representationFactory = representationFactory;
     }
 
-    public ReadableResource read(Reader reader) {
+    public ReadableRepresentation read(Reader reader) {
         try {
             ObjectMapper mapper = new ObjectMapper();
 
             JsonNode rootNode = mapper.readValue(reader, JsonNode.class);
 
-            MutableResource resource = readResource(rootNode);
+            MutableRepresentation resource = readResource(rootNode);
 
             return resource.toImmutableResource();
         } catch (Exception e) {
-            throw new ResourceException(e);
+            throw new RepresentationException(e);
         }
 
     }
 
-    private MutableResource readResource(JsonNode rootNode) {
-        MutableResource resource = new MutableResource(resourceFactory);
+    private MutableRepresentation readResource(JsonNode rootNode) {
+        MutableRepresentation resource = new MutableRepresentation(representationFactory);
 
         readNamespaces(resource, rootNode);
         readLinks(resource, rootNode);
@@ -54,7 +46,7 @@ public class JsonResourceReader implements ResourceReader {
         return resource;
     }
 
-    private void readNamespaces(MutableResource resource, JsonNode rootNode) {
+    private void readNamespaces(MutableRepresentation resource, JsonNode rootNode) {
         if (rootNode.has(LINKS)) {
             JsonNode linksNode = rootNode.get(LINKS);
             if (linksNode.has(CURIE)) {
@@ -73,7 +65,7 @@ public class JsonResourceReader implements ResourceReader {
         }
     }
 
-    private void readLinks(MutableResource resource, JsonNode rootNode) {
+    private void readLinks(MutableRepresentation resource, JsonNode rootNode) {
         if (rootNode.has(LINKS)) {
             Iterator<Map.Entry<String, JsonNode>> fields = rootNode.get(LINKS).fields();
             while (fields.hasNext()) {
@@ -93,23 +85,23 @@ public class JsonResourceReader implements ResourceReader {
         }
     }
 
-    private void withJsonLink(MutableResource resource, Map.Entry<String, JsonNode> keyNode, JsonNode valueNode) {
+    private void withJsonLink(MutableRepresentation resource, Map.Entry<String, JsonNode> keyNode, JsonNode valueNode) {
         String rel = keyNode.getKey();
         String href = valueNode.get(HREF).asText();
-        Optional<String> name = optionalNodeValueAsText(valueNode, NAME);
-        Optional<String> title = optionalNodeValueAsText(valueNode, TITLE);
-        Optional<String> hreflang = optionalNodeValueAsText(valueNode, HREFLANG);
-        Optional<Predicate<ReadableResource>> predicate = Optional.<Predicate<ReadableResource>>absent();
+        String name = optionalNodeValueAsText(valueNode, NAME);
+        String title = optionalNodeValueAsText(valueNode, TITLE);
+        String hreflang = optionalNodeValueAsText(valueNode, HREFLANG);
+        String profile = optionalNodeValueAsText(valueNode, PROFILE);
 
-        resource.withLink(href, rel, predicate, name, title, hreflang );
+        resource.withLink(rel, href, name, title, hreflang, profile);
     }
 
-    Optional<String> optionalNodeValueAsText(JsonNode node, String key) {
+    String optionalNodeValueAsText(JsonNode node, String key) {
         JsonNode value = node.get(key);
-        return value != null ? Optional.of(value.asText()) : Optional.<String>absent();
+        return value != null ? value.asText() : null;
     }
 
-    private void readProperties(MutableResource resource, JsonNode rootNode) {
+    private void readProperties(MutableRepresentation resource, JsonNode rootNode) {
 
         Iterator<String> fieldNames = rootNode.fieldNames();
         while (fieldNames.hasNext()) {
@@ -122,7 +114,7 @@ public class JsonResourceReader implements ResourceReader {
 
     }
 
-    private void readResources(MutableResource resource, JsonNode rootNode) {
+    private void readResources(MutableRepresentation resource, JsonNode rootNode) {
         if (rootNode.has(EMBEDDED)) {
             Iterator<Map.Entry<String, JsonNode>> fields = rootNode.get(EMBEDDED).fields();
             while (fields.hasNext()) {
@@ -131,10 +123,10 @@ public class JsonResourceReader implements ResourceReader {
                     Iterator<JsonNode> values = keyNode.getValue().elements();
                     while (values.hasNext()) {
                         JsonNode valueNode = values.next();
-                        resource.withSubresource(keyNode.getKey(), readResource(valueNode));
+                        resource.withRepresentation(keyNode.getKey(), readResource(valueNode));
                     }
                 } else {
-                    resource.withSubresource(keyNode.getKey(), readResource(keyNode.getValue()));
+                    resource.withRepresentation(keyNode.getKey(), readResource(keyNode.getValue()));
                 }
 
             }
