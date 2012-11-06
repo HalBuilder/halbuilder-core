@@ -23,6 +23,7 @@ import static com.theoryinpractise.halbuilder.impl.api.Support.NAME;
 import static com.theoryinpractise.halbuilder.impl.api.Support.REL;
 import static com.theoryinpractise.halbuilder.impl.api.Support.SELF;
 import static com.theoryinpractise.halbuilder.impl.api.Support.TEMPLATED;
+import static com.theoryinpractise.halbuilder.impl.api.Support.PROFILE;
 import static com.theoryinpractise.halbuilder.impl.api.Support.TITLE;
 import static com.theoryinpractise.halbuilder.impl.api.Support.XSI_NAMESPACE;
 
@@ -88,6 +89,9 @@ public class XmlRepresentationWriter<T> implements RepresentationWriter<T> {
                 }
                 if (!Strings.isNullOrEmpty(link.getHreflang())) {
                     linkElement.setAttribute(HREFLANG, link.getHreflang());
+                }
+                if (!Strings.isNullOrEmpty(link.getProfile())) {
+                    linkElement.setAttribute(PROFILE, link.getProfile());
                 }
                 if (link.hasTemplate()) {
                     linkElement.setAttribute(TEMPLATED, "true");

@@ -91,7 +91,7 @@ public class RenderingTest {
 
 
     private Representation newBaseResource(final Representation resource) {
-        return resource.withLink("ns:parent", BASE_URL + "customer/1234", "bob", "The Parent", "en", "customer");
+        return resource.withLink("ns:parent", BASE_URL + "customer/1234", "bob", "The Parent", "en", "");
     }
 
     private Representation newBaseResource(final URI uri) {

@@ -133,6 +133,9 @@ public class JsonRepresentationWriter<T> implements RepresentationWriter<T> {
         if (!Strings.isNullOrEmpty(link.getHreflang())) {
             g.writeStringField(HREFLANG, link.getHreflang());
         }
+        if (!Strings.isNullOrEmpty(link.getProfile())) {
+            g.writeStringField(PROFILE, link.getProfile());
+        }
         if (link.hasTemplate()) {
             g.writeBooleanField(TEMPLATED, true);
         }
