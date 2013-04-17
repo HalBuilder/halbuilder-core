@@ -1,5 +1,6 @@
 package com.theoryinpractise.halbuilder.impl.json;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
@@ -8,6 +9,7 @@ import com.theoryinpractise.halbuilder.api.RepresentationFactory;
 import com.theoryinpractise.halbuilder.api.RepresentationReader;
 import com.theoryinpractise.halbuilder.impl.representations.MutableRepresentation;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.util.Iterator;
 import java.util.Map;
@@ -16,15 +18,15 @@ import static com.theoryinpractise.halbuilder.impl.api.Support.*;
 
 public class JsonRepresentationReader implements RepresentationReader {
     private RepresentationFactory representationFactory;
+    private ObjectMapper mapper;
 
     public JsonRepresentationReader(RepresentationFactory representationFactory) {
         this.representationFactory = representationFactory;
+        mapper = new ObjectMapper();
     }
 
     public ReadableRepresentation read(Reader reader) {
         try {
-            ObjectMapper mapper = new ObjectMapper();
-
             JsonNode rootNode = mapper.readValue(reader, JsonNode.class);
 
             MutableRepresentation resource = readResource(rootNode);
@@ -102,16 +104,18 @@ public class JsonRepresentationReader implements RepresentationReader {
     }
 
     private void readProperties(MutableRepresentation resource, JsonNode rootNode) {
-
-        Iterator<String> fieldNames = rootNode.fieldNames();
-        while (fieldNames.hasNext()) {
-            String fieldName = fieldNames.next();
-            if (!fieldName.startsWith("_")) {
-                JsonNode field = rootNode.get(fieldName);
-                resource.withProperty(fieldName, field.isNull() ? null : field.asText());
+        Iterator<Map.Entry<String, JsonNode>> fields = rootNode.fields();
+        while (fields.hasNext()) {
+            final Map.Entry<String, JsonNode> keyNode = fields.next();
+            if (!keyNode.getKey().startsWith("_")) {
+                try {
+                    Object properties = mapper.readValue(keyNode.getValue().toString(), new TypeReference<Object>() {});
+                    resource.withProperty(keyNode.getKey(), properties);
+                } catch (IOException e) {
+                    throw new RepresentationException(e);
+                }
             }
         }
-
     }
 
     private void readResources(MutableRepresentation resource, JsonNode rootNode) {
