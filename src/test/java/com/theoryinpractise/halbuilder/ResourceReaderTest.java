@@ -10,6 +10,8 @@ import org.testng.annotations.Test;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.List;
+import java.util.Map;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
@@ -46,6 +48,13 @@ public class ResourceReaderTest {
         return new Object[][]{
                 {representationFactory.readRepresentation(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("/exampleWithoutHref.xml")))},
                 {representationFactory.readRepresentation(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("/exampleWithoutHref.json")))},
+        };
+    }
+
+    @DataProvider
+    public Object[][] provideResourceWithNestedProperties() {
+        return new Object[][] {
+                {representationFactory.readRepresentation(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("/exampleWithNestedProperties.json")))}
         };
     }
 
@@ -93,6 +102,14 @@ public class ResourceReaderTest {
         assertThat(representation.getNamespaces()).hasSize(0);
         assertThat(representation.getCanonicalLinks()).hasSize(0);
         assertThat(representation.getValue("name")).isEqualTo("Example Resource");
+    }
+
+    @Test(dataProvider = "provideResourceWithNestedProperties")
+    public void testResourceWithNestedProperties(ReadableRepresentation representation) {
+        Map<String, Object> properties = representation.getProperties();
+        assertThat(properties.get("nested")).isNotNull();
+        assertThat((List<Map<String, Object>>) properties.get("nested")).hasSize(2);
+        assertThat(((List<Map<String,Object>>) properties.get("nested")).iterator().next().get("value")).isEqualTo("one");
     }
 
     @Test(expectedExceptions = RepresentationException.class)
