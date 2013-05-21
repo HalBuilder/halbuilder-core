@@ -49,6 +49,13 @@ public class ResourceReaderTest {
         };
     }
 
+    @DataProvider
+    public Object[][] provideResourceWithUnderscoredProperty() {
+        return new Object[][]{
+                {representationFactory.readRepresentation(new InputStreamReader(ResourceReaderTest.class.getResourceAsStream("/exampleWithUnderscoredProperty.json")))},
+        };
+    }
+
     @Test(dataProvider = "provideResources")
     public void testReader(ReadableRepresentation representation) {
         assertThat(representation.getResourceLink().getHref()).isEqualTo("https://example.com/api/customer/123456");
@@ -93,6 +100,11 @@ public class ResourceReaderTest {
         assertThat(representation.getNamespaces()).hasSize(0);
         assertThat(representation.getCanonicalLinks()).hasSize(0);
         assertThat(representation.getValue("name")).isEqualTo("Example Resource");
+    }
+
+    @Test(dataProvider = "provideResourceWithUnderscoredProperty")
+    public void testResourceWithUnderscoredProperty(ReadableRepresentation representation) {
+        assertThat(representation.getValue("_name")).isEqualTo("Example Resource");
     }
 
     @Test(expectedExceptions = RepresentationException.class)
