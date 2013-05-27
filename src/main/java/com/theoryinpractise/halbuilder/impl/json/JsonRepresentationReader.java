@@ -6,13 +6,21 @@ import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
 import com.theoryinpractise.halbuilder.api.RepresentationException;
 import com.theoryinpractise.halbuilder.api.RepresentationFactory;
 import com.theoryinpractise.halbuilder.api.RepresentationReader;
+import com.theoryinpractise.halbuilder.impl.api.Support;
 import com.theoryinpractise.halbuilder.impl.representations.MutableRepresentation;
 
 import java.io.Reader;
 import java.util.Iterator;
 import java.util.Map;
 
-import static com.theoryinpractise.halbuilder.impl.api.Support.*;
+import static com.theoryinpractise.halbuilder.impl.api.Support.CURIE;
+import static com.theoryinpractise.halbuilder.impl.api.Support.EMBEDDED;
+import static com.theoryinpractise.halbuilder.impl.api.Support.HREF;
+import static com.theoryinpractise.halbuilder.impl.api.Support.HREFLANG;
+import static com.theoryinpractise.halbuilder.impl.api.Support.LINKS;
+import static com.theoryinpractise.halbuilder.impl.api.Support.NAME;
+import static com.theoryinpractise.halbuilder.impl.api.Support.PROFILE;
+import static com.theoryinpractise.halbuilder.impl.api.Support.TITLE;
 
 public class JsonRepresentationReader implements RepresentationReader {
     private RepresentationFactory representationFactory;
@@ -106,7 +114,7 @@ public class JsonRepresentationReader implements RepresentationReader {
         Iterator<String> fieldNames = rootNode.fieldNames();
         while (fieldNames.hasNext()) {
             String fieldName = fieldNames.next();
-            if (!fieldName.startsWith("_")) {
+            if (!Support.RESERVED_JSON_PROPERTIES.contains(fieldName)) {
                 JsonNode field = rootNode.get(fieldName);
                 resource.withProperty(fieldName, field.isNull() ? null : field.asText());
             }
