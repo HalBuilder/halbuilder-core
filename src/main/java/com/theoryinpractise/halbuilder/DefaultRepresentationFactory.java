@@ -1,13 +1,19 @@
 package com.theoryinpractise.halbuilder;
 
-import com.google.common.collect.*;
-import com.theoryinpractise.halbuilder.api.*;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.theoryinpractise.halbuilder.api.Link;
+import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
+import com.theoryinpractise.halbuilder.api.Representation;
+import com.theoryinpractise.halbuilder.api.RepresentationException;
+import com.theoryinpractise.halbuilder.api.RepresentationFactory;
+import com.theoryinpractise.halbuilder.api.RepresentationReader;
+import com.theoryinpractise.halbuilder.api.RepresentationWriter;
 import com.theoryinpractise.halbuilder.impl.ContentType;
-import com.theoryinpractise.halbuilder.impl.json.JsonRepresentationReader;
-import com.theoryinpractise.halbuilder.impl.json.JsonRepresentationWriter;
 import com.theoryinpractise.halbuilder.impl.representations.MutableRepresentation;
-import com.theoryinpractise.halbuilder.impl.xml.XmlRepresentationReader;
-import com.theoryinpractise.halbuilder.impl.xml.XmlRepresentationWriter;
+import com.theoryinpractise.halbuilder.impl.representations.NamespaceManager;
 
 import java.io.BufferedReader;
 import java.io.Reader;
@@ -16,24 +22,14 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
-
-import static java.lang.String.format;
 
 public class DefaultRepresentationFactory extends RepresentationFactory {
 
     private Map<ContentType, Class<? extends RepresentationWriter>> contentRenderers = Maps.newHashMap();
     private Map<ContentType, Class<? extends RepresentationReader>> representationReaders = Maps.newHashMap();
-    private TreeMap<String, String> namespaces = Maps.newTreeMap(Ordering.usingToString());
+    private NamespaceManager namespaceManager = new NamespaceManager();
     private List<Link> links = Lists.newArrayList();
     private Set<URI> flags = Sets.newHashSet();
-
-    public DefaultRepresentationFactory() {
-        this.contentRenderers.put(new ContentType(HAL_XML), XmlRepresentationWriter.class);
-        this.contentRenderers.put(new ContentType(HAL_JSON), JsonRepresentationWriter.class);
-        this.representationReaders.put(new ContentType(HAL_XML), XmlRepresentationReader.class);
-        this.representationReaders.put(new ContentType(HAL_JSON), JsonRepresentationReader.class);
-    }
 
     public DefaultRepresentationFactory withRenderer(String contentType, Class<? extends RepresentationWriter<String>> rendererClass) {
         contentRenderers.put(new ContentType(contentType), rendererClass);
@@ -47,10 +43,7 @@ public class DefaultRepresentationFactory extends RepresentationFactory {
 
     @Override
     public DefaultRepresentationFactory withNamespace(String namespace, String href) {
-        if (namespaces.containsKey(namespace)) {
-            throw new RepresentationException(format("Duplicate namespace '%s' found for representation factory", namespace));
-        }
-        namespaces.put(namespace, href);
+        namespaceManager.withNamespace(namespace, href);
         return this;
     }
 
@@ -81,7 +74,7 @@ public class DefaultRepresentationFactory extends RepresentationFactory {
         MutableRepresentation representation = new MutableRepresentation(this, href);
 
         // Add factory standard namespaces
-        for (Map.Entry<String, String> entry : namespaces.entrySet()) {
+        for (Map.Entry<String, String> entry : namespaceManager.getNamespaces().entrySet()) {
             representation.withNamespace(entry.getKey(), entry.getValue());
         }
 

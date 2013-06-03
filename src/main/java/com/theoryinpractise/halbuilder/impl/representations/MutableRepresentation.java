@@ -128,10 +128,7 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
      * @return
      */
     public Representation withNamespace(String namespace, String href) {
-        if (namespaces.containsKey(namespace)) {
-            throw new RepresentationException(format("Duplicate namespace '%s' found for resource", namespace));
-        }
-        namespaces.put(namespace, href);
+        namespaceManager.withNamespace(namespace, href);
         return this;
     }
 
