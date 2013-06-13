@@ -1,7 +1,0 @@
-import java.io.*;
-import java.util.jar.JarFile;
-
-File file = new File( basedir, "target/clojure-hal-testing.jar" );
-if ( !file.isFile() ) {
-    throw new FileNotFoundException( "Could not find generated JAR: " + file );
-}
