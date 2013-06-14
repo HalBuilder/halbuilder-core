@@ -3,7 +3,7 @@
 
     <groupId>com.theoryinpractise</groupId>
     <artifactId>halbuilder-core</artifactId>
-    <version>2.1.1</version>
+    <version>2.1.2-SNAPSHOT</version>
     <description>Java based builder for the Hal specification http://stateless.co/hal_specification.html</description>
     <packaging>jar</packaging>
 
@@ -14,7 +14,7 @@
         <connection>scm:git:git@github.com:HalBuilder/halbuilder-core.git</connection>
         <developerConnection>scm:git:git@github.com:HalBuilder/halbuilder-core.git</developerConnection>
         <url>http://gotohal.net</url>
-      <tag>halbuilder-core-2.1.1</tag>
+      <tag>HEAD</tag>
   </scm>
 
     <developers>
