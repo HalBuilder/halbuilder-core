@@ -3,8 +3,25 @@ package com.theoryinpractise.halbuilder.impl.representations;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
-import com.google.common.collect.*;
-import com.theoryinpractise.halbuilder.api.*;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Ordering;
+import com.google.common.collect.Table;
+import com.theoryinpractise.halbuilder.api.Contract;
+import com.theoryinpractise.halbuilder.api.Link;
+import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
+import com.theoryinpractise.halbuilder.api.RepresentationException;
+import com.theoryinpractise.halbuilder.api.RepresentationFactory;
+import com.theoryinpractise.halbuilder.api.RepresentationWriter;
 import com.theoryinpractise.halbuilder.impl.api.Support;
 import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceContract;
 import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceRenderer;
@@ -13,14 +30,18 @@ import javax.annotation.Nullable;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.base.Strings.emptyToNull;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Ordering.usingToString;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.theoryinpractise.halbuilder.impl.api.Support.WHITESPACE_SPLITTER;
-import static java.lang.String.format;
 
 public abstract class BaseRepresentation implements ReadableRepresentation {
 
@@ -32,7 +53,8 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
         }
     });
 
-    protected Map<String, String> namespaces = Maps.newTreeMap(usingToString());
+    protected NamespaceManager namespaceManager = new NamespaceManager();
+
     protected List<Link> links = Lists.newArrayList();
     protected Map<String, Object> properties = Maps.newTreeMap(usingToString());
     protected Multimap<String, ReadableRepresentation> resources = ArrayListMultimap.create();
@@ -49,7 +71,7 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
     }
 
     public Map<String, String> getNamespaces() {
-        return ImmutableMap.copyOf(namespaces);
+        return ImmutableMap.copyOf(namespaceManager.getNamespaces());
     }
 
     public List<Link> getCanonicalLinks() {
@@ -63,7 +85,7 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
     public List<Link> getLinksByRel(final String rel) {
         Support.checkRelType(rel);
 
-        final String curiedRel = currieHref(rel);
+        final String curiedRel = namespaceManager.currieHref(rel);
         final ImmutableList.Builder<Link> linkBuilder = ImmutableList.builder();
 
         linkBuilder.addAll(getLinksByRel(this, curiedRel));
@@ -119,7 +141,7 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
             @Nullable
             @Override
             public Link apply(@Nullable Link link) {
-                return new Link(representationFactory, currieHref(link.getRel()), currieHref(link.getHref()), link.getName(), link.getTitle(), link.getHreflang(), link.getProfile());
+                return new Link(representationFactory, namespaceManager.currieHref(link.getRel()), link.getHref(), link.getName(), link.getTitle(), link.getHreflang(), link.getProfile());
             }
         }).toSortedImmutableList(RELATABLE_ORDERING);
 
@@ -142,7 +164,7 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
 
             String rels = mkSortableJoinerForIterable(" ", relTypes).apply(new Function<String, String>() {
                 public String apply(@Nullable String relType) {
-                    return currieHref(relType);
+                    return namespaceManager.currieHref(relType);
                 }
             });
 
@@ -172,9 +194,7 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
                 }
             });
 
-            String curiedHref = currieHref(href);
-
-            collatedLinks.add(new Link(representationFactory, rels, curiedHref,
+            collatedLinks.add(new Link(representationFactory, rels, href,
                     emptyToNull(names),
                     emptyToNull(titles),
                     emptyToNull(hreflangs),
@@ -195,15 +215,6 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
         };
     }
 
-    private String currieHref(String href) {
-        for (Map.Entry<String, String> entry : namespaces.entrySet()) {
-            if (href.startsWith(entry.getValue())) {
-                return href.replace(entry.getValue(), entry.getKey() + ":");
-            }
-        }
-        return href;
-    }
-
     public Map<String, Object> getProperties() {
         return Collections.unmodifiableMap(properties);
     }
@@ -218,22 +229,11 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
 
     protected void validateNamespaces(ReadableRepresentation representation) {
         for (Link link : representation.getCanonicalLinks()) {
-            validateNamespaces(link.getRel());
+            namespaceManager.validateNamespaces(link.getRel());
         }
         for (Map.Entry<String, ReadableRepresentation> aResource : representation.getResources()) {
-            validateNamespaces(aResource.getKey());
+            namespaceManager.validateNamespaces(aResource.getKey());
             validateNamespaces(aResource.getValue());
-        }
-    }
-
-    private void validateNamespaces(String sourceRel) {
-        for (String rel : WHITESPACE_SPLITTER.split(sourceRel)) {
-            if (!rel.contains("://") && rel.contains(":")) {
-                String[] relPart = rel.split(":");
-                if (!namespaces.keySet().contains(relPart[0])) {
-                    throw new RepresentationException(format("Undeclared namespace in rel %s for resource", rel));
-                }
-            }
         }
     }
 
@@ -252,7 +252,7 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
     }
 
     public ImmutableRepresentation toImmutableResource() {
-        return new ImmutableRepresentation(representationFactory, getNamespaces(), getCanonicalLinks(), getProperties(), getResources(), hasNullProperties);
+        return new ImmutableRepresentation(representationFactory, namespaceManager, getCanonicalLinks(), getProperties(), getResources(), hasNullProperties);
     }
 
 
@@ -295,7 +295,7 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
 
     @Override
     public int hashCode() {
-        int h = namespaces.hashCode();
+        int h = namespaceManager.hashCode();
         h += links.hashCode();
         h += properties.hashCode();
         h += resources.hashCode();
@@ -314,7 +314,7 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
             return false;
         }
         BaseRepresentation that = (BaseRepresentation) obj;
-        boolean e = this.namespaces.equals(that.namespaces);
+        boolean e = this.namespaceManager.equals(that.namespaceManager);
         e &= this.links.equals(that.links);
         e &= this.properties.equals(that.properties);
         e &= this.resources.equals(that.resources);

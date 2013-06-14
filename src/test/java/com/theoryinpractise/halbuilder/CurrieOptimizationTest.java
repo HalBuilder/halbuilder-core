@@ -9,8 +9,9 @@ import static org.fest.assertions.api.Assertions.assertThat;
 
 public class CurrieOptimizationTest {
 
-    RepresentationFactory representationFactory = new DefaultRepresentationFactory().withNamespace("app", "http://localhost/api/applications/")
-            .withNamespace("rel", "http://localhost/api/rels/");
+    RepresentationFactory representationFactory = new DefaultRepresentationFactory()
+            .withNamespace("app", "http://localhost/api/applications/{rel}")
+            .withNamespace("rel", "http://localhost/api/rels/{rel}");
 
     Representation resource = representationFactory.newRepresentation("/api/1")
             .withLink("http://localhost/api/rels/foo", "http://localhost/api/applications/app/1");
@@ -22,7 +23,7 @@ public class CurrieOptimizationTest {
         Link link = resource.getLinks().get(1);
 
         assertThat(link.getRel()).isEqualTo("rel:foo");
-        assertThat(link.getHref()).isEqualTo("app:app/1");
+        assertThat(link.getHref()).isEqualTo("http://localhost/api/applications/app/1");
 
     }
 
@@ -32,7 +33,7 @@ public class CurrieOptimizationTest {
         Link link2 = resource.getLinksByRel("rel:foo").get(0);
 
         assertThat(link2.getRel()).isEqualTo("rel:foo");
-        assertThat(link2.getHref()).isEqualTo("app:app/1");
+        assertThat(link2.getHref()).isEqualTo("http://localhost/api/applications/app/1");
 
     }
 
@@ -42,7 +43,7 @@ public class CurrieOptimizationTest {
         Link link2 = resource.getLinksByRel("http://localhost/api/rels/foo").get(0);
 
         assertThat(link2.getRel()).isEqualTo("rel:foo");
-        assertThat(link2.getHref()).isEqualTo("app:app/1");
+        assertThat(link2.getHref()).isEqualTo("http://localhost/api/applications/app/1");
 
     }
 
@@ -52,7 +53,7 @@ public class CurrieOptimizationTest {
         Link link2 = resource.getLinksByRel("http://localhost/api/rels/foo").get(0);
 
         assertThat(link2.getRel()).isEqualTo("rel:foo");
-        assertThat(link2.getHref()).isEqualTo("app:app/1");
+        assertThat(link2.getHref()).isEqualTo("http://localhost/api/applications/app/1");
 
     }
 

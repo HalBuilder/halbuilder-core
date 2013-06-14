@@ -25,7 +25,7 @@ public class ResourceBasicMethodsTest {
 
     private Representation createDefaultResource() {
         return representationFactory.newRepresentation("http://localhost/test")
-                .withNamespace("testns", "http://example.com/test")
+                .withNamespace("testns", "http://example.com/test/{rel}")
                 .withLink("testlink", "http://example.com/link")
                 .withProperty("testprop", "value")
                 .withProperty("nullprop", null)
@@ -39,7 +39,7 @@ public class ResourceBasicMethodsTest {
 
     @Test
     public void testHashCodeIsDependentOnNamespaces() {
-        resource.withNamespace("testns2", "http://example.com/test2");
+        resource.withNamespace("testns2", "http://example.com/test2/{rel}");
         assertThat(resource.hashCode()).isNotEqualTo(resourceHashCode);
     }
 
@@ -69,7 +69,7 @@ public class ResourceBasicMethodsTest {
 
     @Test
     public void testEqualsIsDependentOnNamespaces() {
-        resource.withNamespace("testns2", "http://example.com/test2");
+        resource.withNamespace("testns2", "http://example.com/test2/{rel}");
         assertThat(resource).isNotEqualTo(otherResource);
     }
 

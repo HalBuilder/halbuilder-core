@@ -14,9 +14,9 @@ public class ImmutableRepresentation extends BaseRepresentation {
     private final Link resourceLink;
 
     public ImmutableRepresentation(RepresentationFactory representationFactory,
-                                   Map<String, String> namespaces, List<Link> links, Map<String, Object> properties, Collection<Map.Entry<String, ReadableRepresentation>> resources, boolean hasNullProperties) {
+                                   NamespaceManager namespaceManager, List<Link> links, Map<String, Object> properties, Collection<Map.Entry<String, ReadableRepresentation>> resources, boolean hasNullProperties) {
         super(representationFactory);
-        this.namespaces = namespaces;
+        this.namespaceManager = namespaceManager;
         this.links = links;
         this.properties = properties;
 
@@ -25,7 +25,6 @@ public class ImmutableRepresentation extends BaseRepresentation {
             resourceBuilder.putAll(entry.getKey(), entry.getValue());
         }
         this.resources = resourceBuilder.build();
-
         this.resourceLink = super.getResourceLink();
         this.hasNullProperties = hasNullProperties;
     }
