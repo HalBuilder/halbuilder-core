@@ -31,7 +31,7 @@ public class InterfaceRenderer<T> {
         return render(representation.getProperties());
     }
 
-    private T render(final Map<String, Object> properties) {
+    public T render(final Map<String, Object> properties) {
         if (InterfaceContract.newInterfaceContract(anInterface).isSatisfiedBy(properties)) {
             T proxy = (T) Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[] {anInterface}, new InvocationHandler() {
                 public Object invoke(Object o, Method method, Object[] objects) throws Throwable {
