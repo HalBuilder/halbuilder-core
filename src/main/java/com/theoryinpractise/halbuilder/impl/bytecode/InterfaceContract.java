@@ -5,6 +5,7 @@ import com.theoryinpractise.halbuilder.api.Contract;
 import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
 
 import java.lang.reflect.Method;
+import java.util.Map;
 
 import static com.theoryinpractise.halbuilder.impl.bytecode.InterfaceSupport.derivePropertyNameFromMethod;
 
@@ -25,16 +26,17 @@ public class InterfaceContract<T> implements Contract {
     }
 
     public boolean isSatisfiedBy(ReadableRepresentation representation) {
+        return isSatisfiedBy(representation.getProperties());
+    }
 
+    public boolean isSatisfiedBy(Map<String, Object> properties) {
         for (Method method : anInterface.getDeclaredMethods()) {
             String propertyName = derivePropertyNameFromMethod(method);
-            if (!"class".equals(propertyName) && !representation.getProperties().containsKey(propertyName)) {
+            if (!"class".equals(propertyName) && !properties.containsKey(propertyName)) {
                 return false;
             }
         }
 
         return true;
-
-
     }
 }
