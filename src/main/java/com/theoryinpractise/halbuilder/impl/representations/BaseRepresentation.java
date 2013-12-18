@@ -143,7 +143,7 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
             public Link apply(@Nullable Link link) {
                 return new Link(representationFactory, namespaceManager.currieHref(link.getRel()), link.getHref(), link.getName(), link.getTitle(), link.getHreflang(), link.getProfile());
             }
-        }).toSortedImmutableList(RELATABLE_ORDERING);
+        }).toSortedList(RELATABLE_ORDERING);
 
     }
 
