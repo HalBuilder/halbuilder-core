@@ -4,7 +4,7 @@ Halbuilder is a simple Java API for generating and consuming HAL documents confo
 ### Generating Local Resources
 
 ```java
-RepresentationFactory representationFactory = new RepresentationFactory();
+RepresentationFactory representationFactory = new StandardRepresentationFactory();
 
 Representation owner = representationFactory.newRepresentation("http://example.com/mike")
   .withLink("td:friend", "http://example.com/mamund")
@@ -12,7 +12,7 @@ Representation owner = representationFactory.newRepresentation("http://example.c
   .withProperty("age", "36");
 
 Representation halResource = representationFactory.newRepresentation("http://example.com/todo-list")
-  .withNamespace("td", "http://example.com/todoapp/rels/")
+  .withNamespace("td", "http://example.com/todoapp/rels/{rel}")
   .withLink("/todo-list/search;{searchterm}", "td:search")
   .withLink("/todo-list/description", "td:description")
   .withProperty("created_at", "2010-01-16")
@@ -39,10 +39,14 @@ HalBuilder is deployed to Apache Maven Central under the following coordinates:
 ```xml
 <dependency>
   <groupId>com.theoryinpractise</groupId>
-  <artifactId>halbuilder</artifactId>
-  <version>2.0.1-SNAPSHOT</version>
+  <artifactId>halbuilder-standard</artifactId>
+  <version>3.0.1</version>
 </dependency>
 ```
+
+### Website
+
+More documentation is available from the main website at [gotohal.net](http://gotohal.net/).
 
 ### Development Forum
 

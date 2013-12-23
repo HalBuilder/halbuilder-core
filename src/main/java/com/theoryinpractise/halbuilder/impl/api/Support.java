@@ -3,7 +3,6 @@ package com.theoryinpractise.halbuilder.impl.api;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
-import org.jdom.Namespace;
 
 import java.util.Set;
 
@@ -26,12 +25,6 @@ public class Support {
     public static final String TEMPLATED = "templated";
     public static final Set<String> RESERVED_JSON_PROPERTIES = ImmutableSet.of(EMBEDDED, LINKS);
 
-    /**
-     * Define the XML schema instance namespace, so we can use it when
-     * rendering nil elements.
-     */
-    public static final Namespace XSI_NAMESPACE = Namespace.getNamespace(
-            "xsi", "http://www.w3.org/2001/XMLSchema-instance");
     public static final String PROFILE = "profile";
 
     public static void checkRelType(String rel) {

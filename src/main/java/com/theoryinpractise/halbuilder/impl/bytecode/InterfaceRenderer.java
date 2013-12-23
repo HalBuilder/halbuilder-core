@@ -7,6 +7,7 @@ import com.theoryinpractise.halbuilder.api.RepresentationException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Map;
 
 import static com.theoryinpractise.halbuilder.impl.bytecode.InterfaceSupport.derivePropertyNameFromMethod;
 
@@ -27,20 +28,24 @@ public class InterfaceRenderer<T> {
     }
 
     public T render(final ReadableRepresentation representation) {
+        return render(representation.getProperties());
+    }
 
-        if (representation.isSatisfiedBy(InterfaceContract.newInterfaceContract(anInterface))) {
-            T proxy = (T) Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{anInterface}, new InvocationHandler() {
+    public T render(final Map<String, Object> properties) {
+        if (InterfaceContract.newInterfaceContract(anInterface).isSatisfiedBy(properties)) {
+            T proxy = (T) Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[] {anInterface}, new InvocationHandler() {
                 public Object invoke(Object o, Method method, Object[] objects) throws Throwable {
 
                     String propertyName = derivePropertyNameFromMethod(method);
 
-                    Object propertyValue = representation.getProperties().get(propertyName);
+
+                    Object propertyValue = properties.get(propertyName);
 
                     Class<?> returnType = method.getReturnType();
 
                     Object returnValue;
 
-                    if(propertyValue != null) {
+                    if (propertyValue != null) {
                         returnValue = returnType.getConstructor(propertyValue.getClass()).newInstance(propertyValue);
                     } else {
                         // In this case, we have a null property.
@@ -54,7 +59,5 @@ public class InterfaceRenderer<T> {
         } else {
             throw new RepresentationException("Unable to write representation to " + anInterface.getName());
         }
-
-
     }
 }
