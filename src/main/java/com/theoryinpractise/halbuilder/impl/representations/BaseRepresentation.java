@@ -89,10 +89,6 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
         final ImmutableList.Builder<Link> linkBuilder = ImmutableList.builder();
 
         linkBuilder.addAll(getLinksByRel(this, curiedRel));
-        // TODO Should this check descendants? Should maybe be an overloaded method with a boolean check
-        for (ReadableRepresentation resource : resources.values()) {
-            linkBuilder.addAll(getLinksByRel(resource, curiedRel));
-        }
 
         return linkBuilder.build();
     }
