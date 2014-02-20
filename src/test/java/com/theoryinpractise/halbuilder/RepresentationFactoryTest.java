@@ -16,11 +16,11 @@ public class RepresentationFactoryTest {
     public void testWithCustomReader() {
         RepresentationFactory representationFactory = new DefaultRepresentationFactory()
                 .withReader(RepresentationFactory.HAL_XML, DummyRepresentationReader.class);
-        ReadableRepresentation representation = representationFactory.readRepresentation(new StringReader("<>"));
+        ReadableRepresentation representation = representationFactory.readRepresentation(RepresentationFactory.HAL_XML, new StringReader("<>"));
         assertThat(representation.getProperties().get("name")).isEqualTo("dummy");
     }
 
-    public static class DummyRepresentationReader implements RepresentationReader {
+     static class DummyRepresentationReader implements RepresentationReader {
         private final RepresentationFactory representationFactory;
 
         public DummyRepresentationReader(RepresentationFactory representationFactory) {

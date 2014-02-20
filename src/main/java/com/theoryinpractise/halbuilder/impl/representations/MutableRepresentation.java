@@ -1,5 +1,6 @@
 package com.theoryinpractise.halbuilder.impl.representations;
 
+import com.theoryinpractise.halbuilder.AbstractRepresentationFactory;
 import com.theoryinpractise.halbuilder.api.*;
 import com.theoryinpractise.halbuilder.impl.api.Support;
 
@@ -16,14 +17,14 @@ import static java.lang.String.format;
 
 public class MutableRepresentation extends BaseRepresentation implements Representation {
 
-    public MutableRepresentation(RepresentationFactory representationFactory, String href) {
+    public MutableRepresentation(AbstractRepresentationFactory representationFactory, String href) {
         super(representationFactory);
         if (href != null) {
             this.links.add(new Link(representationFactory, "self", href));
         }
     }
 
-    public MutableRepresentation(RepresentationFactory representationFactory) {
+    public MutableRepresentation(AbstractRepresentationFactory representationFactory) {
         super(representationFactory);
     }
 

@@ -16,6 +16,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Table;
+import com.theoryinpractise.halbuilder.AbstractRepresentationFactory;
 import com.theoryinpractise.halbuilder.api.Contract;
 import com.theoryinpractise.halbuilder.api.Link;
 import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
@@ -59,10 +60,10 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
     protected Map<String, Object> properties = Maps.newTreeMap(usingToString());
     protected Multimap<String, ReadableRepresentation> resources = ArrayListMultimap.create();
 
-    protected RepresentationFactory representationFactory;
+    protected AbstractRepresentationFactory representationFactory;
     protected boolean hasNullProperties = false;
 
-    protected BaseRepresentation(RepresentationFactory representationFactory) {
+    protected BaseRepresentation(AbstractRepresentationFactory representationFactory) {
         this.representationFactory = representationFactory;
     }
 
