@@ -5,12 +5,12 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.theoryinpractise.halbuilder.api.Link;
-import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
 import com.theoryinpractise.halbuilder.api.Representation;
 import com.theoryinpractise.halbuilder.api.RepresentationException;
 import com.theoryinpractise.halbuilder.api.RepresentationFactory;
 import com.theoryinpractise.halbuilder.api.RepresentationReader;
 import com.theoryinpractise.halbuilder.api.RepresentationWriter;
+import com.theoryinpractise.halbuilder.api.ContentRepresentation;
 import com.theoryinpractise.halbuilder.impl.ContentType;
 import com.theoryinpractise.halbuilder.impl.representations.MutableRepresentation;
 import com.theoryinpractise.halbuilder.impl.representations.NamespaceManager;
@@ -86,13 +86,13 @@ public class DefaultRepresentationFactory extends AbstractRepresentationFactory 
     }
 
     @Override
-    public ReadableRepresentation readRepresentation(String contentType, Reader reader) {
+    public ContentRepresentation readRepresentation(String contentType, Reader reader) {
         try {
             Class<? extends RepresentationReader> readerClass = representationReaders.get(new ContentType(contentType));
             if (readerClass == null) {
               throw new IllegalStateException("No representation reader for content type " + contentType + " registered.");
             }
-            Constructor<? extends RepresentationReader> readerConstructor = readerClass.getConstructor(RepresentationFactory.class);
+            Constructor<? extends RepresentationReader> readerConstructor = readerClass.getConstructor(AbstractRepresentationFactory.class);
             return readerConstructor.newInstance(this).read(reader);
         } catch (Exception e) {
             throw new RepresentationException(e);
