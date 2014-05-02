@@ -136,6 +136,14 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
     public MutableRepresentation withRepresentation(String rel, ReadableRepresentation resource) {
         Support.checkRelType(rel);
         resources.put(rel, resource);
+
+        if(representationFactory.getFlags().contains(RepresentationFactory.HYPERTEXT_CACHE_PATTERN)) {
+            Link selfLink = resource.getLinkByRel("self");
+            if (selfLink != null) {
+                withLink(rel, selfLink.getHref(), selfLink.getName(), selfLink.getTitle(), selfLink.getHreflang(), selfLink.getProfile());
+            }
+        }
+
         // Propagate null property flag to parent.
         if (resource.hasNullProperties()) {
             hasNullProperties = true;
