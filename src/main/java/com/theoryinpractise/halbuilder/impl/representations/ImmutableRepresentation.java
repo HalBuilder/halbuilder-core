@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMultimap;
 import com.theoryinpractise.halbuilder.AbstractRepresentationFactory;
 import com.theoryinpractise.halbuilder.api.Link;
 import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
-import com.theoryinpractise.halbuilder.api.RepresentationFactory;
 
 import java.util.Collection;
 import java.util.List;

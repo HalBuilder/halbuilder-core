@@ -271,6 +271,7 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
         return toString(contentType, Collections.<URI>emptySet());
     }
 
+    @Deprecated
     public String toString(String contentType, final Set<URI> flags) {
         StringWriter sw = new StringWriter();
         toString(contentType, flags, sw);
@@ -281,6 +282,7 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
         toString(contentType, Collections.<URI>emptySet(), writer);
     }
 
+    @Deprecated
     public void toString(String contentType, Set<URI> flags, Writer writer) {
         validateNamespaces(this);
         RepresentationWriter<String> representationWriter = representationFactory.lookupRenderer(contentType);
@@ -289,8 +291,17 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
         representationWriter.write(this, uriBuilder.build(), writer);
     }
 
+  @Override
+  public String toString(String contentType, URI... flags) {
+    return toString(contentType, ImmutableSet.copyOf(flags));
+  }
 
-    @Override
+  @Override
+  public void toString(String contentType, Writer writer, URI... flags) {
+    toString(contentType, ImmutableSet.copyOf(flags), writer);
+  }
+
+  @Override
     public int hashCode() {
         int h = namespaceManager.hashCode();
         h += links.hashCode();
