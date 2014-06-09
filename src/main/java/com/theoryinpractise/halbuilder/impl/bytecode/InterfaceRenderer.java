@@ -4,9 +4,8 @@ import com.google.common.base.Preconditions;
 import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
 import com.theoryinpractise.halbuilder.api.RepresentationException;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
+import java.lang.reflect.*;
+import java.util.Collection;
 import java.util.Map;
 
 import static com.theoryinpractise.halbuilder.impl.bytecode.InterfaceSupport.derivePropertyNameFromMethod;
@@ -46,7 +45,16 @@ public class InterfaceRenderer<T> {
                     Object returnValue;
 
                     if (propertyValue != null) {
-                        returnValue = returnType.getConstructor(propertyValue.getClass()).newInstance(propertyValue);
+                        if(propertyValue instanceof Collection) {
+                            InterfaceRenderer collectionValueRenderer = new InterfaceRenderer((Class<?>)((((ParameterizedType)method.getGenericReturnType()).getActualTypeArguments()[0])));
+                            returnValue = returnType.getConstructor(Collection.class).newInstance(propertyValue);
+                            ((Collection) returnValue).clear();
+                            for(ReadableRepresentation item : (Collection<ReadableRepresentation>) propertyValue) {
+                                ((Collection) returnValue).add(collectionValueRenderer.render(item));
+                            }
+                        } else {
+                            returnValue = returnType.getConstructor(propertyValue.getClass()).newInstance(propertyValue);
+                        }
                     } else {
                         // In this case, we have a null property.
                         returnValue = null;
