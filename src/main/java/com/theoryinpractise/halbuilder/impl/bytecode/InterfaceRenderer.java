@@ -48,7 +48,9 @@ public class InterfaceRenderer<T> {
 
                     if (propertyValue != null) {
                         if(propertyValue instanceof Collection) {
-                            InterfaceRenderer collectionValueRenderer = new InterfaceRenderer((Class<?>)((((ParameterizedType)method.getGenericReturnType()).getActualTypeArguments()[0])));
+                            ParameterizedType genericReturnType = ((ParameterizedType)method.getGenericReturnType());
+                            Type collectionType = genericReturnType.getActualTypeArguments()[0];
+                            InterfaceRenderer collectionValueRenderer = new InterfaceRenderer((Class<?>)collectionType);
                             returnValue = returnType.getConstructor(Collection.class).newInstance(propertyValue);
                             ((Collection) returnValue).clear();
                             for(ReadableRepresentation item : (Collection<ReadableRepresentation>) propertyValue) {
