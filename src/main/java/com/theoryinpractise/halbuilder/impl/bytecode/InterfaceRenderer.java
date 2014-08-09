@@ -39,7 +39,6 @@ public class InterfaceRenderer<T> {
 
                     String propertyName = derivePropertyNameFromMethod(method);
 
-
                     Object propertyValue = properties.get(propertyName);
 
                     Class<?> returnType = method.getReturnType();
@@ -57,7 +56,11 @@ public class InterfaceRenderer<T> {
                                 ((Collection) returnValue).add(collectionValueRenderer.render(item));
                             }
                         } else {
-                            returnValue = returnType.getConstructor(propertyValue.getClass()).newInstance(propertyValue);
+                            if (returnType.isInstance(propertyValue)) {
+                                returnValue = propertyValue;
+                            } else {
+                                returnValue = returnType.getConstructor(propertyValue.getClass()).newInstance(propertyValue);
+                            }
                         }
                     } else {
                         // In this case, we have a null property.
