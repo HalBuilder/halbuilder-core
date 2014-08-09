@@ -28,7 +28,9 @@ import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceContract;
 import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceRenderer;
 
 import javax.annotation.Nullable;
-import java.io.StringWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URI;
 import java.util.Collection;
@@ -273,9 +275,14 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
 
     @Deprecated
     public String toString(String contentType, final Set<URI> flags) {
-        StringWriter sw = new StringWriter();
-        toString(contentType, flags, sw);
-        return sw.toString();
+        try {
+            ByteArrayOutputStream boas = new ByteArrayOutputStream();
+            OutputStreamWriter osw = new OutputStreamWriter(boas, "UTF-8");
+            toString(contentType, flags, osw);
+            return boas.toString();
+        } catch (UnsupportedEncodingException e) {
+            throw new RepresentationException("Unable to write representation: " + e.getMessage());
+        }
     }
 
     public void toString(String contentType, Writer writer) {
