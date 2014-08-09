@@ -1,12 +1,13 @@
 package com.theoryinpractise.halbuilder.impl.bytecode;
 
 import com.google.common.base.Preconditions;
+import com.theoryinpractise.halbuilder.api.Link;
 import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
 import com.theoryinpractise.halbuilder.api.RepresentationException;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
+import java.lang.reflect.*;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import static com.theoryinpractise.halbuilder.impl.bytecode.InterfaceSupport.derivePropertyNameFromMethod;
@@ -28,10 +29,10 @@ public class InterfaceRenderer<T> {
     }
 
     public T render(final ReadableRepresentation representation) {
-        return render(representation.getProperties());
+        return render(representation.getProperties(), representation.getLinks(), representation.getResourceMap());
     }
 
-    public T render(final Map<String, Object> properties) {
+    public T render(final Map<String, Object> properties, final List<Link> links, final Map<String, Collection<ReadableRepresentation>> resources) {
         if (InterfaceContract.newInterfaceContract(anInterface).isSatisfiedBy(properties)) {
             T proxy = (T) Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[] {anInterface}, new InvocationHandler() {
                 public Object invoke(Object o, Method method, Object[] objects) throws Throwable {
@@ -46,10 +47,29 @@ public class InterfaceRenderer<T> {
                     Object returnValue;
 
                     if (propertyValue != null) {
-                        returnValue = returnType.getConstructor(propertyValue.getClass()).newInstance(propertyValue);
+                        if(propertyValue instanceof Collection) {
+                            ParameterizedType genericReturnType = ((ParameterizedType)method.getGenericReturnType());
+                            Type collectionType = genericReturnType.getActualTypeArguments()[0];
+                            InterfaceRenderer collectionValueRenderer = new InterfaceRenderer((Class<?>)collectionType);
+                            returnValue = returnType.getConstructor(Collection.class).newInstance(propertyValue);
+                            ((Collection) returnValue).clear();
+                            for(ReadableRepresentation item : (Collection<ReadableRepresentation>) propertyValue) {
+                                ((Collection) returnValue).add(collectionValueRenderer.render(item));
+                            }
+                        } else {
+                            returnValue = returnType.getConstructor(propertyValue.getClass()).newInstance(propertyValue);
+                        }
                     } else {
                         // In this case, we have a null property.
                         returnValue = null;
+                    }
+
+                    if(method.getName().equals("getLinks")) {
+                        return links;
+                    }
+
+                    if(method.getName().equals("getEmbedded")) {
+                        return resources;
                     }
 
                     return returnValue;

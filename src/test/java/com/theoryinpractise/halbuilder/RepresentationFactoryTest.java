@@ -1,34 +1,29 @@
 package com.theoryinpractise.halbuilder;
 
-import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
 import com.theoryinpractise.halbuilder.api.RepresentationFactory;
-import com.theoryinpractise.halbuilder.api.RepresentationReader;
+import com.theoryinpractise.halbuilder.api.ContentRepresentation;
 import org.testng.annotations.Test;
 
-import java.io.Reader;
+import java.io.IOException;
 import java.io.StringReader;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
 public class RepresentationFactoryTest {
 
-    @Test
-    public void testWithCustomReader() {
-        RepresentationFactory representationFactory = new DefaultRepresentationFactory()
-                .withReader(RepresentationFactory.HAL_XML, DummyRepresentationReader.class);
-        ReadableRepresentation representation = representationFactory.readRepresentation(new StringReader("<>"));
-        assertThat(representation.getProperties().get("name")).isEqualTo("dummy");
-    }
+  private static final String TEXT_X_JAVA_PROPERTIES = "text/x-java-properties";
 
-    public static class DummyRepresentationReader implements RepresentationReader {
-        private final RepresentationFactory representationFactory;
+  @Test
+  public void testWithCustomReader() throws IOException {
+    RepresentationFactory representationFactory = new DefaultRepresentationFactory()
+        .withReader(TEXT_X_JAVA_PROPERTIES, PropertiesRepresentationReader.class);
 
-        public DummyRepresentationReader(RepresentationFactory representationFactory) {
-            this.representationFactory = representationFactory;
-        }
+    String source = "name=dummy";
 
-        public ReadableRepresentation read(Reader source) {
-            return representationFactory.newRepresentation("/dummy").withProperty("name", "dummy");
-        }
-    }
+    ContentRepresentation representation = representationFactory.readRepresentation(TEXT_X_JAVA_PROPERTIES, new StringReader(source));
+    assertThat(representation.getProperties().get("name")).isEqualTo("dummy");
+    assertThat(representation.getContent()).isEqualTo(source);
+
+  }
+
 }

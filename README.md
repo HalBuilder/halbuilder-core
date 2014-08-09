@@ -20,8 +20,8 @@ Representation halResource = representationFactory.newRepresentation("http://exa
   .withProperty("summary", "An example list")
   .withRepresentation("td:owner", owner);
 
-String xml = halResource.renderContent(ResourceFactory.HAL_XML);
-String json = halResource.renderContent(ResourceFactory.HAL_JSON);
+String xml = halResource.toString(RepresentationFactory.HAL_XML);
+String json = halResource.toString(RepresentationFactory.HAL_JSON);
 ```
 
 ### Reading Local Resources
@@ -29,7 +29,8 @@ String json = halResource.renderContent(ResourceFactory.HAL_JSON);
 ```java
 RepresentationFactory representationFactory = new RepresentationFactory();
 
-Representation representation = representationFactory.readRepresentation(new InputStreamReader(Some.class.getResourceAsStream("/test.xml")));
+Representation representation = representationFactory.readRepresentation(
+                  new InputStreamReader(Some.class.getResourceAsStream("/test.xml")));
 ```
 
 ### Apache Maven

@@ -5,17 +5,16 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.theoryinpractise.halbuilder.api.Link;
-import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
 import com.theoryinpractise.halbuilder.api.Representation;
 import com.theoryinpractise.halbuilder.api.RepresentationException;
 import com.theoryinpractise.halbuilder.api.RepresentationFactory;
 import com.theoryinpractise.halbuilder.api.RepresentationReader;
 import com.theoryinpractise.halbuilder.api.RepresentationWriter;
+import com.theoryinpractise.halbuilder.api.ContentRepresentation;
 import com.theoryinpractise.halbuilder.impl.ContentType;
 import com.theoryinpractise.halbuilder.impl.representations.MutableRepresentation;
 import com.theoryinpractise.halbuilder.impl.representations.NamespaceManager;
 
-import java.io.BufferedReader;
 import java.io.Reader;
 import java.lang.reflect.Constructor;
 import java.net.URI;
@@ -23,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class DefaultRepresentationFactory extends RepresentationFactory {
+public class DefaultRepresentationFactory extends AbstractRepresentationFactory {
 
     private Map<ContentType, Class<? extends RepresentationWriter>> contentRenderers = Maps.newHashMap();
     private Map<ContentType, Class<? extends RepresentationReader>> representationReaders = Maps.newHashMap();
@@ -87,26 +86,14 @@ public class DefaultRepresentationFactory extends RepresentationFactory {
     }
 
     @Override
-    public ReadableRepresentation readRepresentation(Reader reader) {
+    public ContentRepresentation readRepresentation(String contentType, Reader reader) {
         try {
-            Reader bufferedReader = new BufferedReader(reader);
-            bufferedReader.mark(1);
-            char firstChar = (char) bufferedReader.read();
-            bufferedReader.reset();
-
-            Class<? extends RepresentationReader> readerClass;
-            switch (firstChar) {
-                case '{':
-                    readerClass = representationReaders.get(new ContentType(HAL_JSON));
-                    break;
-                case '<':
-                    readerClass = representationReaders.get(new ContentType(HAL_XML));
-                    break;
-                default:
-                    throw new RepresentationException("unrecognized initial character in stream: " + firstChar);
+            Class<? extends RepresentationReader> readerClass = representationReaders.get(new ContentType(contentType));
+            if (readerClass == null) {
+              throw new IllegalStateException("No representation reader for content type " + contentType + " registered.");
             }
-            Constructor<? extends RepresentationReader> readerConstructor = readerClass.getConstructor(RepresentationFactory.class);
-            return readerConstructor.newInstance(this).read(bufferedReader);
+            Constructor<? extends RepresentationReader> readerConstructor = readerClass.getConstructor(AbstractRepresentationFactory.class);
+            return readerConstructor.newInstance(this).read(reader);
         } catch (Exception e) {
             throw new RepresentationException(e);
         }

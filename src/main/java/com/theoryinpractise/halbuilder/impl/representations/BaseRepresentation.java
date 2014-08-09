@@ -16,6 +16,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Table;
+import com.theoryinpractise.halbuilder.AbstractRepresentationFactory;
 import com.theoryinpractise.halbuilder.api.Contract;
 import com.theoryinpractise.halbuilder.api.Link;
 import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
@@ -27,7 +28,9 @@ import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceContract;
 import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceRenderer;
 
 import javax.annotation.Nullable;
-import java.io.StringWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URI;
 import java.util.Collection;
@@ -59,10 +62,10 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
     protected Map<String, Object> properties = Maps.newTreeMap(usingToString());
     protected Multimap<String, ReadableRepresentation> resources = ArrayListMultimap.create();
 
-    protected RepresentationFactory representationFactory;
+    protected AbstractRepresentationFactory representationFactory;
     protected boolean hasNullProperties = false;
 
-    protected BaseRepresentation(RepresentationFactory representationFactory) {
+    protected BaseRepresentation(AbstractRepresentationFactory representationFactory) {
         this.representationFactory = representationFactory;
     }
 
@@ -270,16 +273,23 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
         return toString(contentType, Collections.<URI>emptySet());
     }
 
+    @Deprecated
     public String toString(String contentType, final Set<URI> flags) {
-        StringWriter sw = new StringWriter();
-        toString(contentType, flags, sw);
-        return sw.toString();
+        try {
+            ByteArrayOutputStream boas = new ByteArrayOutputStream();
+            OutputStreamWriter osw = new OutputStreamWriter(boas, "UTF-8");
+            toString(contentType, flags, osw);
+            return boas.toString();
+        } catch (UnsupportedEncodingException e) {
+            throw new RepresentationException("Unable to write representation: " + e.getMessage());
+        }
     }
 
     public void toString(String contentType, Writer writer) {
         toString(contentType, Collections.<URI>emptySet(), writer);
     }
 
+    @Deprecated
     public void toString(String contentType, Set<URI> flags, Writer writer) {
         validateNamespaces(this);
         RepresentationWriter<String> representationWriter = representationFactory.lookupRenderer(contentType);
@@ -288,8 +298,17 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
         representationWriter.write(this, uriBuilder.build(), writer);
     }
 
+  @Override
+  public String toString(String contentType, URI... flags) {
+    return toString(contentType, ImmutableSet.copyOf(flags));
+  }
 
-    @Override
+  @Override
+  public void toString(String contentType, Writer writer, URI... flags) {
+    toString(contentType, ImmutableSet.copyOf(flags), writer);
+  }
+
+  @Override
     public int hashCode() {
         int h = namespaceManager.hashCode();
         h += links.hashCode();
