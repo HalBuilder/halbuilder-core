@@ -1,13 +1,19 @@
 package com.theoryinpractise.halbuilder.impl;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class ContentType {
     private String type;
     private String subType;
 
     public ContentType(String contentType) {
-        String[] parts = contentType.split("/");
-        type = parts[0];
-        subType = parts[1];
+        Pattern contentTypePattern = Pattern.compile("([\\w|\\*]*)/([^;,\\s]*)");
+        Matcher matcher = contentTypePattern.matcher(contentType);
+        if (matcher.find()) {
+            type = matcher.group(1);
+            subType = matcher.group(2);
+        }
     }
 
     public String getType() {
