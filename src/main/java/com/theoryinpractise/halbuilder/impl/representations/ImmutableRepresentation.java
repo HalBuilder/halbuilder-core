@@ -2,6 +2,7 @@ package com.theoryinpractise.halbuilder.impl.representations;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.theoryinpractise.halbuilder.AbstractRepresentationFactory;
+import com.theoryinpractise.halbuilder.api.Rel;
 import com.theoryinpractise.halbuilder.api.Link;
 import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
 
@@ -34,4 +35,7 @@ public class ImmutableRepresentation extends BaseRepresentation {
     }
 
 
+    public Map<String, Rel> getRels() {
+        return rels;
+    }
 }

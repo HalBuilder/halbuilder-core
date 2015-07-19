@@ -3,7 +3,7 @@
 
     <groupId>com.theoryinpractise</groupId>
     <artifactId>halbuilder-core</artifactId>
-    <version>4.0.4-SNAPSHOT</version>
+    <version>4.1.1-SNAPSHOT</version>
     <description>Java based builder for the Hal specification http://stateless.co/hal_specification.html</description>
     <packaging>jar</packaging>
 
@@ -82,7 +82,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
+                <version>3.3</version>
             </plugin>
             <plugin>
                 <artifactId>maven-release-plugin</artifactId>
@@ -103,7 +103,7 @@
         <dependency>
             <groupId>com.theoryinpractise</groupId>
             <artifactId>halbuilder-api</artifactId>
-            <version>4.0.1</version>
+            <version>4.1.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -115,7 +115,7 @@
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>6.8.8</version>
+            <version>6.9.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -133,7 +133,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>17.0</version>
+            <version>18.0</version>
         </dependency>
        <dependency>
             <groupId>com.google.code.findbugs</groupId>

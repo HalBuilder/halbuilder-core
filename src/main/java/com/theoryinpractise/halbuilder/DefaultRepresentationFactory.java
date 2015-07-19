@@ -1,16 +1,18 @@
 package com.theoryinpractise.halbuilder;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.theoryinpractise.halbuilder.api.Rel;
+import com.theoryinpractise.halbuilder.api.ContentRepresentation;
 import com.theoryinpractise.halbuilder.api.Link;
 import com.theoryinpractise.halbuilder.api.Representation;
 import com.theoryinpractise.halbuilder.api.RepresentationException;
 import com.theoryinpractise.halbuilder.api.RepresentationFactory;
 import com.theoryinpractise.halbuilder.api.RepresentationReader;
 import com.theoryinpractise.halbuilder.api.RepresentationWriter;
-import com.theoryinpractise.halbuilder.api.ContentRepresentation;
 import com.theoryinpractise.halbuilder.impl.ContentType;
 import com.theoryinpractise.halbuilder.impl.representations.MutableRepresentation;
 import com.theoryinpractise.halbuilder.impl.representations.NamespaceManager;
@@ -29,8 +31,13 @@ public class DefaultRepresentationFactory extends AbstractRepresentationFactory 
     private NamespaceManager namespaceManager = new NamespaceManager();
     private List<Link> links = Lists.newArrayList();
     private Set<URI> flags = Sets.newHashSet();
+    private Map<String, Rel> rels = Maps.newHashMap();
 
-    public DefaultRepresentationFactory withRenderer(String contentType, Class<? extends RepresentationWriter<String>> rendererClass) {
+    public DefaultRepresentationFactory() {
+      withRel(Rel.singleton("self"));
+    }
+
+  public DefaultRepresentationFactory withRenderer(String contentType, Class<? extends RepresentationWriter<String>> rendererClass) {
         contentRenderers.put(new ContentType(contentType), rendererClass);
         return this;
     }
@@ -46,7 +53,16 @@ public class DefaultRepresentationFactory extends AbstractRepresentationFactory 
         return this;
     }
 
-    @Override
+  @Override
+  public RepresentationFactory withRel(Rel rel) {
+    if (rels.containsKey(rel.rel())) {
+      throw new IllegalStateException(String.format("Rel %s is already declared.", rel.rel()));
+    }
+    rels.put(rel.rel(), rel);
+    return this;
+  }
+
+  @Override
     public DefaultRepresentationFactory withLink(String rel, String href) {
         links.add(new Link(this, rel, href));
         return this;
@@ -75,6 +91,11 @@ public class DefaultRepresentationFactory extends AbstractRepresentationFactory 
         // Add factory standard namespaces
         for (Map.Entry<String, String> entry : namespaceManager.getNamespaces().entrySet()) {
             representation.withNamespace(entry.getKey(), entry.getValue());
+        }
+
+        // Add factorry standard rels
+        for (Rel rel : rels.values()) {
+          representation.withRel(rel);
         }
 
         // Add factory standard links
@@ -119,6 +140,10 @@ public class DefaultRepresentationFactory extends AbstractRepresentationFactory 
 
     public Set<URI> getFlags() {
         return ImmutableSet.copyOf(flags);
+    }
+
+    public Map<String,Rel> getRels() {
+      return ImmutableMap.copyOf(rels);
     }
 
 }

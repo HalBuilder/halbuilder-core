@@ -1,7 +1,13 @@
 package com.theoryinpractise.halbuilder.impl.representations;
 
+import com.google.common.collect.ImmutableMap;
 import com.theoryinpractise.halbuilder.AbstractRepresentationFactory;
-import com.theoryinpractise.halbuilder.api.*;
+import com.theoryinpractise.halbuilder.api.Rel;
+import com.theoryinpractise.halbuilder.api.Link;
+import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
+import com.theoryinpractise.halbuilder.api.Representable;
+import com.theoryinpractise.halbuilder.api.Representation;
+import com.theoryinpractise.halbuilder.api.RepresentationException;
 import com.theoryinpractise.halbuilder.impl.api.Support;
 
 import java.beans.BeanInfo;
@@ -12,6 +18,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.net.URI;
+import java.util.Map;
 
 import static java.lang.String.format;
 
@@ -28,7 +35,27 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
         super(representationFactory);
     }
 
+  /**
+   * Define rel semantics for this representation
+   * @param rel A defined relationship type
+   */
+    public MutableRepresentation withRel(Rel rel) {
+        if (rels.containsKey(rel.rel())) {
+            throw new IllegalStateException(String.format("Rel %s is already declared.", rel.rel()));
+        }
+        rels.put(rel.rel(), rel);
+        return this;
+    }
+
     /**
+     * Retrieve the defined rel semantics for this representation
+     * @return
+     */
+    public Map<String,Rel> getRels() {
+      return ImmutableMap.copyOf(rels);
+    }
+
+  /**
      * Add a link to this resource
      *
      * @param rel
@@ -48,11 +75,23 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
      */
     public MutableRepresentation withLink(String rel, String href, String name, String title, String hreflang, String profile) {
         Support.checkRelType(rel);
+
+        validateSingletonRel(rel);
+
         links.add(new Link(representationFactory, rel, href, name, title, hreflang, profile));
         return this;
     }
 
-    /**
+    private void validateSingletonRel(String rel) {
+      if (rels.containsKey(rel)) {
+        // Rel is resisted, check for duplicate singleton
+        if (rels.get(rel).isSingleton() && (!getLinksByRel(rel).isEmpty() || !getResourcesByRel(rel).isEmpty())) {
+          throw new IllegalStateException(String.format("%s is registered as a single rel and already exists.", rel));
+        }
+      }
+    }
+
+  /**
      * Add a link to this resource
      *
      * @param rel
@@ -135,6 +174,9 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
 
     public MutableRepresentation withRepresentation(String rel, ReadableRepresentation resource) {
         Support.checkRelType(rel);
+
+        validateSingletonRel(rel);
+
         resources.put(rel, resource);
         // Propagate null property flag to parent.
         if (resource.hasNullProperties()) {

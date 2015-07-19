@@ -17,6 +17,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Table;
 import com.theoryinpractise.halbuilder.AbstractRepresentationFactory;
+import com.theoryinpractise.halbuilder.api.Rel;
 import com.theoryinpractise.halbuilder.api.Contract;
 import com.theoryinpractise.halbuilder.api.Link;
 import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
@@ -58,6 +59,7 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
 
     protected NamespaceManager namespaceManager = new NamespaceManager();
 
+    protected Map<String, Rel> rels = Maps.newHashMap();
     protected List<Link> links = Lists.newArrayList();
     protected Map<String, Object> properties = Maps.newTreeMap(usingToString());
     protected Multimap<String, ReadableRepresentation> resources = ArrayListMultimap.create();
@@ -298,17 +300,17 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
         representationWriter.write(this, uriBuilder.build(), writer);
     }
 
-  @Override
-  public String toString(String contentType, URI... flags) {
-    return toString(contentType, ImmutableSet.copyOf(flags));
-  }
+    @Override
+    public String toString(String contentType, URI... flags) {
+      return toString(contentType, ImmutableSet.copyOf(flags));
+    }
 
-  @Override
-  public void toString(String contentType, Writer writer, URI... flags) {
+    @Override
+    public void toString(String contentType, Writer writer, URI... flags) {
     toString(contentType, ImmutableSet.copyOf(flags), writer);
   }
 
-  @Override
+    @Override
     public int hashCode() {
         int h = namespaceManager.hashCode();
         h += links.hashCode();
