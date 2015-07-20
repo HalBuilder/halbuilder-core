@@ -13,8 +13,8 @@ Representation owner = representationFactory.newRepresentation("http://example.c
 
 Representation halResource = representationFactory.newRepresentation("http://example.com/todo-list")
   .withNamespace("td", "http://example.com/todoapp/rels/{rel}")
-  .withLink("/todo-list/search;{searchterm}", "td:search")
-  .withLink("/todo-list/description", "td:description")
+  .withLink("td:search", "/todo-list/search;{searchterm}")
+  .withLink("td:description", "/todo-list/description")
   .withProperty("created_at", "2010-01-16")
   .withProperty("updated_at", "2010-02-21")
   .withProperty("summary", "An example list")
