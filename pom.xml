@@ -3,7 +3,7 @@
 
     <groupId>com.theoryinpractise</groupId>
     <artifactId>halbuilder-core</artifactId>
-    <version>4.1.1-SNAPSHOT</version>
+    <version>5.0.1-SNAPSHOT</version>
     <description>Java based builder for the Hal specification http://stateless.co/hal_specification.html</description>
     <packaging>jar</packaging>
 
@@ -83,6 +83,10 @@
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.3</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-release-plugin</artifactId>
@@ -103,7 +107,7 @@
         <dependency>
             <groupId>com.theoryinpractise</groupId>
             <artifactId>halbuilder-api</artifactId>
-            <version>4.1.1-SNAPSHOT</version>
+            <version>5.0.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>

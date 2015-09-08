@@ -3,51 +3,61 @@ package com.theoryinpractise.halbuilder.impl.bytecode;
 import com.theoryinpractise.halbuilder.DefaultRepresentationFactory;
 import com.theoryinpractise.halbuilder.api.Link;
 import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
+import com.theoryinpractise.halbuilder.api.Representation;
 import com.theoryinpractise.halbuilder.api.RepresentationFactory;
+import fj.Ord;
+import fj.data.List;
+import fj.data.Option;
+import fj.data.Set;
+import fj.data.TreeMap;
 import org.testng.annotations.Test;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
 
+import static fj.data.Option.some;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 public class InterfaceRendererTest {
-    private static final RepresentationFactory representationFactory = new DefaultRepresentationFactory();
 
-    public static interface IPerson {
-        Integer getAge();
+  @Test
+  public void testRendering() {
 
-        Boolean getExpired();
+    RepresentationFactory representationFactory = new DefaultRepresentationFactory();
+    TreeMap<String, Option<Object>> properties = TreeMap.<String, Option<Object>>empty(Ord.stringOrd)
+                                                     .set("name", some("Joe Smith"))
+                                                     .set("id", some(1))
+                                                     .set("expired", some(false))
+                                                     .set("age", some(40));
 
-        Integer getId();
+    List<Link> links = List.list(new Link(representationFactory, "self", "/123/456"));
 
-        String getName();
+    final Set<Representation> representations = Set.set(Ord.hashOrd(), representationFactory.newRepresentation());
 
-        List<Link> getLinks();
+    final Collection<? extends ReadableRepresentation> coll = representations.toList().toCollection();
 
-        Map<String, Collection<ReadableRepresentation>> getEmbedded();
-    }
+    TreeMap<String, Collection<? extends ReadableRepresentation>> embedded = TreeMap.empty(Ord.stringOrd);
+    embedded = embedded.set("user", coll);
 
-    private static final Map<String, Object> properties = new HashMap<String, Object>();
-    private static final List<Link> links = new ArrayList<Link>();
-    private static final Map<String, Collection<ReadableRepresentation>> embedded = new HashMap<String, Collection<ReadableRepresentation>>();
+    InterfaceRenderer<IPerson> renderer = InterfaceRenderer.newInterfaceRenderer(IPerson.class);
+    IPerson person = renderer.render(properties, links, embedded);
+    assertThat(person).isNotNull();
+    assertThat(person.getName()).isNotEmpty();
+    assertThat(person.getLinks()).isNotEmpty();
+  }
 
-    static {
-        properties.put("name","Joe Smith");
-        properties.put("id",1);
-        properties.put("expired",false);
-        properties.put("age",40);
-        links.add(new Link(representationFactory, "self", "/123/456"));
-        Set<ReadableRepresentation> embeddedResources = new HashSet<ReadableRepresentation>();
-        embeddedResources.add(representationFactory.newRepresentation());
-        embedded.put("user", embeddedResources);
-    }
+  public interface IPerson {
+    Integer getAge();
 
-    @Test
-    public void testRendering() {
-        InterfaceRenderer<IPerson> renderer = InterfaceRenderer.newInterfaceRenderer(IPerson.class);
-        IPerson person = renderer.render(properties, links, embedded);
-        assertThat(person).isNotNull();
-        assertThat(person.getName()).isNotEmpty();
-        assertThat(person.getLinks()).isNotEmpty();
-    }
+    Boolean getExpired();
+
+    Integer getId();
+
+    String getName();
+
+    List<Link> getLinks();
+
+    Map<String, Collection<ReadableRepresentation>> getEmbedded();
+  }
+
 }

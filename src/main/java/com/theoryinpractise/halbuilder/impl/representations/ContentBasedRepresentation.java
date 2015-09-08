@@ -3,7 +3,9 @@ package com.theoryinpractise.halbuilder.impl.representations;
 import com.theoryinpractise.halbuilder.AbstractRepresentationFactory;
 import com.theoryinpractise.halbuilder.api.ContentRepresentation;
 
-public class ContentBasedRepresentation extends MutableRepresentation implements ContentRepresentation {
+public class ContentBasedRepresentation
+    extends MutableRepresentation
+    implements ContentRepresentation {
 
   private String source;
 

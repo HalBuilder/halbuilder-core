@@ -2,8 +2,8 @@ package com.theoryinpractise.halbuilder;
 
 import com.google.common.base.Throwables;
 import com.google.common.io.CharStreams;
-import com.theoryinpractise.halbuilder.api.RepresentationReader;
 import com.theoryinpractise.halbuilder.api.ContentRepresentation;
+import com.theoryinpractise.halbuilder.api.RepresentationReader;
 import com.theoryinpractise.halbuilder.impl.representations.ContentBasedRepresentation;
 
 import java.io.IOException;
@@ -14,7 +14,8 @@ import java.util.Properties;
 /**
  * RepresentationReader for java.util.Properties like files.
  */
-public class PropertiesRepresentationReader implements RepresentationReader {
+public class PropertiesRepresentationReader
+    implements RepresentationReader {
   private final AbstractRepresentationFactory representationFactory;
 
   public PropertiesRepresentationReader(AbstractRepresentationFactory representationFactory) {
