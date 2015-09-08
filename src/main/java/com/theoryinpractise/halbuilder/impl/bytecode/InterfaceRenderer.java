@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import static com.theoryinpractise.halbuilder.impl.bytecode.InterfaceSupport.derivePropertyNameFromMethod;
+import static fj.data.Option.some;
 
 /**
  * Java Interface based "renderer", this will write the resource as a Proxy to a Java interface.
@@ -41,6 +42,14 @@ public class InterfaceRenderer<T> {
 
   public T render(final TreeMap<String, Option<Object>> map) {
     return render(map, List.nil(), TreeMap.empty(Ord.stringOrd));
+  }
+
+  private TreeMap<String, Option<Object>> fromJavaMap(Map<String, Object> map) {
+    TreeMap<String, Option<Object>> returnMap = TreeMap.empty(Ord.stringOrd);
+    for (Map.Entry<String, Object> entry : map.entrySet()) {
+      returnMap = returnMap.set(entry.getKey(), some(entry.getValue()));
+    }
+    return returnMap;
   }
 
   public T render(final TreeMap<String, Option<Object>> properties, final List<Link> links,
@@ -69,8 +78,8 @@ public class InterfaceRenderer<T> {
 
           if (optionalPropertyValue.isSome()) {
             Object propertyValue = optionalPropertyValue.some();
-            if (propertyValue instanceof List) {
-              List propertyCollection = (List) propertyValue;
+            if (propertyValue instanceof java.util.List) {
+              java.util.List propertyCollection = (java.util.List) propertyValue;
               Object propertyHeadValue = propertyCollection.iterator().next();
               ParameterizedType genericReturnType = ((ParameterizedType) method.getGenericReturnType());
               Class<?> collectionType = (Class<?>) genericReturnType.getActualTypeArguments()[0];
@@ -81,17 +90,14 @@ public class InterfaceRenderer<T> {
                 InterfaceRenderer collectionValueRenderer = new InterfaceRenderer(collectionType);
                 returnValue = new ArrayList();
                 for (Object item : propertyCollection) {
-                  ((ArrayList) returnValue).add(collectionValueRenderer.render((TreeMap) item));
+                  ((ArrayList) returnValue).add(collectionValueRenderer.render(fromJavaMap((Map) item)));
                 }
               }
             } else if (returnType.isInstance(propertyValue)) {
               returnValue = propertyValue;
             } else if (Map.class.isInstance(propertyValue)) {
-
               InterfaceRenderer propertyValueRenderer = new InterfaceRenderer(returnType);
-//              returnValue = propertyValueRenderer.render((Map<String, Object>) propertyValue);
-              // TODO Work out how to convert a java.util.Map to a fj.data.Map
-              returnValue = propertyValueRenderer.render(TreeMap.empty(Ord.stringOrd));
+              returnValue = propertyValueRenderer.render(fromJavaMap((Map) propertyValue));
             } else {
               returnValue = returnType.getConstructor(propertyValue.getClass()).newInstance(propertyValue);
             }
