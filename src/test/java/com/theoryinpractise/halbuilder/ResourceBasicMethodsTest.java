@@ -1,7 +1,7 @@
 package com.theoryinpractise.halbuilder;
 
 import com.theoryinpractise.halbuilder.api.Representation;
-import com.theoryinpractise.halbuilder.impl.representations.MutableRepresentation;
+import com.theoryinpractise.halbuilder.impl.representations.PersistentRepresentation;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -13,7 +13,7 @@ public class ResourceBasicMethodsTest {
 
   private Representation resource;
   private Representation otherResource;
-  private int            resourceHashCode;
+  private int resourceHashCode;
 
   @BeforeMethod
   public void setUpResources() {
@@ -21,7 +21,6 @@ public class ResourceBasicMethodsTest {
     otherResource = createDefaultResource();
     resourceHashCode = resource.hashCode();
   }
-
 
   private Representation createDefaultResource() {
     return representationFactory.newRepresentation("http://localhost/test")
@@ -39,56 +38,57 @@ public class ResourceBasicMethodsTest {
 
   @Test
   public void testHashCodeIsDependentOnNamespaces() {
-    resource.withNamespace("testns2", "http://example.com/test2/{rel}");
-    assertThat(resource.hashCode()).isNotEqualTo(resourceHashCode);
+    final Representation updatedResource = resource.withNamespace("testns2", "http://example.com/test2/{rel}");
+    assertThat(updatedResource.hashCode()).isNotEqualTo(resourceHashCode);
   }
 
   @Test
   public void testHashCodeIsDependentOnLinks() {
-    resource.withLink("testlink2", "http://example.com/link2");
-    assertThat(resource.hashCode()).isNotEqualTo(resourceHashCode);
+    final Representation updatedResource = resource.withLink("testlink2", "http://example.com/link2");
+    assertThat(updatedResource.hashCode()).isNotEqualTo(resourceHashCode);
   }
 
   @Test
   public void testHashCodeIsDependentOnProperties() {
-    resource.withProperty("proptest2", "value2");
-    assertThat(resource.hashCode()).isNotEqualTo(resourceHashCode);
+    final Representation updatedResource = resource.withProperty("proptest2", "value2");
+    assertThat(updatedResource.hashCode()).isNotEqualTo(resourceHashCode);
   }
 
   @Test
   public void testHashCodeIsDependentOnNullProperties() {
-    resource.withProperty("othernullprop", null);
-    assertThat(resource.hashCode()).isNotEqualTo(resourceHashCode);
+    final Representation updatedResource = resource.withProperty("othernullprop", null);
+    assertThat(updatedResource.hashCode()).isNotEqualTo(resourceHashCode);
   }
 
   @Test
   public void testHashCodeIsDependentOnResources() {
-    resource.withRepresentation("testsub2", representationFactory.newRepresentation("/subtest2"));
-    assertThat(resource.hashCode()).isNotEqualTo(resourceHashCode);
+    final Representation updatedResource = resource.withRepresentation("testsub2",
+                                                                       representationFactory.newRepresentation("/subtest2"));
+    assertThat(updatedResource.hashCode()).isNotEqualTo(resourceHashCode);
   }
 
   @Test
   public void testEqualsIsDependentOnNamespaces() {
-    resource.withNamespace("testns2", "http://example.com/test2/{rel}");
-    assertThat(resource).isNotEqualTo(otherResource);
+    final Representation updatedResource = resource.withNamespace("testns2", "http://example.com/test2/{rel}");
+    assertThat(updatedResource).isNotEqualTo(otherResource);
   }
 
   @Test
   public void testEqualsIsDependentOnLinks() {
-    resource.withLink("testlink2", "http://example.com/link2");
-    assertThat(resource).isNotEqualTo(otherResource);
+    final Representation updatedResource = resource.withLink("testlink2", "http://example.com/link2");
+    assertThat(updatedResource).isNotEqualTo(otherResource);
   }
 
   @Test
   public void testEqualsIsDependentOnProperties() {
-    resource.withProperty("proptest2", "value2");
-    assertThat(resource).isNotEqualTo(otherResource);
+    final Representation updatedResource = resource.withProperty("proptest2", "value2");
+    assertThat(updatedResource).isNotEqualTo(otherResource);
   }
 
   @Test
   public void testEqualsIsDependentOnNullProperties() {
-    resource.withProperty("othernullprop", null);
-    assertThat(resource).isNotEqualTo(otherResource);
+    final Representation updatedResource = resource.withProperty("othernullprop", null);
+    assertThat(updatedResource).isNotEqualTo(otherResource);
   }
 
   @Test
@@ -99,13 +99,14 @@ public class ResourceBasicMethodsTest {
 
   @Test
   public void testToStringRendersSelfHref() {
-    String toString = new MutableRepresentation(representationFactory, "http://localhost/test").toString();
+    String toString = new PersistentRepresentation(representationFactory, "http://localhost/test").toString();
     assertThat(toString).isEqualTo("<Representation: http://localhost/test>");
   }
 
   @Test
   public void testToStringRendersHashCode() {
-    String toString = new MutableRepresentation(representationFactory).toString();
+    String toString = new PersistentRepresentation(representationFactory).toString();
     assertThat(toString).matches("<Representation: @[0-9a-f]+>");
   }
+
 }

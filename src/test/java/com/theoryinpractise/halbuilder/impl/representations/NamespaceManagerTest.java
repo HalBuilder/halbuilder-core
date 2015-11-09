@@ -13,7 +13,7 @@ public class NamespaceManagerTest {
   public void testNamespaceNeedsRel()
       throws Exception {
 
-    NamespaceManager ns = new NamespaceManager();
+    NamespaceManager ns = NamespaceManager.EMPTY;
     try {
       ns.withNamespace("tst", "http://localhost/test/rel");
       fail("Should not allow us to add a namespace href without {rel}");
@@ -38,18 +38,19 @@ public class NamespaceManagerTest {
   @Test(dataProvider = "provideNamespaceData")
   public void testCurrieHref(String ns, String href, String original, String curried)
       throws Exception {
-    NamespaceManager namespaceManager = new NamespaceManager();
-    namespaceManager.withNamespace(ns, href);
-    assertThat(namespaceManager.currieHref(original)).isEqualTo(curried);
+    NamespaceManager namespaceManager = NamespaceManager.EMPTY;
+    NamespaceManager updatedNamespaceManager = namespaceManager.withNamespace(ns, href);
+    assertThat(namespaceManager.currieHref(original)).isEqualTo(original);
+    assertThat(updatedNamespaceManager.currieHref(original)).isEqualTo(curried);
   }
 
   @Test(dataProvider = "provideNamespaceData")
   public void testUnCurrieHref(String ns, String href, String original, String curried)
       throws Exception {
-    NamespaceManager namespaceManager = new NamespaceManager();
-    namespaceManager.withNamespace(ns, href);
-    assertThat(namespaceManager.resolve(curried).isSuccess()).isTrue();
-    assertThat(namespaceManager.resolve(curried).success()).isEqualTo(original);
+    NamespaceManager namespaceManager = NamespaceManager.EMPTY.withNamespace(ns, href);
+
+    assertThat(namespaceManager.resolve(curried).isRight()).isTrue();
+    assertThat(namespaceManager.resolve(curried).get()).isEqualTo(original);
   }
 
 }

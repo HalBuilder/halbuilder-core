@@ -25,15 +25,20 @@ public class ContentType {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
 
     ContentType that = (ContentType) o;
 
-    if (!subType.equals(that.subType)) return false;
-    if (!type.equals(that.type)) return false;
+    if (!subType.equals(that.subType)) {
+      return false;
+    }
+    return type.equals(that.type);
 
-    return true;
   }
 
   public boolean matches(String contentType) {

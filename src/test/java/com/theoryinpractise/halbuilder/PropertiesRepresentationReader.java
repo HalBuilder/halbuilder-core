@@ -2,9 +2,10 @@ package com.theoryinpractise.halbuilder;
 
 import com.google.common.base.Throwables;
 import com.google.common.io.CharStreams;
-import com.theoryinpractise.halbuilder.api.ContentRepresentation;
+import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
+import com.theoryinpractise.halbuilder.api.Representation;
 import com.theoryinpractise.halbuilder.api.RepresentationReader;
-import com.theoryinpractise.halbuilder.impl.representations.ContentBasedRepresentation;
+import com.theoryinpractise.halbuilder.impl.representations.PersistentRepresentation;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -22,14 +23,16 @@ public class PropertiesRepresentationReader
     this.representationFactory = representationFactory;
   }
 
-  public ContentRepresentation read(Reader reader) {
+  public ReadableRepresentation read(Reader reader) {
     try {
       String source = CharStreams.toString(reader);
-      ContentBasedRepresentation sbr = new ContentBasedRepresentation(representationFactory, source);
+      Representation sbr = new PersistentRepresentation(representationFactory, source);
       Properties properties = new Properties();
+
       properties.load(new StringReader(source));
+
       for (String key : properties.stringPropertyNames()) {
-        sbr.withProperty(key, properties.getProperty(key));
+        sbr = sbr.withProperty(key, properties.getProperty(key));
       }
       return sbr;
     } catch (IOException e) {

@@ -1,13 +1,13 @@
 package com.theoryinpractise.halbuilder;
 
-import com.theoryinpractise.halbuilder.api.ContentRepresentation;
+import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
 import com.theoryinpractise.halbuilder.api.RepresentationFactory;
+import javaslang.control.Option;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.io.StringReader;
 
-import static fj.data.Option.some;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 public class RepresentationFactoryTest {
@@ -22,12 +22,11 @@ public class RepresentationFactoryTest {
 
     String source = "name=dummy";
 
-    ContentRepresentation representation = representationFactory.readRepresentation(
+    ReadableRepresentation representation = representationFactory.readRepresentation(
         TEXT_X_JAVA_PROPERTIES, new StringReader(source));
 
-    assertThat(representation.getProperties().get("name")).isEqualTo(some(some("dummy")));
-    assertThat(representation.getValue("name")).isEqualTo(some("dummy"));
-    assertThat(representation.getContent()).isEqualTo(source);
+    assertThat(representation.getProperties().get("name")).isEqualTo(Option.of(Option.of("dummy")));
+    assertThat(representation.getValue("name")).isEqualTo(Option.of("dummy"));
 
   }
 

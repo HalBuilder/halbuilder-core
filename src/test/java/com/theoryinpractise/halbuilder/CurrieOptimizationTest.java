@@ -17,11 +17,10 @@ public class CurrieOptimizationTest {
                                                  .withLink("http://localhost/api/rels/foo",
                                                            "http://localhost/api/applications/app/1");
 
-
   @Test
   public void testCurrieOptimizationOnFirstLink() {
 
-    Link link = resource.getLinks().index(1);
+    Link link = resource.getLinks().get(1);
 
     assertThat(link.getRel()).isEqualTo("rel:foo");
     assertThat(link.getHref()).isEqualTo("http://localhost/api/applications/app/1");
@@ -31,7 +30,7 @@ public class CurrieOptimizationTest {
   @Test
   public void testLinkLookupByCurrieOptimizationRel() {
 
-    Link link2 = resource.getLinksByRel("rel:foo").index(0);
+    Link link2 = resource.getLinksByRel("rel:foo").get(0);
 
     assertThat(link2.getRel()).isEqualTo("rel:foo");
     assertThat(link2.getHref()).isEqualTo("http://localhost/api/applications/app/1");
@@ -41,7 +40,7 @@ public class CurrieOptimizationTest {
   @Test
   public void testLinkLookupByAbsoluteRel() {
 
-    Link link2 = resource.getLinksByRel("http://localhost/api/rels/foo").index(0);
+    Link link2 = resource.getLinksByRel("http://localhost/api/rels/foo").get(0);
 
     assertThat(link2.getRel()).isEqualTo("rel:foo");
     assertThat(link2.getHref()).isEqualTo("http://localhost/api/applications/app/1");
@@ -51,7 +50,7 @@ public class CurrieOptimizationTest {
   @Test
   public void testLinkLookupByCanonicalRel() {
 
-    Link link2 = resource.getLinksByRel("http://localhost/api/rels/foo").index(0);
+    Link link2 = resource.getLinksByRel("http://localhost/api/rels/foo").get(0);
 
     assertThat(link2.getRel()).isEqualTo("rel:foo");
     assertThat(link2.getHref()).isEqualTo("http://localhost/api/applications/app/1");

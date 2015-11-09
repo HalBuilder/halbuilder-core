@@ -1,6 +1,6 @@
 package com.theoryinpractise.halbuilder;
 
-import com.theoryinpractise.halbuilder.api.Rel;
+import com.theoryinpractise.halbuilder.api.Rels;
 import org.testng.annotations.Test;
 
 import static org.fest.assertions.api.Fail.fail;
@@ -12,7 +12,7 @@ public class SingleLinksTest {
 
     try {
       new DefaultRepresentationFactory()
-          .withRel(Rel.singleton("bar"))
+          .withRel(Rels.singleton("bar"))
           .newRepresentation("/foo")
           .withLink("bar", "/bar")
           .withLink("bar", "/bar");
@@ -31,7 +31,7 @@ public class SingleLinksTest {
       final DefaultRepresentationFactory factory = new DefaultRepresentationFactory();
 
       factory
-          .withRel(Rel.singleton("bar"))
+          .withRel(Rels.singleton("bar"))
           .newRepresentation("/foo")
           .withRepresentation("bar", factory.newRepresentation().withProperty("id", 1))
           .withRepresentation("bar", factory.newRepresentation().withProperty("id", 1));

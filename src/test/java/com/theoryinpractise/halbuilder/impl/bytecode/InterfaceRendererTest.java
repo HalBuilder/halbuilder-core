@@ -5,17 +5,16 @@ import com.theoryinpractise.halbuilder.api.Link;
 import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
 import com.theoryinpractise.halbuilder.api.Representation;
 import com.theoryinpractise.halbuilder.api.RepresentationFactory;
-import fj.Ord;
-import fj.data.List;
-import fj.data.Option;
-import fj.data.Set;
-import fj.data.TreeMap;
+import javaslang.Tuple;
+import javaslang.collection.List;
+import javaslang.collection.Map;
+import javaslang.collection.TreeMap;
+import javaslang.control.Option;
 import org.testng.annotations.Test;
 
 import java.util.Collection;
-import java.util.Map;
 
-import static fj.data.Option.some;
+import static java.util.Comparator.naturalOrder;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 public class InterfaceRendererTest {
@@ -24,25 +23,38 @@ public class InterfaceRendererTest {
   public void testRendering() {
 
     RepresentationFactory representationFactory = new DefaultRepresentationFactory();
-    TreeMap<String, Option<Object>> properties = TreeMap.<String, Option<Object>>empty(Ord.stringOrd)
-                                                     .set("name", some("Joe Smith"))
-                                                     .set("id", some(1))
-                                                     .set("expired", some(false))
-                                                     .set("age", some(40));
+    Map<String, Object> properties = TreeMap.<String, Object>empty(naturalOrder())
+                                         .put("name", "Joe Smith")
+                                         .put("id", 1)
+                                         .put("expired", false)
+                                         .put("age", 40);
 
-    List<Link> links = List.list(new Link(representationFactory, "self", "/123/456"));
+    List<Link> links = List.of(new Link("self", "/123/456"));
 
-    final Set<Representation> representations = Set.set(Ord.hashOrd(), representationFactory.newRepresentation());
+    final List<Representation> representations = List.of(representationFactory.newRepresentation());
 
-    final Collection<? extends ReadableRepresentation> coll = representations.toList().toCollection();
-
-    TreeMap<String, Collection<? extends ReadableRepresentation>> embedded = TreeMap.empty(Ord.stringOrd);
-    embedded = embedded.set("user", coll);
+    TreeMap<String, List<? extends ReadableRepresentation>> embedded = TreeMap.empty(naturalOrder());
+    embedded = embedded.put("user", representations);
 
     InterfaceRenderer<IPerson> renderer = InterfaceRenderer.newInterfaceRenderer(IPerson.class);
-    IPerson person = renderer.render(properties, links, embedded);
+
+    Map<String, Option<Object>> optionalProperties = properties.map((k, v) -> Tuple.of(k, Option.of(v)));
+
+    IPerson person = renderer.render(optionalProperties, links, embedded);
+    assertFactsAboutPerson(person);
+
+    IPerson person2 = representationFactory.newRepresentation()
+                                           .withProperties(properties)
+                                           .toClass(IPerson.class);
+
+    assertFactsAboutPerson(person2);
+
+  }
+
+  public void assertFactsAboutPerson(IPerson person) {
     assertThat(person).isNotNull();
-    assertThat(person.getName()).isNotEmpty();
+    assertThat(person.getName()).isEqualTo("Joe Smith");
+    assertThat(person.getAge()).isEqualTo(40);
     assertThat(person.getLinks()).isNotEmpty();
   }
 

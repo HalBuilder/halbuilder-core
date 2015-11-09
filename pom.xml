@@ -10,70 +10,6 @@
     <name>halbuilder</name>
     <url>http://maven.apache.org</url>
 
-    <scm>
-        <connection>scm:git:git@github.com:HalBuilder/halbuilder-core.git</connection>
-        <developerConnection>scm:git:git@github.com:HalBuilder/halbuilder-core.git</developerConnection>
-        <url>http://gotohal.net</url>
-      <tag>HEAD</tag>
-  </scm>
-
-    <developers>
-        <developer>
-            <id>talios</id>
-            <name>Mark Derricutt</name>
-            <email>mark@talios.com</email>
-            <url>http://twitter.com/talios</url>
-        </developer>
-    </developers>
-
-    <licenses>
-        <license>
-            <name>Apache License</name>
-        </license>
-    </licenses>
-
-    <distributionManagement>
-        <repository>
-            <id>sonatype-staging</id>
-            <name>oss.sonatype.org Staging Repository</name>
-            <url>http://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-        <snapshotRepository>
-            <id>github-snapshots</id>
-            <name>oss.sonatype.org github Release Repository Snapshot Repository</name>
-            <url>http://oss.sonatype.org/content/repositories/github-snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
-
-    <profiles>
-        <profile>
-            <id>release</id>
-            <activation>
-                <property>
-                    <name>performRelease</name>
-                    <value>true</value>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
-
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
    </properties>
@@ -81,22 +17,15 @@
     <build>
         <plugins>
             <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.3</version>
+                <groupId>io.repaint.maven</groupId>
+                <artifactId>tiles-maven-plugin</artifactId>
+                <version>2.4</version>
+                <extensions>true</extensions>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>2.5</version>
-                <configuration>
-                    <preparationGoals>clean install</preparationGoals>
-                    <goals>deploy</goals>
-                    <pushChanges>false</pushChanges>
-                    <localCheckout>true</localCheckout>
-                    <allowTimestampedSnapshots>true</allowTimestampedSnapshots>
+                    <tiles>
+                        <tile>com.theoryinpractise:halbuilder-release-tile:[1.0.0,2.0.0)</tile>
+                        <tile>com.theoryinpractise:halbuilder-styleguide-tile:[1.0.0,2.0.0)</tile>
+                    </tiles>
                 </configuration>
             </plugin>
         </plugins>
@@ -109,6 +38,11 @@
             <artifactId>halbuilder-api</artifactId>
             <version>5.0.1-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>com.javaslang</groupId>
+            <artifactId>javaslang</artifactId>
+            <version>2.0.0-RC1-SNAPSHOT</version>
+        </dependency>
 
         <dependency>
             <groupId>org.easytesting</groupId>
@@ -119,21 +53,21 @@
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>6.9.4</version>
+            <version>6.9.9</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
+        <!-- <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-bundle</artifactId>
             <version>1.18.1</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
+        </dependency> -->
+        <!-- <dependency>
             <groupId>com.damnhandy</groupId>
             <artifactId>handy-uri-templates</artifactId>
             <version>2.0.2</version>
             <scope>test</scope>
-        </dependency>
+        </dependency> -->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
@@ -142,7 +76,7 @@
        <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
-            <version>3.0.0</version>
+            <version>3.0.1</version>
         </dependency>
     </dependencies>
 </project>

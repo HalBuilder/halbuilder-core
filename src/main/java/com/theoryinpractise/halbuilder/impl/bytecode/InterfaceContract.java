@@ -3,15 +3,15 @@ package com.theoryinpractise.halbuilder.impl.bytecode;
 import com.google.common.base.Preconditions;
 import com.theoryinpractise.halbuilder.api.Contract;
 import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
-import fj.data.Option;
-import fj.data.TreeMap;
+import javaslang.collection.Map;
+import javaslang.control.Option;
 
 import java.lang.reflect.Method;
 
 import static com.theoryinpractise.halbuilder.impl.bytecode.InterfaceSupport.derivePropertyNameFromMethod;
 
 /**
- * A Java Interface matching contract
+ * A Java Interface matching contract.
  */
 public class InterfaceContract<T>
     implements Contract {
@@ -31,13 +31,13 @@ public class InterfaceContract<T>
     return isSatisfiedBy(representation.getProperties());
   }
 
-  public boolean isSatisfiedBy(TreeMap<String, Option<Object>> properties) {
+  public boolean isSatisfiedBy(Map<String, Option<Object>> properties) {
     for (Method method : anInterface.getDeclaredMethods()) {
       String propertyName = derivePropertyNameFromMethod(method);
       if (!"class".equals(propertyName)
           && !"links".equals(propertyName)
           && !"embedded".equals(propertyName)
-          && !properties.contains(propertyName)) {
+          && !properties.containsKey(propertyName)) {
         return false;
       }
     }

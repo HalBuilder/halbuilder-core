@@ -4,21 +4,18 @@ import com.google.common.base.Preconditions;
 import com.theoryinpractise.halbuilder.api.Link;
 import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
 import com.theoryinpractise.halbuilder.api.RepresentationException;
-import fj.Ord;
-import fj.data.List;
-import fj.data.Option;
-import fj.data.TreeMap;
+import javaslang.collection.List;
+import javaslang.collection.Map;
+import javaslang.collection.TreeMap;
+import javaslang.control.Option;
 
 import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
+import java.util.Comparator;
 
 import static com.theoryinpractise.halbuilder.impl.bytecode.InterfaceSupport.derivePropertyNameFromMethod;
-import static fj.data.Option.some;
 
 /**
  * Java Interface based "renderer", this will write the resource as a Proxy to a Java interface.
@@ -40,75 +37,82 @@ public class InterfaceRenderer<T> {
     return render(representation.getProperties(), representation.getLinks(), representation.getResourceMap());
   }
 
-  public T render(final TreeMap<String, Option<Object>> map) {
-    return render(map, List.nil(), TreeMap.empty(Ord.stringOrd));
+  public T render(final Map<String, Option<Object>> map) {
+    return render(map, List.empty(), TreeMap.empty(Comparator.naturalOrder()));
   }
 
-  private TreeMap<String, Option<Object>> fromJavaMap(Map<String, Object> map) {
-    TreeMap<String, Option<Object>> returnMap = TreeMap.empty(Ord.stringOrd);
-    for (Map.Entry<String, Object> entry : map.entrySet()) {
-      returnMap = returnMap.set(entry.getKey(), some(entry.getValue()));
+  private TreeMap<String, Option<Object>> fromJavaMap(java.util.Map<String, Object> map) {
+    TreeMap<String, Option<Object>> returnMap = TreeMap.empty(Comparator.naturalOrder());
+    for (java.util.Map.Entry<String, Object> entry : map.entrySet()) {
+      returnMap = returnMap.put(entry.getKey(), Option.of(entry.getValue()));
     }
     return returnMap;
   }
 
-  public T render(final TreeMap<String, Option<Object>> properties, final List<Link> links,
-                  final TreeMap<String, Collection<? extends ReadableRepresentation>> resources) {
+  @SuppressWarnings("unchecked")
+  public T render(final Map<String, Option<Object>> properties, final List<Link> links,
+                  final Map<String, List<? extends ReadableRepresentation>> resources) {
     if (InterfaceContract.newInterfaceContract(anInterface).isSatisfiedBy(properties)) {
-      T proxy = (T) Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{anInterface}, new InvocationHandler() {
-        public Object invoke(Object o, Method method, Object[] objects)
-            throws Throwable {
-
-          if (method.getName().equals("getLinks")) {
-            return links;
-          }
-
-          if (method.getName().equals("getEmbedded")) {
-            return resources;
-          }
-
-          String propertyName = derivePropertyNameFromMethod(method);
-
-          Option<Object> optionalPropertyValue = properties.get(propertyName)
-                                                           .bind(val -> val);
-
-          Class<?> returnType = method.getReturnType();
-
-          Object returnValue = null;
-
-          if (optionalPropertyValue.isSome()) {
-            Object propertyValue = optionalPropertyValue.some();
-            if (propertyValue instanceof java.util.List) {
-              java.util.List propertyCollection = (java.util.List) propertyValue;
-              Object propertyHeadValue = propertyCollection.iterator().next();
-              ParameterizedType genericReturnType = ((ParameterizedType) method.getGenericReturnType());
-              Class<?> collectionType = (Class<?>) genericReturnType.getActualTypeArguments()[0];
-
-              if (collectionType.isInstance(propertyHeadValue)) {
-                returnValue = propertyValue;
-              } else {
-                InterfaceRenderer collectionValueRenderer = new InterfaceRenderer(collectionType);
-                returnValue = new ArrayList();
-                for (Object item : propertyCollection) {
-                  ((ArrayList) returnValue).add(collectionValueRenderer.render(fromJavaMap((Map) item)));
-                }
-              }
-            } else if (returnType.isInstance(propertyValue)) {
-              returnValue = propertyValue;
-            } else if (Map.class.isInstance(propertyValue)) {
-              InterfaceRenderer propertyValueRenderer = new InterfaceRenderer(returnType);
-              returnValue = propertyValueRenderer.render(fromJavaMap((Map) propertyValue));
-            } else {
-              returnValue = returnType.getConstructor(propertyValue.getClass()).newInstance(propertyValue);
-            }
-          }
-
-          return returnValue;
-        }
-      });
-      return proxy;
+      return (T) Proxy.newProxyInstance(this.getClass().getClassLoader(),
+          new Class[]{anInterface},
+          makeInterfaceRendererHandler(properties, links, resources));
     } else {
       throw new RepresentationException("Unable to write representation to " + anInterface.getName());
     }
+  }
+
+  public InvocationHandler makeInterfaceRendererHandler(final Map<String, Option<Object>> properties, final List<Link> links,
+                                                        final Map<String, List<? extends ReadableRepresentation>> resources) {
+    return (o, method, objects) -> {
+
+      if (method.getName().equals("getLinks")) {
+        return links;
+      }
+
+      if (method.getName().equals("getEmbedded")) {
+        return resources;
+      }
+
+      String propertyName = derivePropertyNameFromMethod(method);
+
+      Option<Object> optionalPropertyValue = properties.get(propertyName)
+                                                       .flatMap(val -> val);
+
+      Class<?> returnType = method.getReturnType();
+
+      Object returnValue = null;
+
+      if (optionalPropertyValue.isDefined()) {
+        Object propertyValue = optionalPropertyValue.get();
+        if (propertyValue instanceof java.util.List) {
+          java.util.List propertyCollection = (java.util.List) propertyValue;
+          Object propertyHeadValue = propertyCollection.iterator().next();
+          ParameterizedType genericReturnType = ((ParameterizedType) method.getGenericReturnType());
+          Class<?> collectionType = (Class<?>) genericReturnType.getActualTypeArguments()[0];
+
+          if (collectionType.isInstance(propertyHeadValue)) {
+            returnValue = propertyValue;
+          } else {
+            InterfaceRenderer collectionValueRenderer = new InterfaceRenderer(collectionType);
+            returnValue = new ArrayList();
+            for (Object item : propertyCollection) {
+              ((ArrayList) returnValue).add(
+                  collectionValueRenderer.render(InterfaceRenderer.this.fromJavaMap((java.util.Map) item)));
+            }
+          }
+        } else if (returnType.isInstance(propertyValue)) {
+          returnValue = propertyValue;
+        } else if (Map.class.isInstance(propertyValue)) {
+          InterfaceRenderer propertyValueRenderer = new InterfaceRenderer(returnType);
+          returnValue = propertyValueRenderer.render(
+              InterfaceRenderer.this.fromJavaMap((java.util.Map) propertyValue));
+        } else {
+          returnValue = returnType.getConstructor(
+              propertyValue.getClass()).newInstance(propertyValue);
+        }
+      }
+
+      return returnValue;
+    };
   }
 }
