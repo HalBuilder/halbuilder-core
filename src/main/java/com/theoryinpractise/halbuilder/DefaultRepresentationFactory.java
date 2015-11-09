@@ -1,149 +1,169 @@
 package com.theoryinpractise.halbuilder;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.theoryinpractise.halbuilder.api.Rel;
-import com.theoryinpractise.halbuilder.api.ContentRepresentation;
 import com.theoryinpractise.halbuilder.api.Link;
+import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
+import com.theoryinpractise.halbuilder.api.Rel;
+import com.theoryinpractise.halbuilder.api.Rels;
 import com.theoryinpractise.halbuilder.api.Representation;
 import com.theoryinpractise.halbuilder.api.RepresentationException;
 import com.theoryinpractise.halbuilder.api.RepresentationFactory;
 import com.theoryinpractise.halbuilder.api.RepresentationReader;
 import com.theoryinpractise.halbuilder.api.RepresentationWriter;
 import com.theoryinpractise.halbuilder.impl.ContentType;
-import com.theoryinpractise.halbuilder.impl.representations.MutableRepresentation;
 import com.theoryinpractise.halbuilder.impl.representations.NamespaceManager;
+import com.theoryinpractise.halbuilder.impl.representations.PersistentRepresentation;
+import javaslang.collection.HashMap;
+import javaslang.collection.HashSet;
+import javaslang.collection.List;
+import javaslang.collection.Map;
+import javaslang.collection.Set;
+import javaslang.collection.TreeMap;
 
 import java.io.Reader;
-import java.lang.reflect.Constructor;
 import java.net.URI;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
-public class DefaultRepresentationFactory extends AbstractRepresentationFactory {
+import static java.lang.String.format;
 
-    private Map<ContentType, Class<? extends RepresentationWriter>> contentRenderers = Maps.newHashMap();
-    private Map<ContentType, Class<? extends RepresentationReader>> representationReaders = Maps.newHashMap();
-    private NamespaceManager namespaceManager = new NamespaceManager();
-    private List<Link> links = Lists.newArrayList();
-    private Set<URI> flags = Sets.newHashSet();
-    private Map<String, Rel> rels = Maps.newHashMap();
+public class DefaultRepresentationFactory
+    extends AbstractRepresentationFactory {
 
-    public DefaultRepresentationFactory() {
-      withRel(Rel.singleton("self"));
-    }
+  private Map<ContentType, Class<? extends RepresentationWriter<String>>> contentRenderers = HashMap.empty();
+  private Map<ContentType, Class<? extends RepresentationReader>> representationReaders = HashMap.empty();
+  private NamespaceManager namespaceManager = NamespaceManager.EMPTY;
+  private List<Link> links = List.empty();
+  private Set<URI> flags = HashSet.empty();
+  private TreeMap<String, Rel> rels = TreeMap.empty();
 
-  public DefaultRepresentationFactory withRenderer(String contentType, Class<? extends RepresentationWriter<String>> rendererClass) {
-        contentRenderers.put(new ContentType(contentType), rendererClass);
-        return this;
-    }
+  public DefaultRepresentationFactory() {
+    withRel(Rels.singleton("self"));
+  }
 
-    public DefaultRepresentationFactory withReader(String contentType, Class<? extends RepresentationReader> readerClass) {
-        representationReaders.put(new ContentType(contentType), readerClass);
-        return this;
-    }
+  public DefaultRepresentationFactory withRenderer(String contentType,
+                                                   Class<? extends RepresentationWriter<String>>
+                                                       rendererClass) {
+    contentRenderers = contentRenderers.put(new ContentType(contentType), rendererClass);
+    return this;
+  }
 
-    @Override
-    public DefaultRepresentationFactory withNamespace(String namespace, String href) {
-        namespaceManager.withNamespace(namespace, href);
-        return this;
-    }
-
-  @Override
-  public RepresentationFactory withRel(Rel rel) {
-    if (rels.containsKey(rel.rel())) {
-      throw new IllegalStateException(String.format("Rel %s is already declared.", rel.rel()));
-    }
-    rels.put(rel.rel(), rel);
+  public DefaultRepresentationFactory withReader(String contentType, Class<? extends
+                                                                               RepresentationReader> readerClass) {
+    representationReaders = representationReaders.put(new ContentType(contentType), readerClass);
     return this;
   }
 
   @Override
-    public DefaultRepresentationFactory withLink(String rel, String href) {
-        links.add(new Link(this, rel, href));
-        return this;
+  public DefaultRepresentationFactory withNamespace(String namespace, String href) {
+    namespaceManager = namespaceManager.withNamespace(namespace, href);
+    return this;
+  }
+
+  @Override
+  public RepresentationFactory withRel(Rel rel) {
+    if (rels.containsKey(Rels.getRel(rel))) {
+      throw new IllegalStateException(format("Rel %s is already declared.", rel.rel()));
     }
+    rels = rels.put(rel.rel(), rel);
+    return this;
+  }
 
-    @Override
-    public RepresentationFactory withFlag(URI flag) {
-        flags.add(flag);
-        return this;
+  @Override
+  public DefaultRepresentationFactory withLink(String rel, String href) {
+    links = links.append(new Link(rel, href));
+    return this;
+  }
+
+  @Override
+  public RepresentationFactory withFlag(URI flag) {
+    flags = flags.add(flag);
+    return this;
+  }
+
+  @Override
+  public Representation newRepresentation(URI uri) {
+    return newRepresentation(uri.toString());
+  }
+
+  @Override
+  public Representation newRepresentation() {
+    return newRepresentation("");
+  }
+
+  @Override
+  public Representation newRepresentation(String href) {
+    PersistentRepresentation representation = PersistentRepresentation.empty(this)
+                                                                      .withLink("self", href);
+
+    // Add factory standard namespaces
+    representation = namespaceManager.getNamespaces()
+                                     .foldLeft(representation,
+                                         (rep, ns) -> rep.withNamespace(ns._1, ns._2));
+
+    // Add factory standard rels
+    representation = rels.foldLeft(representation,
+        (rep, rel) -> rep.withRel(rel._2));
+
+    // Add factory standard links
+    representation = links.foldLeft(representation,
+        (rep, link) -> rep.withLink(link.getRel(),
+            link.getHref(),
+            link.getName(),
+            link.getTitle(),
+            link.getHreflang(),
+            link.getProfile()));
+
+    return representation;
+  }
+
+  @Override
+  public ReadableRepresentation readRepresentation(String contentType, Reader reader) {
+    try {
+      return representationReaders.get(new ContentType(contentType))
+                                  .map(rc -> buildContentRepresentation(rc, reader))
+                                  .orElseThrow(() -> {
+                                    throw new IllegalStateException(format(
+                                        "No representation reader for content type %s registered.", contentType));
+                                  });
+
+    } catch (Exception e) {
+      throw new RepresentationException(e);
     }
+  }
 
-    @Override
-    public Representation newRepresentation(URI uri) {
-        return newRepresentation(uri.toString());
+  private ReadableRepresentation buildContentRepresentation(Class<? extends RepresentationReader>
+                                                                rc, Reader reader) {
+    try {
+      return rc.getConstructor(AbstractRepresentationFactory.class).newInstance(this).read(reader);
+    } catch (ReflectiveOperationException e) {
+      throw new RepresentationException(e);
     }
+  }
 
-    @Override
-    public Representation newRepresentation() {
-        return newRepresentation((String) null);
+  public Set<URI> getFlags() {
+    return flags;
+  }
+
+  public TreeMap<String, Rel> getRels() {
+    return rels;
+  }
+
+  public RepresentationWriter<String> lookupRenderer(String contentType) {
+
+    return contentRenderers.findFirst(ct -> ct._1.matches(contentType))
+                           .map(ct -> newInstanceOf(ct._2))
+                           .orElseThrow(() -> {
+                             throw new IllegalArgumentException("Unsupported contentType: " + contentType);
+                           });
+
+  }
+
+  public RepresentationWriter<String> newInstanceOf(final Class<? extends
+                                                                    RepresentationWriter<String>>
+                                                        writerClass) {
+    try {
+      return writerClass.newInstance();
+    } catch (InstantiationException | IllegalAccessException e) {
+      throw new RepresentationException(e);
     }
-
-    @Override
-    public Representation newRepresentation(String href) {
-        MutableRepresentation representation = new MutableRepresentation(this, href);
-
-        // Add factory standard namespaces
-        for (Map.Entry<String, String> entry : namespaceManager.getNamespaces().entrySet()) {
-            representation.withNamespace(entry.getKey(), entry.getValue());
-        }
-
-        // Add factorry standard rels
-        for (Rel rel : rels.values()) {
-          representation.withRel(rel);
-        }
-
-        // Add factory standard links
-        for (Link link : links) {
-            representation.withLink(link.getRel(), link.getHref(), link.getName(), link.getTitle(), link.getHreflang(), link.getProfile());
-        }
-
-        return representation;
-    }
-
-    @Override
-    public ContentRepresentation readRepresentation(String contentType, Reader reader) {
-        try {
-            Class<? extends RepresentationReader> readerClass = representationReaders.get(new ContentType(contentType));
-            if (readerClass == null) {
-              throw new IllegalStateException("No representation reader for content type " + contentType + " registered.");
-            }
-            Constructor<? extends RepresentationReader> readerConstructor = readerClass.getConstructor(AbstractRepresentationFactory.class);
-            return readerConstructor.newInstance(this).read(reader);
-        } catch (Exception e) {
-            throw new RepresentationException(e);
-        }
-    }
-
-    public RepresentationWriter<String> lookupRenderer(String contentType) {
-
-        for (Map.Entry<ContentType, Class<? extends RepresentationWriter>> entry : contentRenderers.entrySet()) {
-            if (entry.getKey().matches(contentType)) {
-                try {
-                    return entry.getValue().newInstance();
-                } catch (InstantiationException e) {
-                    throw new RepresentationException(e);
-                } catch (IllegalAccessException e) {
-                    throw new RepresentationException(e);
-                }
-            }
-        }
-
-        throw new IllegalArgumentException("Unsupported contentType: " + contentType);
-
-    }
-
-    public Set<URI> getFlags() {
-        return ImmutableSet.copyOf(flags);
-    }
-
-    public Map<String,Rel> getRels() {
-      return ImmutableMap.copyOf(rels);
-    }
+  }
 
 }

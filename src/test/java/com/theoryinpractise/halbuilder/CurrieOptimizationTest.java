@@ -9,52 +9,52 @@ import static org.fest.assertions.api.Assertions.assertThat;
 
 public class CurrieOptimizationTest {
 
-    RepresentationFactory representationFactory = new DefaultRepresentationFactory()
-            .withNamespace("app", "http://localhost/api/applications/{rel}")
-            .withNamespace("rel", "http://localhost/api/rels/{rel}");
+  RepresentationFactory representationFactory = new DefaultRepresentationFactory()
+                                                    .withNamespace("app", "http://localhost/api/applications/{rel}")
+                                                    .withNamespace("rel", "http://localhost/api/rels/{rel}");
 
-    Representation resource = representationFactory.newRepresentation("/api/1")
-            .withLink("http://localhost/api/rels/foo", "http://localhost/api/applications/app/1");
+  Representation resource = representationFactory.newRepresentation("/api/1")
+                                                 .withLink("http://localhost/api/rels/foo",
+                                                           "http://localhost/api/applications/app/1");
 
+  @Test
+  public void testCurrieOptimizationOnFirstLink() {
 
-    @Test
-    public void testCurrieOptimizationOnFirstLink() {
+    Link link = resource.getLinks().get(1);
 
-        Link link = resource.getLinks().get(1);
+    assertThat(link.getRel()).isEqualTo("rel:foo");
+    assertThat(link.getHref()).isEqualTo("http://localhost/api/applications/app/1");
 
-        assertThat(link.getRel()).isEqualTo("rel:foo");
-        assertThat(link.getHref()).isEqualTo("http://localhost/api/applications/app/1");
+  }
 
-    }
+  @Test
+  public void testLinkLookupByCurrieOptimizationRel() {
 
-    @Test
-    public void testLinkLookupByCurrieOptimizationRel() {
+    Link link2 = resource.getLinksByRel("rel:foo").get(0);
 
-        Link link2 = resource.getLinksByRel("rel:foo").get(0);
+    assertThat(link2.getRel()).isEqualTo("rel:foo");
+    assertThat(link2.getHref()).isEqualTo("http://localhost/api/applications/app/1");
 
-        assertThat(link2.getRel()).isEqualTo("rel:foo");
-        assertThat(link2.getHref()).isEqualTo("http://localhost/api/applications/app/1");
+  }
 
-    }
+  @Test
+  public void testLinkLookupByAbsoluteRel() {
 
-    @Test
-    public void testLinkLookupByAbsoluteRel() {
+    Link link2 = resource.getLinksByRel("http://localhost/api/rels/foo").get(0);
 
-        Link link2 = resource.getLinksByRel("http://localhost/api/rels/foo").get(0);
+    assertThat(link2.getRel()).isEqualTo("rel:foo");
+    assertThat(link2.getHref()).isEqualTo("http://localhost/api/applications/app/1");
 
-        assertThat(link2.getRel()).isEqualTo("rel:foo");
-        assertThat(link2.getHref()).isEqualTo("http://localhost/api/applications/app/1");
+  }
 
-    }
+  @Test
+  public void testLinkLookupByCanonicalRel() {
 
-    @Test
-    public void testLinkLookupByCanonicalRel() {
+    Link link2 = resource.getLinksByRel("http://localhost/api/rels/foo").get(0);
 
-        Link link2 = resource.getLinksByRel("http://localhost/api/rels/foo").get(0);
+    assertThat(link2.getRel()).isEqualTo("rel:foo");
+    assertThat(link2.getHref()).isEqualTo("http://localhost/api/applications/app/1");
 
-        assertThat(link2.getRel()).isEqualTo("rel:foo");
-        assertThat(link2.getHref()).isEqualTo("http://localhost/api/applications/app/1");
-
-    }
+  }
 
 }

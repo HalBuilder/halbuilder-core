@@ -1,32 +1,30 @@
 package com.theoryinpractise.halbuilder.impl.representations;
 
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.base.Predicate;
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Ordering;
 import com.google.common.collect.Table;
 import com.theoryinpractise.halbuilder.AbstractRepresentationFactory;
-import com.theoryinpractise.halbuilder.api.Rel;
 import com.theoryinpractise.halbuilder.api.Contract;
 import com.theoryinpractise.halbuilder.api.Link;
 import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
+import com.theoryinpractise.halbuilder.api.Rel;
 import com.theoryinpractise.halbuilder.api.RepresentationException;
 import com.theoryinpractise.halbuilder.api.RepresentationFactory;
-import com.theoryinpractise.halbuilder.api.RepresentationWriter;
 import com.theoryinpractise.halbuilder.impl.api.Support;
 import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceContract;
 import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceRenderer;
+import javaslang.Function1;
+import javaslang.Tuple;
+import javaslang.Tuple2;
+import javaslang.collection.HashSet;
+import javaslang.collection.List;
+import javaslang.collection.Map;
+import javaslang.collection.Set;
+import javaslang.collection.TreeMap;
+import javaslang.collection.TreeSet;
+import javaslang.control.Option;
 
 import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
@@ -35,317 +33,300 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URI;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static com.google.common.base.Strings.emptyToNull;
-import static com.google.common.collect.Iterables.transform;
-import static com.google.common.collect.Ordering.usingToString;
-import static com.google.common.collect.Sets.newHashSet;
+import static com.theoryinpractise.halbuilder.api.Rels.getRel;
 import static com.theoryinpractise.halbuilder.impl.api.Support.WHITESPACE_SPLITTER;
 
-public abstract class BaseRepresentation implements ReadableRepresentation {
+public abstract class BaseRepresentation
+    implements ReadableRepresentation {
 
-    public static final Ordering<Link> RELATABLE_ORDERING = Ordering.from(new Comparator<Link>() {
-        public int compare(Link l1, Link l2) {
-            if (l1.getRel().contains("self")) return -1;
-            if (l2.getRel().contains("self")) return 1;
-            return l1.getRel().compareTo(l2.getRel());
-        }
-    });
-
-    protected NamespaceManager namespaceManager = new NamespaceManager();
-
-    protected Map<String, Rel> rels = Maps.newHashMap();
-    protected List<Link> links = Lists.newArrayList();
-    protected Map<String, Object> properties = Maps.newTreeMap(usingToString());
-    protected Multimap<String, ReadableRepresentation> resources = ArrayListMultimap.create();
-
-    protected AbstractRepresentationFactory representationFactory;
-    protected boolean hasNullProperties = false;
-
-    protected BaseRepresentation(AbstractRepresentationFactory representationFactory) {
-        this.representationFactory = representationFactory;
-    }
-
-    public Link getResourceLink() {
-        return Iterables.find(getLinks(), LinkPredicate.newLinkPredicate(Support.SELF), null);
-    }
-
-    public Map<String, String> getNamespaces() {
-        return ImmutableMap.copyOf(namespaceManager.getNamespaces());
-    }
-
-    public List<Link> getCanonicalLinks() {
-        return ImmutableList.copyOf(getNaturalLinks());
-    }
-
-    public Link getLinkByRel(String rel) {
-        return Iterables.getFirst(getLinksByRel(rel), null);
-    }
-
-    public List<Link> getLinksByRel(final String rel) {
-        Support.checkRelType(rel);
-
-        final String curiedRel = namespaceManager.currieHref(rel);
-        final ImmutableList.Builder<Link> linkBuilder = ImmutableList.builder();
-
-        linkBuilder.addAll(getLinksByRel(this, curiedRel));
-
-        return linkBuilder.build();
-    }
-
-    public List<? extends ReadableRepresentation> getResourcesByRel(final String rel) {
-        Support.checkRelType(rel);
-
-        return ImmutableList.copyOf(resources.get(rel));
-    }
-
-    public Object getValue(String name) {
-        if (properties.containsKey(name)) {
-            return properties.get(name);
-        } else {
-            throw new RepresentationException("Resource does not contain " + name);
-        }
-    }
-
-    public Object getValue(String name, Object defaultValue) {
-        try {
-            return getValue(name);
-        } catch (RepresentationException e) {
-            return defaultValue;
-        }
-    }
-
-    private List<Link> getLinksByRel(ReadableRepresentation representation, final String rel) {
-        Support.checkRelType(rel);
-        return ImmutableList.copyOf(Iterables.filter(representation.getCanonicalLinks(), new Predicate<Link>() {
-            public boolean apply(@Nullable Link relatable) {
-                return rel.equals(relatable.getRel()) || Iterables.contains(WHITESPACE_SPLITTER.split(relatable.getRel()), rel);
+  public static final Comparator<Link> RELATABLE_ORDERING =
+      Comparator.comparing(Link::getRel,
+          (r1, r2) -> {
+            if (r1.contains("self")) {
+              return -1;
             }
-        }));
-    }
-
-    public List<Link> getLinks() {
-        if (representationFactory.getFlags().contains(RepresentationFactory.COALESCE_LINKS)) {
-            return getCollatedLinks();
-        } else {
-            return getNaturalLinks();
-        }
-    }
-
-    private List<Link> getNaturalLinks() {
-        return FluentIterable.from(links).transform(new Function<Link, Link>() {
-            @Nullable
-            @Override
-            public Link apply(@Nullable Link link) {
-                return new Link(representationFactory, namespaceManager.currieHref(link.getRel()), link.getHref(), link.getName(), link.getTitle(), link.getHreflang(), link.getProfile());
+            if (r2.contains("self")) {
+              return 1;
             }
-        }).toSortedList(RELATABLE_ORDERING);
+            return r1.compareTo(r2);
+          });
+  protected NamespaceManager namespaceManager = NamespaceManager.EMPTY;
+  protected TreeMap<String, Rel> rels = TreeMap.empty();
+  protected List<Link> links = List.empty();
+  protected TreeMap<String, Option<Object>> properties = TreeMap.empty();
+  protected Multimap<String, ReadableRepresentation> resources = ArrayListMultimap.create();
+  protected boolean hasNullProperties = false;
+  protected AbstractRepresentationFactory representationFactory;
 
-    }
-
-
-    private List<Link> getCollatedLinks() {
-        List<Link> collatedLinks = Lists.newArrayList();
-
-        // href, rel, link
-        Table<String, String, Link> linkTable = HashBasedTable.create();
-
-        for (Link link : links) {
-            linkTable.put(link.getHref(), link.getRel(), link);
-        }
-
-        for (String href : linkTable.rowKeySet()) {
-            Set<String> relTypes = linkTable.row(href).keySet();
-            Collection<Link> hrefLinks = linkTable.row(href).values();
-
-            String rels = mkSortableJoinerForIterable(" ", relTypes).apply(new Function<String, String>() {
-                public String apply(@Nullable String relType) {
-                    return namespaceManager.currieHref(relType);
-                }
-            });
-
-            Function<Function<Link, String>, String> nameFunc = mkSortableJoinerForIterable(", ", hrefLinks);
-
-            String titles = nameFunc.apply(new Function<Link, String>() {
-                public String apply(@Nullable Link link) {
-                    return link.getTitle();
-                }
-            });
-
-            String names = nameFunc.apply(new Function<Link, String>() {
-                public String apply(@Nullable Link link) {
-                    return link.getName();
-                }
-            });
-
-            String hreflangs = nameFunc.apply(new Function<Link, String>() {
-                public String apply(@Nullable Link link) {
-                    return link.getHreflang();
-                }
-            });
-
-            String profile = nameFunc.apply(new Function<Link, String>() {
-                public String apply(@Nullable Link link) {
-                    return link.getProfile();
-                }
-            });
-
-            collatedLinks.add(new Link(representationFactory, rels, href,
-                    emptyToNull(names),
-                    emptyToNull(titles),
-                    emptyToNull(hreflangs),
-                    emptyToNull(profile)
-            ));
-        }
-
-        return RELATABLE_ORDERING.sortedCopy(collatedLinks);
-    }
-
-    private <T> Function<Function<T, String>, String> mkSortableJoinerForIterable(final String join, final Iterable<T> ts) {
-        return new Function<Function<T, String>, String>() {
-            @Nullable
-            @Override
-            public String apply(Function<T, String> f) {
-                return Joiner.on(join).skipNulls().join(usingToString().nullsFirst().sortedCopy(newHashSet(transform(ts, f))));
-            }
-        };
-    }
-
-    public Map<String, Object> getProperties() {
-        return Collections.unmodifiableMap(properties);
-    }
-
-    public Collection<Map.Entry<String, ReadableRepresentation>> getResources() {
-        return ImmutableMultimap.copyOf(resources).entries();
-    }
-
-    public Map<String, Collection<ReadableRepresentation>> getResourceMap() {
-        return ImmutableMap.copyOf(resources.asMap());
-    }
-
-    protected void validateNamespaces(ReadableRepresentation representation) {
-        for (Link link : representation.getCanonicalLinks()) {
-            namespaceManager.validateNamespaces(link.getRel());
-        }
-        for (Map.Entry<String, ReadableRepresentation> aResource : representation.getResources()) {
-            namespaceManager.validateNamespaces(aResource.getKey());
-            validateNamespaces(aResource.getValue());
-        }
-    }
-
-    /**
-     * Test whether the Representation in its current state satisfies the provided interface.
-     *
-     * @param contract The interface we wish to check
-     * @return Is that Representation satisfied by the supplied contract?
-     */
-    public boolean isSatisfiedBy(Contract contract) {
-        return contract.isSatisfiedBy(this);
-    }
-
-    public boolean hasNullProperties() {
-        return hasNullProperties;
-    }
-
-    public ImmutableRepresentation toImmutableResource() {
-        return new ImmutableRepresentation(representationFactory, namespaceManager, getCanonicalLinks(), getProperties(), getResources(), hasNullProperties);
-    }
-
-
-    /**
-     * Renders the current Representation as a proxy to the provider interface
-     *
-     * @param anInterface The interface we wish to proxy the resource as
-     * @return A Guava Optional of the rendered class, this will be absent if the interface doesn't satisfy the interface
-     */
-    public <T> T toClass(Class<T> anInterface) {
-        if (InterfaceContract.newInterfaceContract(anInterface).isSatisfiedBy(this)) {
-            return InterfaceRenderer.newInterfaceRenderer(anInterface).render(this);
-        } else {
-            throw new RepresentationException("Unable to write representation to " + anInterface.getName());
-        }
-    }
-
-    public String toString(String contentType) {
-        return toString(contentType, Collections.<URI>emptySet());
-    }
-
-    @Deprecated
-    public String toString(String contentType, final Set<URI> flags) {
-        try {
-            ByteArrayOutputStream boas = new ByteArrayOutputStream();
-            OutputStreamWriter osw = new OutputStreamWriter(boas, "UTF-8");
-            toString(contentType, flags, osw);
-            return boas.toString();
-        } catch (UnsupportedEncodingException e) {
-            throw new RepresentationException("Unable to write representation: " + e.getMessage());
-        }
-    }
-
-    public void toString(String contentType, Writer writer) {
-        toString(contentType, Collections.<URI>emptySet(), writer);
-    }
-
-    @Deprecated
-    public void toString(String contentType, Set<URI> flags, Writer writer) {
-        validateNamespaces(this);
-        RepresentationWriter<String> representationWriter = representationFactory.lookupRenderer(contentType);
-        ImmutableSet.Builder<URI> uriBuilder = ImmutableSet.<URI>builder().addAll(representationFactory.getFlags());
-        if (flags != null) uriBuilder.addAll(flags);
-        representationWriter.write(this, uriBuilder.build(), writer);
-    }
-
-    @Override
-    public String toString(String contentType, URI... flags) {
-      return toString(contentType, ImmutableSet.copyOf(flags));
-    }
-
-    @Override
-    public void toString(String contentType, Writer writer, URI... flags) {
-    toString(contentType, ImmutableSet.copyOf(flags), writer);
+  protected BaseRepresentation(AbstractRepresentationFactory representationFactory) {
+    this.representationFactory = representationFactory;
   }
 
-    @Override
-    public int hashCode() {
-        int h = namespaceManager.hashCode();
-        h += links.hashCode();
-        h += properties.hashCode();
-        h += resources.hashCode();
-        return h;
+  private String toString(String contentType, final Set<URI> flags) {
+    try {
+      ByteArrayOutputStream boas = new ByteArrayOutputStream();
+      OutputStreamWriter osw = new OutputStreamWriter(boas, "UTF-8");
+      toString(contentType, flags, osw);
+      return boas.toString();
+    } catch (UnsupportedEncodingException e) {
+      throw new RepresentationException("Unable to write representation: " + e.getMessage());
+    }
+  }
+
+  private void toString(String contentType, Set<URI> flags, Writer writer) {
+    validateNamespaces(this);
+    representationFactory.lookupRenderer(contentType)
+                         .write(this, flags.addAll(representationFactory.getFlags()), writer);
+  }
+
+  protected void validateNamespaces(ReadableRepresentation representation) {
+    representation.getCanonicalLinks()
+                  .forEach(l -> namespaceManager.validateNamespaces(l.getRel()));
+
+    representation.getResources().forEach(r -> {
+      namespaceManager.validateNamespaces(r._1());
+      validateNamespaces(r._2());
+    });
+
+  }
+
+  @Override
+  public Option<String> getContent() {
+    return Option.none();
+  }
+
+  public Option<Link> getResourceLink() {
+    return getLinkByRel(Support.SELF);
+  }
+
+  public Map<String, String> getNamespaces() {
+    return namespaceManager.getNamespaces();
+  }
+
+  public List<Link> getCanonicalLinks() {
+    return getNaturalLinks();
+  }
+
+  public List<Link> getLinks() {
+    if (representationFactory.getFlags().contains(RepresentationFactory.COALESCE_LINKS)) {
+      return getCollatedLinks();
+    } else {
+      return getNaturalLinks();
+    }
+  }
+
+  public Option<Link> getLinkByRel(String rel) {
+    return getLinksByRel(rel).headOption();
+  }
+
+  public Option<Link> getLinkByRel(Rel rel) {
+    return getLinkByRel(getRel(rel));
+  }
+
+  public List<Link> getLinksByRel(final String rel) {
+    Support.checkRelType(rel);
+    final String curiedRel = namespaceManager.currieHref(rel);
+    return getLinksByRel(this, curiedRel);
+  }
+
+  public List<Link> getLinksByRel(final Rel rel) {
+    return getLinksByRel(getRel(rel));
+  }
+
+  public List<? extends ReadableRepresentation> getResourcesByRel(final String rel) {
+    Support.checkRelType(rel);
+
+    return List.ofAll(resources.get(rel));
+  }
+
+  public List<? extends ReadableRepresentation> getResourcesByRel(final Rel rel) {
+    return getResourcesByRel(getRel(rel));
+  }
+
+  public Option<Object> getValue(String name) {
+    return properties.get(name)
+                     .flatMap(val -> val);
+  }
+
+  public Object getValue(String name, Object defaultValue) {
+    return getValue(name).orElse(defaultValue);
+  }
+
+  public Map<String, Option<Object>> getProperties() {
+    return properties;
+  }
+
+  public boolean hasNullProperties() {
+    return hasNullProperties;
+  }
+
+  public List<Tuple2<String, ReadableRepresentation>> getResources() {
+    return List.ofAll(resources.entries())
+               .map(e -> Tuple.of(e.getKey(), e.getValue()));
+  }
+
+  public Map<String, List<? extends ReadableRepresentation>> getResourceMap() {
+
+    final java.lang.Iterable<Tuple2<String, List<ReadableRepresentation>>> entries
+        = resources.asMap().entrySet().stream()
+                   .map(e -> Tuple.of(e.getKey(), List.ofAll(e.getValue())))
+                   .collect(Collectors.toList());
+
+    return TreeMap.ofAll(entries);
+
+  }
+
+  /**
+   * Test whether the Representation in its current state satisfies the provided interface.
+   *
+   * @param contract The interface we wish to check
+   *
+   * @return Is that Representation satisfied by the supplied contract?
+   */
+  public boolean isSatisfiedBy(Contract contract) {
+    return contract.isSatisfiedBy(this);
+  }
+
+  /**
+   * Renders the current Representation as a proxy to the provider interface.
+   *
+   * @param anInterface The interface we wish to proxy the resource as
+   *
+   * @return A Guava Optional of the rendered class, this will be absent if the interface doesn't satisfy the interface
+   */
+  public <T> T toClass(Class<T> anInterface) {
+    if (InterfaceContract.newInterfaceContract(anInterface).isSatisfiedBy(this)) {
+      return InterfaceRenderer.newInterfaceRenderer(anInterface).render(this);
+    } else {
+      throw new RepresentationException("Unable to write representation to " + anInterface.getName());
+    }
+  }
+
+  public String toString(String contentType) {
+    return toString(contentType, HashSet.empty());
+  }
+
+  @Override
+  public String toString(String contentType, URI... flags) {
+    return toString(contentType, HashSet.ofAll(flags));
+  }
+
+  public void toString(String contentType, Writer writer) {
+    toString(contentType, HashSet.empty(), writer);
+  }
+
+  @Override
+  public void toString(String contentType, Writer writer, URI... flags) {
+    toString(contentType, HashSet.ofAll(flags), writer);
+  }
+
+  private List<Link> getCollatedLinks() {
+    List<Link> collatedLinks = List.empty();
+
+    // href, rel, link
+    Table<String, String, Link> linkTable = HashBasedTable.create();
+
+    for (Link link : links) {
+      linkTable.put(link.getHref(), link.getRel(), link);
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (obj == this) {
-            return true;
-        }
-        if (!(obj instanceof BaseRepresentation)) {
-            return false;
-        }
-        BaseRepresentation that = (BaseRepresentation) obj;
-        boolean e = this.namespaceManager.equals(that.namespaceManager);
-        e &= this.links.equals(that.links);
-        e &= this.properties.equals(that.properties);
-        e &= this.resources.equals(that.resources);
-        return e;
+    for (String href : linkTable.rowKeySet()) {
+      Set<String> relTypes = TreeSet.ofAll(linkTable.row(href).keySet());
+      Collection<Link> hrefLinks = linkTable.row(href).values();
+
+      String rels = mkSortableJoiner(" ", relTypes)
+                        .apply(relType -> namespaceManager.currieHref(relType));
+
+      Function1<Function1<Link, String>, String> nameFunc = mkSortableJoiner(", ", hrefLinks);
+
+      String titles = nameFunc.apply(Link::getTitle);
+
+      String names = nameFunc.apply(Link::getName);
+
+      String hreflangs = nameFunc.apply(Link::getHreflang);
+
+      String profile = nameFunc.apply(Link::getProfile);
+
+      collatedLinks = collatedLinks.append(new Link(rels, href, emptyToNull(names),
+                                                       emptyToNull(titles),
+                                                       emptyToNull(hreflangs),
+                                                       emptyToNull(profile)));
     }
 
-    @Override
-    public String toString() {
-        Link href = getLinkByRel("self");
-        if (href != null) {
-            return "<Representation: " + href.getHref() + ">";
-        } else {
-            return "<Representation: @" + Integer.toHexString(hashCode()) + ">";
-        }
+    return collatedLinks.sort(RELATABLE_ORDERING);
+  }
+
+  private <T> Function1<Function1<T, String>, String> mkSortableJoiner(final String join, final Iterable<T> ts) {
+    return new Function1<Function1<T, String>, String>() {
+      @Nullable
+      @Override
+      public String apply(Function1<T, String> f) {
+        return StreamSupport.stream(ts.spliterator(), false)
+                            .map(f::apply)
+                            .filter(Objects::nonNull)
+                            .sorted()
+                            .distinct()
+                            .collect(Collectors.joining(join));
+      }
+    };
+  }
+
+  private List<Link> getNaturalLinks() {
+    return links.map(link -> new Link(namespaceManager.currieHref(link.getRel()),
+                                         link.getHref(), link.getName(), link.getTitle(),
+                                         link.getHreflang(), link.getProfile()))
+                .sort(RELATABLE_ORDERING);
+
+  }
+
+  private List<Link> getLinksByRel(ReadableRepresentation representation, String rel) {
+    Support.checkRelType(rel);
+    return representation
+               .getCanonicalLinks()
+               .filter(link -> rel.equals(link.getRel())
+                               || Iterables.contains(WHITESPACE_SPLITTER.split(link.getRel()),
+                   rel));
+  }
+
+  @Override
+  public int hashCode() {
+    int h = namespaceManager.hashCode();
+    h += links.hashCode();
+    h += properties.hashCode();
+    h += resources.hashCode();
+    return h;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
     }
+    if (obj == this) {
+      return true;
+    }
+    if (!(obj instanceof BaseRepresentation)) {
+      return false;
+    }
+    BaseRepresentation that = (BaseRepresentation) obj;
+    boolean e = this.namespaceManager.equals(that.namespaceManager);
+    e &= this.links.equals(that.links);
+    e &= this.properties.equals(that.properties);
+    e &= this.resources.equals(that.resources);
+    return e;
+  }
+
+  @Override
+  public String toString() {
+    return getLinkByRel("self")
+               .map(href -> "<Representation: " + href.getHref() + ">")
+               .orElse("<Representation: @" + Integer.toHexString(hashCode()) + ">");
+  }
 
 }

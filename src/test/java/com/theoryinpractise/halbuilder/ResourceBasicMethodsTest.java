@@ -1,7 +1,7 @@
 package com.theoryinpractise.halbuilder;
 
-import com.theoryinpractise.halbuilder.impl.representations.MutableRepresentation;
 import com.theoryinpractise.halbuilder.api.Representation;
+import com.theoryinpractise.halbuilder.impl.representations.PersistentRepresentation;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -9,103 +9,104 @@ import static org.fest.assertions.api.Assertions.assertThat;
 
 public class ResourceBasicMethodsTest {
 
-    private DefaultRepresentationFactory representationFactory = new DefaultRepresentationFactory();
+  private DefaultRepresentationFactory representationFactory = new DefaultRepresentationFactory();
 
-    private Representation resource;
-    private Representation otherResource;
-    private int resourceHashCode;
+  private Representation resource;
+  private Representation otherResource;
+  private int resourceHashCode;
 
-    @BeforeMethod
-    public void setUpResources() {
-        resource = createDefaultResource();
-        otherResource = createDefaultResource();
-        resourceHashCode = resource.hashCode();
-    }
+  @BeforeMethod
+  public void setUpResources() {
+    resource = createDefaultResource();
+    otherResource = createDefaultResource();
+    resourceHashCode = resource.hashCode();
+  }
 
+  private Representation createDefaultResource() {
+    return representationFactory.newRepresentation("http://localhost/test")
+                                .withNamespace("testns", "http://example.com/test/{rel}")
+                                .withLink("testlink", "http://example.com/link")
+                                .withProperty("testprop", "value")
+                                .withProperty("nullprop", null)
+                                .withRepresentation("testsub", representationFactory.newRepresentation("/subtest"));
+  }
 
-    private Representation createDefaultResource() {
-        return representationFactory.newRepresentation("http://localhost/test")
-                .withNamespace("testns", "http://example.com/test/{rel}")
-                .withLink("testlink", "http://example.com/link")
-                .withProperty("testprop", "value")
-                .withProperty("nullprop", null)
-                .withRepresentation("testsub", representationFactory.newRepresentation("/subtest"));
-    }
+  @Test
+  public void equalResourcesHaveEqualHashCodes() {
+    assertThat(resource.hashCode()).isEqualTo(otherResource.hashCode());
+  }
 
-    @Test
-    public void equalResourcesHaveEqualHashCodes() {
-        assertThat(resource.hashCode()).isEqualTo(otherResource.hashCode());
-    }
+  @Test
+  public void testHashCodeIsDependentOnNamespaces() {
+    final Representation updatedResource = resource.withNamespace("testns2", "http://example.com/test2/{rel}");
+    assertThat(updatedResource.hashCode()).isNotEqualTo(resourceHashCode);
+  }
 
-    @Test
-    public void testHashCodeIsDependentOnNamespaces() {
-        resource.withNamespace("testns2", "http://example.com/test2/{rel}");
-        assertThat(resource.hashCode()).isNotEqualTo(resourceHashCode);
-    }
+  @Test
+  public void testHashCodeIsDependentOnLinks() {
+    final Representation updatedResource = resource.withLink("testlink2", "http://example.com/link2");
+    assertThat(updatedResource.hashCode()).isNotEqualTo(resourceHashCode);
+  }
 
-    @Test
-    public void testHashCodeIsDependentOnLinks() {
-        resource.withLink("testlink2", "http://example.com/link2");
-        assertThat(resource.hashCode()).isNotEqualTo(resourceHashCode);
-    }
+  @Test
+  public void testHashCodeIsDependentOnProperties() {
+    final Representation updatedResource = resource.withProperty("proptest2", "value2");
+    assertThat(updatedResource.hashCode()).isNotEqualTo(resourceHashCode);
+  }
 
-    @Test
-    public void testHashCodeIsDependentOnProperties() {
-        resource.withProperty("proptest2", "value2");
-        assertThat(resource.hashCode()).isNotEqualTo(resourceHashCode);
-    }
+  @Test
+  public void testHashCodeIsDependentOnNullProperties() {
+    final Representation updatedResource = resource.withProperty("othernullprop", null);
+    assertThat(updatedResource.hashCode()).isNotEqualTo(resourceHashCode);
+  }
 
-    @Test
-    public void testHashCodeIsDependentOnNullProperties() {
-        resource.withProperty("othernullprop", null);
-        assertThat(resource.hashCode()).isNotEqualTo(resourceHashCode);
-    }
+  @Test
+  public void testHashCodeIsDependentOnResources() {
+    final Representation updatedResource = resource.withRepresentation("testsub2",
+                                                                       representationFactory.newRepresentation("/subtest2"));
+    assertThat(updatedResource.hashCode()).isNotEqualTo(resourceHashCode);
+  }
 
-    @Test
-    public void testHashCodeIsDependentOnResources() {
-        resource.withRepresentation("testsub2", representationFactory.newRepresentation("/subtest2"));
-        assertThat(resource.hashCode()).isNotEqualTo(resourceHashCode);
-    }
+  @Test
+  public void testEqualsIsDependentOnNamespaces() {
+    final Representation updatedResource = resource.withNamespace("testns2", "http://example.com/test2/{rel}");
+    assertThat(updatedResource).isNotEqualTo(otherResource);
+  }
 
-    @Test
-    public void testEqualsIsDependentOnNamespaces() {
-        resource.withNamespace("testns2", "http://example.com/test2/{rel}");
-        assertThat(resource).isNotEqualTo(otherResource);
-    }
+  @Test
+  public void testEqualsIsDependentOnLinks() {
+    final Representation updatedResource = resource.withLink("testlink2", "http://example.com/link2");
+    assertThat(updatedResource).isNotEqualTo(otherResource);
+  }
 
-    @Test
-    public void testEqualsIsDependentOnLinks() {
-        resource.withLink("testlink2", "http://example.com/link2");
-        assertThat(resource).isNotEqualTo(otherResource);
-    }
+  @Test
+  public void testEqualsIsDependentOnProperties() {
+    final Representation updatedResource = resource.withProperty("proptest2", "value2");
+    assertThat(updatedResource).isNotEqualTo(otherResource);
+  }
 
-    @Test
-    public void testEqualsIsDependentOnProperties() {
-        resource.withProperty("proptest2", "value2");
-        assertThat(resource).isNotEqualTo(otherResource);
-    }
+  @Test
+  public void testEqualsIsDependentOnNullProperties() {
+    final Representation updatedResource = resource.withProperty("othernullprop", null);
+    assertThat(updatedResource).isNotEqualTo(otherResource);
+  }
 
-    @Test
-    public void testEqualsIsDependentOnNullProperties() {
-        resource.withProperty("othernullprop", null);
-        assertThat(resource).isNotEqualTo(otherResource);
-    }
+  @Test
+  public void testEqualsIsDependentOnResources() {
+    resource.withRepresentation("testsub2", representationFactory.newRepresentation("/subtest2"));
+    assertThat(resource).isNotEqualTo(otherResource);
+  }
 
-    @Test
-    public void testEqualsIsDependentOnResources() {
-        resource.withRepresentation("testsub2", representationFactory.newRepresentation("/subtest2"));
-        assertThat(resource).isNotEqualTo(otherResource);
-    }
+  @Test
+  public void testToStringRendersSelfHref() {
+    String toString = new PersistentRepresentation(representationFactory, "http://localhost/test").toString();
+    assertThat(toString).isEqualTo("<Representation: http://localhost/test>");
+  }
 
-    @Test
-    public void testToStringRendersSelfHref() {
-        String toString = new MutableRepresentation(representationFactory, "http://localhost/test").toString();
-        assertThat(toString).isEqualTo("<Representation: http://localhost/test>");
-    }
+  @Test
+  public void testToStringRendersHashCode() {
+    String toString = new PersistentRepresentation(representationFactory).toString();
+    assertThat(toString).matches("<Representation: @[0-9a-f]+>");
+  }
 
-    @Test
-    public void testToStringRendersHashCode() {
-        String toString = new MutableRepresentation(representationFactory).toString();
-        assertThat(toString).matches("<Representation: @[0-9a-f]+>");
-    }
 }
