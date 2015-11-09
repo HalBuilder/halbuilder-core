@@ -37,19 +37,20 @@ public class PersistentRepresentation
   }
 
   public PersistentRepresentation(AbstractRepresentationFactory representationFactory, String href) {
-    super(representationFactory);
+    super(representationFactory, Option.none());
     if (href != null) {
       this.links = this.links.append(new Link("self", href));
     }
   }
 
   public PersistentRepresentation(final AbstractRepresentationFactory representationFactory,
+                                  final Option<String> content,
                                   final List<Link> links,
                                   final TreeMap<String, Rel> rels,
                                   final NamespaceManager namespaceManager,
                                   final TreeMap<String, Option<Object>> properties,
                                   final Multimap<String, ReadableRepresentation> resources) {
-    super(representationFactory);
+    super(representationFactory, content);
     this.links = links;
     this.rels = rels;
     this.namespaceManager = namespaceManager;
@@ -59,6 +60,7 @@ public class PersistentRepresentation
 
   public static PersistentRepresentation empty(final AbstractRepresentationFactory representationFactory) {
     return new PersistentRepresentation(representationFactory,
+                                           Option.none(),
                                            List.empty(),
                                            TreeMap.empty(naturalOrder()),
                                            NamespaceManager.EMPTY,
@@ -76,6 +78,18 @@ public class PersistentRepresentation
   }
 
   /**
+   * Adds or replaces the content of the representation.
+   *
+   * @param content The source content of the representation.
+   *
+   * @return A new instance of a PersistentRepresentation with the namespace included.
+   */
+  public PersistentRepresentation withContent(String content) {
+    return new PersistentRepresentation(representationFactory, Option.of(content), links, rels,
+                                           namespaceManager, properties, resources);
+  }
+
+  /**
    * Define rel semantics for this representation.
    *
    * @param rel A defined relationship type
@@ -85,7 +99,7 @@ public class PersistentRepresentation
       throw new IllegalStateException(String.format("Rel %s is already declared.", rel.rel()));
     }
     final TreeMap<String, Rel> updatedRels = rels.put(rel.rel(), rel);
-    return new PersistentRepresentation(representationFactory, links, updatedRels,
+    return new PersistentRepresentation(representationFactory, content, links, updatedRels,
                                            namespaceManager, properties, resources);
   }
 
@@ -128,7 +142,7 @@ public class PersistentRepresentation
     }
 
     final List<Link> updatedLinks = links.append(new Link(rel, href, name, title, hreflang, profile));
-    return new PersistentRepresentation(representationFactory, updatedLinks, rels,
+    return new PersistentRepresentation(representationFactory, content, updatedLinks, rels,
                                            namespaceManager, properties, resources);
   }
 
@@ -140,7 +154,7 @@ public class PersistentRepresentation
       this.hasNullProperties = true;
     }
     final TreeMap<String, Option<Object>> updateProperties = properties.put(name, Option.of(value));
-    return new PersistentRepresentation(representationFactory, links, rels, namespaceManager,
+    return new PersistentRepresentation(representationFactory, content, links, rels, namespaceManager,
                                            updateProperties, resources);
   }
 
@@ -203,9 +217,8 @@ public class PersistentRepresentation
       rels = rels.put("curies", Rels.natural("curies"));
     }
 
-    final NamespaceManager updatedNamespaceManager = namespaceManager.withNamespace(namespace,
-        href);
-    return new PersistentRepresentation(representationFactory, links, rels,
+    final NamespaceManager updatedNamespaceManager = namespaceManager.withNamespace(namespace, href);
+    return new PersistentRepresentation(representationFactory, content, links, rels,
                                            updatedNamespaceManager, properties, resources);
   }
 
@@ -224,14 +237,6 @@ public class PersistentRepresentation
     return this;
   }
 
-  private static boolean isSingleton(Rel rel) {
-    return rel.match(Rels.cases(
-        (__) -> true,
-        (__) -> false,
-        (__, id, comparator) -> false
-    ));
-  }
-
   private void validateSingletonRel(String unvalidatedRel) {
     rels.get(unvalidatedRel).forEach(rel -> {
       // Rel is register, check for duplicate singleton
@@ -241,6 +246,14 @@ public class PersistentRepresentation
             "%s is registered as a single rel and already exists.", rel));
       }
     });
+  }
+
+  private static boolean isSingleton(Rel rel) {
+    return rel.match(Rels.cases(
+        (__) -> true,
+        (__) -> false,
+        (__, id, comparator) -> false
+    ));
   }
 
 }

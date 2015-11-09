@@ -56,7 +56,9 @@ public abstract class BaseRepresentation
             }
             return r1.compareTo(r2);
           });
+
   protected NamespaceManager namespaceManager = NamespaceManager.EMPTY;
+  protected Option<String> content = Option.none();
   protected TreeMap<String, Rel> rels = TreeMap.empty();
   protected List<Link> links = List.empty();
   protected TreeMap<String, Option<Object>> properties = TreeMap.empty();
@@ -64,8 +66,9 @@ public abstract class BaseRepresentation
   protected boolean hasNullProperties = false;
   protected AbstractRepresentationFactory representationFactory;
 
-  protected BaseRepresentation(AbstractRepresentationFactory representationFactory) {
+  protected BaseRepresentation(AbstractRepresentationFactory representationFactory, final Option<String> content) {
     this.representationFactory = representationFactory;
+    this.content = content;
   }
 
   private String toString(String contentType, final Set<URI> flags) {
@@ -98,7 +101,7 @@ public abstract class BaseRepresentation
 
   @Override
   public Option<String> getContent() {
-    return Option.none();
+    return content;
   }
 
   public Option<Link> getResourceLink() {
