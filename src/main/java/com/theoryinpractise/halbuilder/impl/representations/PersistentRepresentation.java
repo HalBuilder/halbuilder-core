@@ -26,7 +26,6 @@ import java.lang.reflect.Modifier;
 import java.net.URI;
 
 import static java.lang.String.format;
-import static java.util.Comparator.naturalOrder;
 
 public class PersistentRepresentation
     extends BaseRepresentation
@@ -62,9 +61,9 @@ public class PersistentRepresentation
     return new PersistentRepresentation(representationFactory,
                                            Option.none(),
                                            List.empty(),
-                                           TreeMap.empty(naturalOrder()),
+                                           TreeMap.empty(),
                                            NamespaceManager.EMPTY,
-                                           TreeMap.empty(naturalOrder()),
+                                           TreeMap.empty(),
                                            ArrayListMultimap.create());
   }
 
@@ -135,14 +134,17 @@ public class PersistentRepresentation
    */
   public PersistentRepresentation withLink(String rel, String href, String name, String title,
                                            String hreflang, String profile) {
+
     Support.checkRelType(rel);
     validateSingletonRel(rel);
-    if (!rels.containsKey(rel)) {
-      withRel(Rels.natural(rel));
-    }
+
+    final TreeMap<String, Rel> updatedRels = !rels.containsKey(rel)
+                                             ? rels.put(rel, Rels.natural(rel))
+                                             : rels;
 
     final List<Link> updatedLinks = links.append(new Link(rel, href, name, title, hreflang, profile));
-    return new PersistentRepresentation(representationFactory, content, updatedLinks, rels,
+
+    return new PersistentRepresentation(representationFactory, content, updatedLinks, updatedRels,
                                            namespaceManager, properties, resources);
   }
 
@@ -225,6 +227,7 @@ public class PersistentRepresentation
   public PersistentRepresentation withRepresentation(String rel, ReadableRepresentation resource) {
     Support.checkRelType(rel);
     validateSingletonRel(rel);
+    // TODO This should not mutate... this is loosing rel information
     if (!rels.containsKey(rel)) {
       withRel(Rels.natural(rel));
     }
@@ -248,11 +251,11 @@ public class PersistentRepresentation
     });
   }
 
-  private static boolean isSingleton(Rel rel) {
+  private static Boolean isSingleton(Rel rel) {
     return rel.match(Rels.cases(
-        (__) -> true,
-        (__) -> false,
-        (__, id, comparator) -> false
+        (__) -> Boolean.TRUE,
+        (__) -> Boolean.FALSE,
+        (__, id, comparator) -> Boolean.FALSE
     ));
   }
 

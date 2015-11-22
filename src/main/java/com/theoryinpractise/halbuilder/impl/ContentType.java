@@ -19,8 +19,7 @@ public class ContentType {
   @Override
   public int hashCode() {
     int result = type.hashCode();
-    result = 31 * result + subType.hashCode();
-    return result;
+    return 31 * result + subType.hashCode();
   }
 
   @Override

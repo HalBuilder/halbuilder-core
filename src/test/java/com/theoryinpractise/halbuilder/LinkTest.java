@@ -1,13 +1,11 @@
 package com.theoryinpractise.halbuilder;
 
 import com.theoryinpractise.halbuilder.api.Link;
-import com.theoryinpractise.halbuilder.api.RepresentationFactory;
 import org.testng.annotations.Test;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
 public class LinkTest {
-  private RepresentationFactory representationFactory = new DefaultRepresentationFactory();
 
   private Link link = new Link("rel", "http://example.com/", "name", "title", "hreflang", "");
 

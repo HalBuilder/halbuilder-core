@@ -34,10 +34,6 @@ public class DefaultRepresentationFactory
   private Set<URI> flags = HashSet.empty();
   private TreeMap<String, Rel> rels = TreeMap.empty();
 
-  public DefaultRepresentationFactory() {
-    withRel(Rels.singleton("self"));
-  }
-
   public DefaultRepresentationFactory withRenderer(String contentType,
                                                    Class<? extends RepresentationWriter<String>>
                                                        rendererClass) {
@@ -91,6 +87,7 @@ public class DefaultRepresentationFactory
   @Override
   public Representation newRepresentation(String href) {
     PersistentRepresentation representation = PersistentRepresentation.empty(this)
+                                                                      .withRel(Rels.singleton("self"))
                                                                       .withLink("self", href);
 
     // Add factory standard namespaces
@@ -103,15 +100,14 @@ public class DefaultRepresentationFactory
         (rep, rel) -> rep.withRel(rel._2));
 
     // Add factory standard links
-    representation = links.foldLeft(representation,
+
+    return links.foldLeft(representation,
         (rep, link) -> rep.withLink(link.getRel(),
             link.getHref(),
             link.getName(),
             link.getTitle(),
             link.getHreflang(),
             link.getProfile()));
-
-    return representation;
   }
 
   @Override

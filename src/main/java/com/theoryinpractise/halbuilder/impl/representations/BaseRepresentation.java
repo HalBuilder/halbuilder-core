@@ -32,6 +32,7 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Objects;
@@ -74,9 +75,9 @@ public abstract class BaseRepresentation
   private String toString(String contentType, final Set<URI> flags) {
     try {
       ByteArrayOutputStream boas = new ByteArrayOutputStream();
-      OutputStreamWriter osw = new OutputStreamWriter(boas, "UTF-8");
+      OutputStreamWriter osw = new OutputStreamWriter(boas, StandardCharsets.UTF_8);
       toString(contentType, flags, osw);
-      return boas.toString();
+      return boas.toString(StandardCharsets.UTF_8.name());
     } catch (UnsupportedEncodingException e) {
       throw new RepresentationException("Unable to write representation: " + e.getMessage());
     }
@@ -265,7 +266,7 @@ public abstract class BaseRepresentation
     return collatedLinks.sort(RELATABLE_ORDERING);
   }
 
-  private <T> Function1<Function1<T, String>, String> mkSortableJoiner(final String join, final Iterable<T> ts) {
+  private static <T> Function1<Function1<T, String>, String> mkSortableJoiner(final String join, final Iterable<T> ts) {
     return new Function1<Function1<T, String>, String>() {
       @Nullable
       @Override
