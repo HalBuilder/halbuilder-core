@@ -4,8 +4,8 @@ import com.theoryinpractise.halbuilder.api.RepresentationException;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import static org.fest.assertions.api.Assertions.assertThat;
-import static org.fest.assertions.api.Fail.fail;
+import static com.google.common.truth.Truth.assertThat;
+import static org.testng.Assert.fail;
 
 public class NamespaceManagerTest {
 

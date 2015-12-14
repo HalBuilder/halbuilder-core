@@ -1,16 +1,14 @@
 package com.theoryinpractise.halbuilder;
 
-import com.google.common.collect.Iterables;
 import com.theoryinpractise.halbuilder.api.Link;
 import com.theoryinpractise.halbuilder.api.Representation;
 import com.theoryinpractise.halbuilder.api.RepresentationFactory;
 import javaslang.collection.List;
-import org.fest.assertions.core.Condition;
 import org.testng.annotations.Test;
 
-import static com.theoryinpractise.halbuilder.impl.api.Support.WHITESPACE_SPLITTER;
-import static org.fest.assertions.api.Assertions.assertThat;
-import static org.fest.assertions.api.Assertions.fail;
+import static com.google.common.truth.Truth.assertThat;
+import static com.theoryinpractise.halbuilder.LinkListSubject.assertAboutLinkLists;
+import static org.testng.Assert.fail;
 
 public class CoalesceLinksTest {
 
@@ -21,36 +19,19 @@ public class CoalesceLinksTest {
                                                                 .withLink("bar", "/bar")
                                                                 .withLink("foo", "/bar");
 
-    assertThat(resource.getLinks())
-        .isNotEmpty()
-        .has(containsRelCondition("bar"))
-        .has(containsRelCondition("foo"));
+    assertThat(resource.getLinks()).isNotEmpty();
 
-    assertThat(resource.getLinksByRel("bar"))
-        .isNotNull()
-        .has(containsRelCondition("bar"))
-        .doesNotHave(containsRelCondition("foo"));
+    assertAboutLinkLists(resource.getLinks()).containsRelCondition("bar");
+    assertAboutLinkLists(resource.getLinks()).containsRelCondition("foo");
 
-    assertThat(resource.getLinksByRel("foo"))
-        .isNotNull()
-        .doesNotHave(containsRelCondition("bar"))
-        .has(containsRelCondition("foo"));
+    assertThat(resource.getLinksByRel("bar")).isNotNull();
+    assertAboutLinkLists(resource.getLinksByRel("bar")).containsRelCondition("bar");
+    assertAboutLinkLists(resource.getLinksByRel("bar")).doesNotContainRelCondition("foo");
 
-  }
+    assertThat(resource.getLinksByRel("foo")).isNotNull();
+    assertAboutLinkLists(resource.getLinksByRel("foo")).containsRelCondition("foo");
+    assertAboutLinkLists(resource.getLinksByRel("foo")).doesNotContainRelCondition("bar");
 
-  private static Condition<Iterable<Link>> containsRelCondition(String rel) {
-    return new Condition<Iterable<Link>>() {
-      @Override
-      public boolean matches(final Iterable<Link> links) {
-        boolean hasMatch = false;
-        for (Link link : links) {
-          if (rel.equals(link.getRel()) || Iterables.contains(WHITESPACE_SPLITTER.split(link.getRel()), rel)) {
-            hasMatch = true;
-          }
-        }
-        return hasMatch;
-      }
-    };
   }
 
   @Test
@@ -64,21 +45,18 @@ public class CoalesceLinksTest {
 
     final List<Link> links = resource.getLinks();
 
-    assertThat(links)
-        .isNotEmpty()
-        .has(containsRelCondition("bar foo"))
-        .has(containsRelCondition("bar"))
-        .has(containsRelCondition("foo"));
+    assertThat(links).isNotEmpty();
+    assertAboutLinkLists(links).containsRelCondition("bar foo");
+    assertAboutLinkLists(links).containsRelCondition("bar");
+    assertAboutLinkLists(links).containsRelCondition("foo");
 
-    assertThat(resource.getLinksByRel("bar"))
-        .isNotNull()
-        .has(containsRelCondition("bar"))
-        .doesNotHave(containsRelCondition("foo"));
+    assertThat(resource.getLinksByRel("bar")).isNotNull();
+    assertAboutLinkLists(resource.getLinksByRel("bar")).containsRelCondition("bar");
+    assertAboutLinkLists(resource.getLinksByRel("bar")).doesNotContainRelCondition("foo");
 
-    assertThat(resource.getLinksByRel("foo"))
-        .isNotNull()
-        .doesNotHave(containsRelCondition("bar"))
-        .has(containsRelCondition("foo"));
+    assertThat(resource.getLinksByRel("foo")).isNotNull();
+    assertAboutLinkLists(resource.getLinksByRel("foo")).doesNotContainRelCondition("barf");
+    assertAboutLinkLists(resource.getLinksByRel("foo")).containsRelCondition("foo");
   }
 
   @Test

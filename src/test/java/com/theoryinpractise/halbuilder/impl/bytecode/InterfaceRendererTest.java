@@ -14,8 +14,8 @@ import org.testng.annotations.Test;
 
 import java.util.Collection;
 
+import static com.google.common.truth.Truth.assertThat;
 import static java.util.Comparator.naturalOrder;
-import static org.fest.assertions.api.Assertions.assertThat;
 
 public class InterfaceRendererTest {
 
@@ -24,10 +24,10 @@ public class InterfaceRendererTest {
 
     RepresentationFactory representationFactory = new DefaultRepresentationFactory();
     Map<String, Object> properties = TreeMap.<String, Object>empty(naturalOrder())
-                                         .put("name", "Joe Smith")
-                                         .put("id", 1)
-                                         .put("expired", false)
-                                         .put("age", 40);
+        .put("name", "Joe Smith")
+        .put("id", 1)
+        .put("expired", false)
+        .put("age", 40);
 
     List<Link> links = List.of(new Link("self", "/123/456"));
 

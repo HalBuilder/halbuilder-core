@@ -19,7 +19,7 @@ public class Support {
   public static final String TITLE = "title";
   public static final String HREFLANG = "hreflang";
   public static final String TEMPLATED = "templated";
-  public static final Set<String> RESERVED_JSON_PROPERTIES = HashSet.ofAll(EMBEDDED, LINKS);
+  public static final Set<String> RESERVED_JSON_PROPERTIES = HashSet.of(EMBEDDED, LINKS);
 
   public static final String PROFILE = "profile";
 

@@ -8,7 +8,7 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.io.StringReader;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 
 public class RepresentationFactoryTest {
 

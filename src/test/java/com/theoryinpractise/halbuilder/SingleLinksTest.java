@@ -3,7 +3,7 @@ package com.theoryinpractise.halbuilder;
 import com.theoryinpractise.halbuilder.api.Rels;
 import org.testng.annotations.Test;
 
-import static org.fest.assertions.api.Fail.fail;
+import static org.testng.Assert.fail;
 
 public class SingleLinksTest {
 

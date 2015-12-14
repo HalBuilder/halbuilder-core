@@ -218,7 +218,7 @@ public abstract class BaseRepresentation
 
   @Override
   public String toString(String contentType, URI... flags) {
-    return toString(contentType, HashSet.ofAll(flags));
+    return toString(contentType, HashSet.of(flags));
   }
 
   public void toString(String contentType, Writer writer) {
@@ -227,7 +227,7 @@ public abstract class BaseRepresentation
 
   @Override
   public void toString(String contentType, Writer writer, URI... flags) {
-    toString(contentType, HashSet.ofAll(flags), writer);
+    toString(contentType, HashSet.of(flags), writer);
   }
 
   private List<Link> getCollatedLinks() {

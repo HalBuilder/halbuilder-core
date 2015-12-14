@@ -5,7 +5,7 @@ import com.theoryinpractise.halbuilder.impl.representations.PersistentRepresenta
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 
 public class ResourceBasicMethodsTest {
 
