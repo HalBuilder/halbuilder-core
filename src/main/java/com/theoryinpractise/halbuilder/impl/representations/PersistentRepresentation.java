@@ -265,6 +265,7 @@ public class PersistentRepresentation
     return rel.match(Rels.cases(
         (__) -> Boolean.TRUE,
         (__) -> Boolean.FALSE,
+        (__) -> Boolean.FALSE,
         (__, id, comparator) -> Boolean.FALSE
     ));
   }
