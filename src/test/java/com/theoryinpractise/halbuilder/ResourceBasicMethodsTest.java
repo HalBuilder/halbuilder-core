@@ -39,24 +39,28 @@ public class ResourceBasicMethodsTest {
   @Test
   public void testHashCodeIsDependentOnNamespaces() {
     final Representation updatedResource = resource.withNamespace("testns2", "http://example.com/test2/{rel}");
+    assertThat(resource).isEqualTo(otherResource);
     assertThat(updatedResource.hashCode()).isNotEqualTo(resourceHashCode);
   }
 
   @Test
   public void testHashCodeIsDependentOnLinks() {
     final Representation updatedResource = resource.withLink("testlink2", "http://example.com/link2");
+    assertThat(resource).isEqualTo(otherResource);
     assertThat(updatedResource.hashCode()).isNotEqualTo(resourceHashCode);
   }
 
   @Test
   public void testHashCodeIsDependentOnProperties() {
     final Representation updatedResource = resource.withProperty("proptest2", "value2");
+    assertThat(resource).isEqualTo(otherResource);
     assertThat(updatedResource.hashCode()).isNotEqualTo(resourceHashCode);
   }
 
   @Test
   public void testHashCodeIsDependentOnNullProperties() {
     final Representation updatedResource = resource.withProperty("othernullprop", null);
+    assertThat(resource).isEqualTo(otherResource);
     assertThat(updatedResource.hashCode()).isNotEqualTo(resourceHashCode);
   }
 
@@ -64,37 +68,44 @@ public class ResourceBasicMethodsTest {
   public void testHashCodeIsDependentOnResources() {
     final Representation updatedResource = resource.withRepresentation("testsub2",
                                                                        representationFactory.newRepresentation("/subtest2"));
+    assertThat(resource).isEqualTo(otherResource);
     assertThat(updatedResource.hashCode()).isNotEqualTo(resourceHashCode);
   }
 
   @Test
   public void testEqualsIsDependentOnNamespaces() {
     final Representation updatedResource = resource.withNamespace("testns2", "http://example.com/test2/{rel}");
+    assertThat(resource).isEqualTo(otherResource);
     assertThat(updatedResource).isNotEqualTo(otherResource);
   }
 
   @Test
   public void testEqualsIsDependentOnLinks() {
     final Representation updatedResource = resource.withLink("testlink2", "http://example.com/link2");
+    assertThat(resource).isEqualTo(otherResource);
     assertThat(updatedResource).isNotEqualTo(otherResource);
   }
 
   @Test
   public void testEqualsIsDependentOnProperties() {
     final Representation updatedResource = resource.withProperty("proptest2", "value2");
+    assertThat(resource).isEqualTo(otherResource);
     assertThat(updatedResource).isNotEqualTo(otherResource);
   }
 
   @Test
   public void testEqualsIsDependentOnNullProperties() {
     final Representation updatedResource = resource.withProperty("othernullprop", null);
+    assertThat(resource).isEqualTo(otherResource);
     assertThat(updatedResource).isNotEqualTo(otherResource);
   }
 
   @Test
   public void testEqualsIsDependentOnResources() {
-    resource.withRepresentation("testsub2", representationFactory.newRepresentation("/subtest2"));
-    assertThat(resource).isNotEqualTo(otherResource);
+    final Representation updatedResource = resource.withRepresentation("testsub2",
+                                                                       representationFactory.newRepresentation("/subtest2"));
+    assertThat(resource).isEqualTo(otherResource);
+    assertThat(updatedResource).isNotEqualTo(otherResource);
   }
 
   @Test

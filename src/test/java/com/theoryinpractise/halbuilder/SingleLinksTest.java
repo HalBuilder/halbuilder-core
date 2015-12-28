@@ -17,7 +17,7 @@ public class SingleLinksTest {
           .withLink("bar", "/bar")
           .withLink("bar", "/bar");
 
-      fail("This should have failed with an InvalidStateException.)");
+      fail("This should have failed with an IllegalStateException.)");
 
     } catch (IllegalStateException exected) {
       //
@@ -36,7 +36,7 @@ public class SingleLinksTest {
           .withRepresentation("bar", factory.newRepresentation().withProperty("id", 1))
           .withRepresentation("bar", factory.newRepresentation().withProperty("id", 1));
 
-      fail("This should have failed with an InvalidStateException.)");
+      fail("This should have failed with an IllegalStateException.)");
 
     } catch (IllegalStateException exected) {
       //

@@ -225,19 +225,29 @@ public class PersistentRepresentation
   }
 
   public PersistentRepresentation withRepresentation(String rel, ReadableRepresentation resource) {
-    Support.checkRelType(rel);
-    validateSingletonRel(rel);
-    // TODO This should not mutate... this is loosing rel information
-    if (!rels.containsKey(rel)) {
-      withRel(Rels.natural(rel));
+
+    if (resources.containsEntry(rel, resource)) {
+      throw new IllegalStateException("Resource is already embedded.");
     }
 
-    resources.put(rel, resource);
+    Support.checkRelType(rel);
+    validateSingletonRel(rel);
+
+    Multimap<String, ReadableRepresentation> updatedResources = ArrayListMultimap.create(resources);
+
+    PersistentRepresentation updatedRepresentation = new PersistentRepresentation(representationFactory, content, links, rels,
+                                                                                  namespaceManager, properties, updatedResources);
+    updatedResources.put(rel, resource);
     // Propagate null property flag to parent.
     if (resource.hasNullProperties()) {
-      hasNullProperties = true;
+      updatedRepresentation.hasNullProperties = true;
     }
-    return this;
+
+    if (!rels.containsKey(rel)) {
+      updatedRepresentation = updatedRepresentation.withRel(Rels.natural(rel));
+    }
+
+    return updatedRepresentation;
   }
 
   private void validateSingletonRel(String unvalidatedRel) {
