@@ -43,7 +43,7 @@ public class InterfaceRendererTest {
     IPerson person = renderer.render(optionalProperties, links, embedded);
     assertFactsAboutPerson(person);
 
-    IPerson person2 = representationFactory.newRepresentation()
+    IPerson person2 = representationFactory.newRepresentation("/123/456")
                                            .withProperties(properties)
                                            .toClass(IPerson.class);
 
