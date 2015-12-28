@@ -81,23 +81,24 @@ public class DefaultRepresentationFactory
 
   @Override
   public Representation newRepresentation() {
-    return newRepresentation("");
+    return newRepresentation((String) null);
   }
 
   @Override
   public Representation newRepresentation(String href) {
     PersistentRepresentation representation = PersistentRepresentation.empty(this)
-                                                                      .withRel(Rels.singleton("self"))
-                                                                      .withLink("self", href);
+                                                                      .withRel(Rels.singleton("self"));
+
+    if (href != null) {
+      representation = representation.withLink("self", href);
+    }
 
     // Add factory standard namespaces
     representation = namespaceManager.getNamespaces()
-                                     .foldLeft(representation,
-                                         (rep, ns) -> rep.withNamespace(ns._1, ns._2));
+                                     .foldLeft(representation, (rep, ns) -> rep.withNamespace(ns._1, ns._2));
 
     // Add factory standard rels
-    representation = rels.foldLeft(representation,
-        (rep, rel) -> rep.withRel(rel._2));
+    representation = rels.foldLeft(representation, (rep, rel) -> rep.withRel(rel._2));
 
     // Add factory standard links
 
