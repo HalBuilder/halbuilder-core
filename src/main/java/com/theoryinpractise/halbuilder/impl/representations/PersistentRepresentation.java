@@ -216,7 +216,7 @@ public class PersistentRepresentation
    */
   public PersistentRepresentation withNamespace(String namespace, String href) {
     if (!rels.containsKey("curies")) {
-      rels = rels.put("curies", Rels.natural("curies"));
+      rels = rels.put("curies", Rels.collection("curies"));
     }
 
     final NamespaceManager updatedNamespaceManager = namespaceManager.withNamespace(namespace, href);
