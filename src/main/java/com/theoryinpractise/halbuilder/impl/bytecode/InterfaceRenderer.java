@@ -102,7 +102,7 @@ public class InterfaceRenderer<T> {
           }
         } else if (returnType.isInstance(propertyValue)) {
           returnValue = propertyValue;
-        } else if (Map.class.isInstance(propertyValue)) {
+        } else if (java.util.Map.class.isInstance(propertyValue)) {
           InterfaceRenderer propertyValueRenderer = new InterfaceRenderer(returnType);
           returnValue = propertyValueRenderer.render(
               InterfaceRenderer.this.fromJavaMap((java.util.Map) propertyValue));
