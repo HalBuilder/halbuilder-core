@@ -97,15 +97,14 @@ public class InterfaceRenderer<T> {
             returnValue = new ArrayList();
             for (Object item : propertyCollection) {
               ((ArrayList) returnValue).add(
-                  collectionValueRenderer.render(InterfaceRenderer.this.fromJavaMap((java.util.Map) item)));
+                  collectionValueRenderer.render((Map) item));
             }
           }
         } else if (returnType.isInstance(propertyValue)) {
           returnValue = propertyValue;
-        } else if (java.util.Map.class.isInstance(propertyValue)) {
+        } else if (Map.class.isInstance(propertyValue)) {
           InterfaceRenderer propertyValueRenderer = new InterfaceRenderer(returnType);
-          returnValue = propertyValueRenderer.render(
-              InterfaceRenderer.this.fromJavaMap((java.util.Map) propertyValue));
+          returnValue = propertyValueRenderer.render((Map) propertyValue);
         } else {
           returnValue = returnType.getConstructor(
               propertyValue.getClass()).newInstance(propertyValue);
