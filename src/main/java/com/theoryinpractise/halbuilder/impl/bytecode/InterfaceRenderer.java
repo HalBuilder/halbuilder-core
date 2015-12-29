@@ -4,10 +4,13 @@ import com.google.common.base.Preconditions;
 import com.theoryinpractise.halbuilder.api.Link;
 import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
 import com.theoryinpractise.halbuilder.api.RepresentationException;
+import javaslang.Tuple;
 import javaslang.collection.List;
 import javaslang.collection.Map;
 import javaslang.collection.TreeMap;
+import javaslang.control.None;
 import javaslang.control.Option;
+import javaslang.control.Some;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.ParameterizedType;
@@ -34,23 +37,16 @@ public class InterfaceRenderer<T> {
   }
 
   public T render(final ReadableRepresentation representation) {
-    return render(representation.getProperties(), representation.getLinks(), representation.getResourceMap());
+    return render(representation.getProperties().map((k, v) -> Tuple.of(k, maybeUnwrap(v))),
+                  representation.getLinks(), representation.getResourceMap());
   }
 
-  public T render(final Map<String, Option<Object>> map) {
+  private T render(final Map<String, Object> map) {
     return render(map, List.empty(), TreeMap.empty(Comparator.naturalOrder()));
   }
 
-  private TreeMap<String, Option<Object>> fromJavaMap(java.util.Map<String, Object> map) {
-    TreeMap<String, Option<Object>> returnMap = TreeMap.empty(Comparator.naturalOrder());
-    for (java.util.Map.Entry<String, Object> entry : map.entrySet()) {
-      returnMap = returnMap.put(entry.getKey(), Option.of(entry.getValue()));
-    }
-    return returnMap;
-  }
-
   @SuppressWarnings("unchecked")
-  public T render(final Map<String, Option<Object>> properties, final List<Link> links,
+  T render(final Map<String, Object> properties, final List<Link> links,
                   final Map<String, List<? extends ReadableRepresentation>> resources) {
     if (InterfaceContract.newInterfaceContract(anInterface).isSatisfiedBy(properties)) {
       return (T) Proxy.newProxyInstance(this.getClass().getClassLoader(),
@@ -61,7 +57,7 @@ public class InterfaceRenderer<T> {
     }
   }
 
-  public InvocationHandler makeInterfaceRendererHandler(final Map<String, Option<Object>> properties, final List<Link> links,
+  public InvocationHandler makeInterfaceRendererHandler(final Map<String, ?> properties, final List<Link> links,
                                                         final Map<String, List<? extends ReadableRepresentation>> resources) {
     return (o, method, objects) -> {
 
@@ -75,8 +71,7 @@ public class InterfaceRenderer<T> {
 
       String propertyName = derivePropertyNameFromMethod(method);
 
-      Option<Object> optionalPropertyValue = properties.get(propertyName)
-                                                       .flatMap(val -> val);
+      Option<?> optionalPropertyValue = properties.get(propertyName);
 
       Class<?> returnType = method.getReturnType();
 
@@ -106,12 +101,24 @@ public class InterfaceRenderer<T> {
           InterfaceRenderer propertyValueRenderer = new InterfaceRenderer(returnType);
           returnValue = propertyValueRenderer.render((Map) propertyValue);
         } else {
-          returnValue = returnType.getConstructor(
-              propertyValue.getClass()).newInstance(propertyValue);
+          returnValue = propertyValue == null
+                        ? null
+                        : returnType.getConstructor(propertyValue.getClass()).newInstance(propertyValue);
         }
       }
 
       return returnValue;
     };
   }
+
+  private Object maybeUnwrap(Object value) {
+    if (value instanceof Some) {
+      return ((Some) value).get();
+    } else if (value instanceof None) {
+      return null;
+    } else {
+      return value;
+    }
+  }
+
 }

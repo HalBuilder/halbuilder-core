@@ -5,11 +5,9 @@ import com.theoryinpractise.halbuilder.api.Link;
 import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
 import com.theoryinpractise.halbuilder.api.Representation;
 import com.theoryinpractise.halbuilder.api.RepresentationFactory;
-import javaslang.Tuple;
 import javaslang.collection.List;
 import javaslang.collection.Map;
 import javaslang.collection.TreeMap;
-import javaslang.control.Option;
 import org.testng.annotations.Test;
 
 import java.util.Collection;
@@ -38,9 +36,7 @@ public class InterfaceRendererTest {
 
     InterfaceRenderer<IPerson> renderer = InterfaceRenderer.newInterfaceRenderer(IPerson.class);
 
-    Map<String, Option<Object>> optionalProperties = properties.map((k, v) -> Tuple.of(k, Option.of(v)));
-
-    IPerson person = renderer.render(optionalProperties, links, embedded);
+    IPerson person = renderer.render(properties, links, embedded);
     assertFactsAboutPerson(person);
 
     IPerson person2 = representationFactory.newRepresentation("/123/456")

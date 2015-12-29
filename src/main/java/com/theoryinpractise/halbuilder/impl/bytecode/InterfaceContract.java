@@ -3,8 +3,8 @@ package com.theoryinpractise.halbuilder.impl.bytecode;
 import com.google.common.base.Preconditions;
 import com.theoryinpractise.halbuilder.api.Contract;
 import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
+import javaslang.Tuple;
 import javaslang.collection.Map;
-import javaslang.control.Option;
 
 import java.lang.reflect.Method;
 
@@ -28,10 +28,13 @@ public class InterfaceContract<T>
   }
 
   public boolean isSatisfiedBy(ReadableRepresentation representation) {
-    return isSatisfiedBy(representation.getProperties());
+    final Map<String, Object> map = representation.getProperties()
+                                                  .map((k, v) -> Tuple.of(k, v.orElse(null)));
+    return isSatisfiedBy(map);
+
   }
 
-  public boolean isSatisfiedBy(Map<String, Option<Object>> properties) {
+  public boolean isSatisfiedBy(Map<String, ?> properties) {
     for (Method method : anInterface.getDeclaredMethods()) {
       String propertyName = derivePropertyNameFromMethod(method);
       if (!"class".equals(propertyName)
