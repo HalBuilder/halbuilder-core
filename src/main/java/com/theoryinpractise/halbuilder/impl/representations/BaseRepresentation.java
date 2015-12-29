@@ -79,7 +79,7 @@ public abstract class BaseRepresentation
       toString(contentType, flags, osw);
       return boas.toString(StandardCharsets.UTF_8.name());
     } catch (UnsupportedEncodingException e) {
-      throw new RepresentationException("Unable to write representation: " + e.getMessage());
+      throw new RepresentationException("Unable to write representation: " + e.getMessage(), e);
     }
   }
 
