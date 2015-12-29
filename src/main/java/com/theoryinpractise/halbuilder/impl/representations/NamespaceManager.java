@@ -77,12 +77,15 @@ public class NamespaceManager {
     if (!ns.contains(":")) {
       return Either.left(new RepresentationException("Namespaced value does not include : - not namespaced?"));
     }
+
     String[] parts = ns.split(":");
-    return Either.right(namespaces.get(parts[0])
-                                  .map(curry -> curry.replace("{rel}", parts[1]))
+    String prefix = parts[0];
+    String suffix = parts[1];
+
+    return Either.right(namespaces.get(prefix)
+                                  .map(curry -> curry.replace("{rel}", suffix))
                                   .orElseGet(() -> {
-                                    throw new RepresentationException("Unknown namespace key: " +
-                                                                      parts[0]);
+                                    throw new RepresentationException("Unknown namespace key: " + prefix);
                                   }));
   }
 
