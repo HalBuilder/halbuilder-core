@@ -329,8 +329,8 @@ public abstract class BaseRepresentation
   @Override
   public String toString() {
     return getLinkByRel("self")
-               .map(href -> "<Representation: " + href.getHref() + ">")
-               .orElse("<Representation: @" + Integer.toHexString(hashCode()) + ">");
+               .map(href -> String.format("<Representation: %s>", href.getHref()))
+               .orElse(String.format("<Representation: @%s>", Integer.toHexString(hashCode())));
   }
 
 }
