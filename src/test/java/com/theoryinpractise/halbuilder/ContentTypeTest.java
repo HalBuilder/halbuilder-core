@@ -8,6 +8,15 @@ import static com.google.common.truth.Truth.assertThat;
 public class ContentTypeTest {
 
   @Test
+  public void testContentTypeEquality() {
+    final ContentType contentType = new ContentType("application/xml");
+    assertThat(contentType.equals(new ContentType("application/xml"))).isTrue();
+    assertThat(contentType.equals(new ContentType("application/json"))).isFalse();
+    assertThat(contentType.equals(contentType)).isTrue();
+    assertThat(contentType.equals(null)).isFalse();
+  }
+
+  @Test
   public void testContentTypeCreation() {
     assertThat(new ContentType("application/xml").getType()).isEqualTo("application");
     assertThat(new ContentType("application/xml").getSubType()).isEqualTo("xml");
@@ -19,6 +28,7 @@ public class ContentTypeTest {
 
   @Test
   public void testContentTypeMatching() {
+    assertThat(new ContentType("application/xml").matches("application/xml")).isTrue();
     assertThat(new ContentType("application/xml").matches(new ContentType("application/xml"))).isTrue();
     assertThat(new ContentType("application/xml").matches(new ContentType("application/*"))).isTrue();
     assertThat(new ContentType("application/xml").matches(new ContentType("*/*"))).isTrue();
