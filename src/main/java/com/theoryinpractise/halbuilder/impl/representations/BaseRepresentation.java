@@ -162,6 +162,10 @@ public abstract class BaseRepresentation
     return getValue(name).orElse(defaultValue);
   }
 
+  public <T> Option<T> getValue(String name, Class<T> castAsClass) {
+    return (Option<T>) getValue(name);
+  }
+
   public Map<String, Option<Object>> getProperties() {
     return properties;
   }
