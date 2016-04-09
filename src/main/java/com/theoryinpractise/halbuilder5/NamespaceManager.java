@@ -1,12 +1,11 @@
-package com.theoryinpractise.halbuilder.impl.representations;
+package com.theoryinpractise.halbuilder5;
 
-import com.theoryinpractise.halbuilder.api.RepresentationException;
 import javaslang.Tuple2;
 import javaslang.collection.Map;
 import javaslang.collection.TreeMap;
 import javaslang.control.Either;
 
-import static com.theoryinpractise.halbuilder.impl.api.Support.WHITESPACE_SPLITTER;
+import static com.theoryinpractise.halbuilder5.Support.WHITESPACE_SPLITTER;
 import static java.lang.String.format;
 
 /**
@@ -31,7 +30,7 @@ public class NamespaceManager {
    * Update the list of declared namespaces with a new namespace.
    *
    * @param namespace Namespace curie identifier
-   * @param href      Namesapce URL
+   * @param href Namesapce URL
    *
    * @return A new instance of the namespace manager with the additional namespace.
    */
@@ -82,11 +81,14 @@ public class NamespaceManager {
     String prefix = parts[0];
     String suffix = parts[1];
 
-    return Either.right(namespaces.get(prefix)
-                                  .map(curry -> curry.replace("{rel}", suffix))
-                                  .orElseGet(() -> {
-                                    throw new RepresentationException("Unknown namespace key: " + prefix);
-                                  }));
+    return Either.right(
+        namespaces
+            .get(prefix)
+            .map(curry -> curry.replace("{rel}", suffix))
+            .getOrElse(
+                () -> {
+                  throw new RepresentationException("Unknown namespace key: " + prefix);
+                }));
   }
 
   @Override
@@ -111,5 +113,4 @@ public class NamespaceManager {
 
     return true;
   }
-
 }

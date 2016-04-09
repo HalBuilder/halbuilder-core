@@ -1,4 +1,4 @@
-package com.theoryinpractise.halbuilder.impl;
+package com.theoryinpractise.halbuilder5;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,7 +37,6 @@ public class ContentType {
       return false;
     }
     return type.equals(that.type);
-
   }
 
   public boolean matches(String contentType) {
@@ -53,7 +52,6 @@ public class ContentType {
     }
 
     return false;
-
   }
 
   private boolean typeMatches(String left, String right) {
@@ -67,5 +65,4 @@ public class ContentType {
   public String getSubType() {
     return subType;
   }
-
 }

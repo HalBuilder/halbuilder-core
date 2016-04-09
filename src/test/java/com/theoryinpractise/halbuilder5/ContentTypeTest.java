@@ -1,7 +1,6 @@
-package com.theoryinpractise.halbuilder;
+package com.theoryinpractise.halbuilder5;
 
-import com.theoryinpractise.halbuilder.impl.ContentType;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -46,5 +45,4 @@ public class ContentTypeTest {
     assertThat(new ContentType("application/hal+json").matches(new ContentType("{*/hal+json ,q=1000}"))).isTrue();
     assertThat(new ContentType("*/*").matches(new ContentType("{application/hal+json ,q=1000}"))).isFalse();
   }
-
 }

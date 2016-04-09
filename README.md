@@ -52,3 +52,22 @@ More documentation is available from the main website at [gotohal.net](http://ww
 ### Development Forum
 
 Email support and discussion is available on the [development forum](https://groups.google.com/forum/#!forum/halbuilder-dev).
+
+curl -v -F r=releases -F hasPom=false -F e=jar -F g=com.test -F a=project -F v=1.0 -F p=jar -F file=@project-1.0.jar -u admin:admin123 http://localhost:8081/nexus/service/local/artifact/maven/content
+
+curl -v -F r=releases -F hasPom=true -F e=jar -F file=@pom.xml -F file=@project-1.0.jar -u admin:admin123 http://localhost:8081/nexus/service/local/artifact/maven/content
+
+#### No pom
+
+    nexus_upload(
+      name="sonatype_snapshot",
+      extension="jar",
+      groupId="com.test",
+      artifactId="project",
+      version="1.0",
+      packaging="jar")
+
+    nexus_upload_jar(
+      name="sonatype_snapshot",
+      pomFile="halbuilder.pom.xml",
+      artifact="//:halbuilder5")
