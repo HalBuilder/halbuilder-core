@@ -1,15 +1,16 @@
 package com.theoryinpractise.halbuilder.impl.representations;
 
 import com.theoryinpractise.halbuilder.AbstractRepresentationFactory;
-import com.theoryinpractise.halbuilder.api.*;
+import com.theoryinpractise.halbuilder.api.Link;
+import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
+import com.theoryinpractise.halbuilder.api.Representable;
+import com.theoryinpractise.halbuilder.api.Representation;
+import com.theoryinpractise.halbuilder.api.RepresentationException;
 import com.theoryinpractise.halbuilder.impl.api.Support;
 
-import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URI;
 
@@ -77,15 +78,12 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
 
     public Representation withBean(Object value) {
         try {
-            BeanInfo beanInfo = Introspector.getBeanInfo(value.getClass());
-            for (PropertyDescriptor pd : beanInfo.getPropertyDescriptors()) {
-                if (!"class".equals(pd.getName())) {
-                    withProperty(pd.getName(), pd.getReadMethod().invoke(value));
+            Method[] methods = value.getClass().getMethods();
+            for (Method method : methods) {
+                if (method.getName().startsWith("get") && !method.getName().equals("getClass")) {
+                    withProperty(method.getName().substring(3).toLowerCase(), method.invoke(value));
                 }
             }
-
-        } catch (IntrospectionException e) {
-            throw new RuntimeException(e);
         } catch (InvocationTargetException e) {
             throw new RuntimeException(e);
         } catch (IllegalAccessException e) {
