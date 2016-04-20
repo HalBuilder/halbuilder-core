@@ -47,7 +47,7 @@ HalBuilder is deployed to Apache Maven Central under the following coordinates:
 
 ### Website
 
-More documentation is available from the main website at [gotohal.net](http://gotohal.net/).
+More documentation is available from the main website at [gotohal.net](http://www.gotohal.net/).
 
 ### Development Forum
 
