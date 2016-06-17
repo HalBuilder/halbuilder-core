@@ -66,6 +66,7 @@ public abstract class BaseRepresentation
   protected Multimap<String, ReadableRepresentation> resources = ArrayListMultimap.create();
   protected boolean hasNullProperties = false;
   protected AbstractRepresentationFactory representationFactory;
+  protected boolean isEmptySubRepresentation = false;
 
   protected BaseRepresentation(AbstractRepresentationFactory representationFactory, final Option<String> content) {
     this.representationFactory = representationFactory;
@@ -335,6 +336,11 @@ public abstract class BaseRepresentation
     return getLinkByRel("self")
                .map(href -> String.format("<Representation: %s>", href.getHref()))
                .orElse(String.format("<Representation: @%s>", Integer.toHexString(hashCode())));
+  }
+
+  @Override
+  public boolean isEmptySubRepresentation() {
+    return isEmptySubRepresentation;
   }
 
 }

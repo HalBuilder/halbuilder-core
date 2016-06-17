@@ -70,7 +70,7 @@ public class PersistentRepresentation
   /**
    * Retrieve the defined rel semantics for this representation.
    *
-   * @return
+   * @return Map<String, Rel>
    */
   public Map<String, Rel> getRels() {
     return rels;
@@ -120,7 +120,7 @@ public class PersistentRepresentation
    * @param rel
    * @param uri The target URI for the link, possibly relative to the href of this resource.
    *
-   * @return
+   * @return PersistentRepresentation
    */
   public PersistentRepresentation withLink(String rel, URI uri) {
     return withLink(rel, uri.toASCIIString());
@@ -129,7 +129,7 @@ public class PersistentRepresentation
   /**
    * Add a link to this resource.
    *
-   * @param rel
+   * @param rel PersistentRepresentation
    * @param href The target href for the link, relative to the href of this resource.
    */
   public PersistentRepresentation withLink(String rel, String href, String name, String title,
@@ -268,6 +268,12 @@ public class PersistentRepresentation
         (__) -> Boolean.FALSE,
         (__, id, comparator) -> Boolean.FALSE
     ));
+  }
+
+  @Override
+  public PersistentRepresentation setEmptySubRepresentation(boolean isEmpty) {
+    isEmptySubRepresentation = isEmpty;
+    return this;
   }
 
 }
