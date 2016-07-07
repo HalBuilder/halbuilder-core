@@ -1,17 +1,22 @@
 package com.theoryinpractise.halbuilder.impl.representations;
 
+import com.google.common.base.CaseFormat;
+import com.google.common.base.Optional;
 import com.theoryinpractise.halbuilder.AbstractRepresentationFactory;
-import com.theoryinpractise.halbuilder.api.*;
+import com.theoryinpractise.halbuilder.api.Link;
+import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
+import com.theoryinpractise.halbuilder.api.Representable;
+import com.theoryinpractise.halbuilder.api.Representation;
+import com.theoryinpractise.halbuilder.api.RepresentationException;
 import com.theoryinpractise.halbuilder.impl.api.Support;
 
-import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URI;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.lang.String.format;
 
@@ -75,17 +80,27 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
         return this;
     }
 
+    private static Pattern propertyReadMethod = Pattern.compile("^(get|is|has)(.+)$");
+
+    static Optional<String> findPropertyReadMethod(String methodName) {
+        if (!methodName.equals("getClass")) {
+            Matcher matcher = propertyReadMethod.matcher(methodName);
+            if (matcher.matches()) {
+                return Optional.of(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, matcher.group(2)));
+            }
+        }
+        return Optional.absent();
+    }
+
     public Representation withBean(Object value) {
         try {
-            BeanInfo beanInfo = Introspector.getBeanInfo(value.getClass());
-            for (PropertyDescriptor pd : beanInfo.getPropertyDescriptors()) {
-                if (!"class".equals(pd.getName())) {
-                    withProperty(pd.getName(), pd.getReadMethod().invoke(value));
+            Method[] methods = value.getClass().getMethods();
+            for (Method method : methods) {
+                Optional<String> propertyReader = findPropertyReadMethod(method.getName());
+                if (propertyReader.isPresent()) {
+                    withProperty(propertyReader.get(), method.invoke(value));
                 }
             }
-
-        } catch (IntrospectionException e) {
-            throw new RuntimeException(e);
         } catch (InvocationTargetException e) {
             throw new RuntimeException(e);
         } catch (IllegalAccessException e) {

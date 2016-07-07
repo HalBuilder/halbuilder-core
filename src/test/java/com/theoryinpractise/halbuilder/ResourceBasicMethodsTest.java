@@ -22,6 +22,22 @@ public class ResourceBasicMethodsTest {
         resourceHashCode = resource.hashCode();
     }
 
+    public static class TestValue {
+        private String name;
+
+        public TestValue(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
+
 
     private Representation createDefaultResource() {
         return representationFactory.newRepresentation("http://localhost/test")
@@ -35,6 +51,12 @@ public class ResourceBasicMethodsTest {
     @Test
     public void equalResourcesHaveEqualHashCodes() {
         assertThat(resource.hashCode()).isEqualTo(otherResource.hashCode());
+    }
+
+    @Test
+    public void testWithBeanProperties() {
+        resource.withBean(new TestValue("Test"));
+        assertThat(resource.getValue("name")).isEqualTo("Test");
     }
 
     @Test
