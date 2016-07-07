@@ -1,5 +1,7 @@
 package com.theoryinpractise.halbuilder.impl.representations;
 
+import com.google.common.base.CaseFormat;
+import com.google.common.base.Optional;
 import com.theoryinpractise.halbuilder.AbstractRepresentationFactory;
 import com.theoryinpractise.halbuilder.api.Link;
 import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
@@ -13,6 +15,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URI;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.lang.String.format;
 
@@ -76,12 +80,25 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
         return this;
     }
 
+    private static Pattern propertyReadMethod = Pattern.compile("^(get|is|has)(.+)$");
+
+    static Optional<String> findPropertyReadMethod(String methodName) {
+        if (!methodName.equals("getClass")) {
+            Matcher matcher = propertyReadMethod.matcher(methodName);
+            if (matcher.matches()) {
+                return Optional.of(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, matcher.group(2)));
+            }
+        }
+        return Optional.absent();
+    }
+
     public Representation withBean(Object value) {
         try {
             Method[] methods = value.getClass().getMethods();
             for (Method method : methods) {
-                if (method.getName().startsWith("get") && !method.getName().equals("getClass")) {
-                    withProperty(method.getName().substring(3).toLowerCase(), method.invoke(value));
+                Optional<String> propertyReader = findPropertyReadMethod(method.getName());
+                if (propertyReader.isPresent()) {
+                    withProperty(propertyReader.get(), method.invoke(value));
                 }
             }
         } catch (InvocationTargetException e) {
