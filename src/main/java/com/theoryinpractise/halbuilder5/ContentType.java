@@ -55,7 +55,7 @@ public class ContentType {
   }
 
   private boolean typeMatches(String left, String right) {
-    return (left.equals(right) || "*".equals(right));
+    return left.equals(right) || "*".equals(right);
   }
 
   public String getType() {

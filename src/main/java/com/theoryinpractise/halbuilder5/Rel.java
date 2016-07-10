@@ -3,15 +3,6 @@ package com.theoryinpractise.halbuilder5;
 import org.derive4j.ArgOption;
 import org.derive4j.Data;
 import org.derive4j.Flavour;
-import org.derive4j.Visibility;
-import static org.derive4j.Make.catamorphism;
-import static org.derive4j.Make.constructors;
-import static org.derive4j.Make.getters;
-import static org.derive4j.Make.lazyConstructor;
-import static org.derive4j.Make.modifiers;
-import static org.derive4j.Make.patternMatching;
-import static org.derive4j.Make.lambdaVisitor;
-import static org.derive4j.Visibility.Same;
 
 import java.util.Comparator;
 

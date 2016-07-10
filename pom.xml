@@ -1,14 +1,14 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.theoryinpractise</groupId>
   <artifactId>halbuilder-core</artifactId>
   <version>5.0.1-SNAPSHOT</version>
-  <description>Java based builder for the Hal specification http://stateless.co/hal_specification.html</description>
   <packaging>jar</packaging>
 
   <name>halbuilder</name>
+  <description>Java based builder for the Hal specification http://stateless.co/hal_specification.html</description>
   <url>http://maven.apache.org</url>
 
   <prerequisites>
@@ -19,7 +19,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <checkstyle.suppressions.location>checkstyle-supressions.xml</checkstyle.suppressions.location>
     <dependency.check.fastfail>false</dependency.check.fastfail>
-    <jackson.version>2.7.3</jackson.version>
+    <jackson.version>2.8.0</jackson.version>
   </properties>
 
   <repositories>
@@ -31,6 +31,83 @@
       </snapshots>
     </repository>
   </repositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.derive4j</groupId>
+      <artifactId>derive4j</artifactId>
+      <version>0.8.2</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.derive4j</groupId>
+      <artifactId>derive4j-annotation</artifactId>
+      <version>0.8.2</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.immutables</groupId>
+      <artifactId>value</artifactId>
+      <version>2.2.10</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.squareup.okio</groupId>
+      <artifactId>okio</artifactId>
+      <version>1.9.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>io.javaslang</groupId>
+      <artifactId>javaslang</artifactId>
+      <version>2.1.0-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>com.damnhandy</groupId>
+        <artifactId>handy-uri-templates</artifactId>
+        <version>2.1.6</version>
+        <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>19.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>jsr305</artifactId>
+      <version>3.0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <version>6.9.12</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.truth</groupId>
+      <artifactId>truth</artifactId>
+      <version>0.28</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 
   <build>
     <plugins>
@@ -70,108 +147,4 @@
       </plugin>
     </plugins>
   </build>
-
-  <dependencies>
-
-    <!--<dependency>-->
-    <!--<groupId>com.theoryinpractise</groupId>-->
-    <!--<artifactId>halbuilder-api</artifactId>-->
-    <!--<version>5.0.1-SNAPSHOT</version>-->
-    <!--</dependency>-->
-    <dependency>
-      <groupId>org.derive4j</groupId>
-      <artifactId>derive4j</artifactId>
-      <version>0.7</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.derive4j</groupId>
-      <artifactId>derive4j-annotation</artifactId>
-      <version>0.7</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.immutables</groupId>
-      <artifactId>value</artifactId>
-      <version>2.1.18</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>com.squareup.okio</groupId>
-      <artifactId>okio</artifactId>
-      <version>1.7.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>io.javaslang</groupId>
-      <artifactId>javaslang</artifactId>
-      <version>2.1.0-SNAPSHOT</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-core</artifactId>
-      <version>${jackson.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-annotations</artifactId>
-      <version>${jackson.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>${jackson.version}</version>
-    </dependency>
-
-    <!-- <dependency>
-        <groupId>com.sun.jersey</groupId>
-        <artifactId>jersey-bundle</artifactId>
-        <version>1.18.1</version>
-        <scope>test</scope>
-    </dependency> -->
-    <dependency>
-        <groupId>com.damnhandy</groupId>
-        <artifactId>handy-uri-templates</artifactId>
-        <version>2.1.5</version>
-        <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>19.0</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.code.findbugs</groupId>
-      <artifactId>jsr305</artifactId>
-      <version>3.0.1</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.testng</groupId>
-      <artifactId>testng</artifactId>
-      <version>6.9.11</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.google.truth</groupId>
-      <artifactId>truth</artifactId>
-      <version>0.28</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>info.cukes</groupId>
-      <artifactId>cucumber-java8</artifactId>
-      <version>1.2.4</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>info.cukes</groupId>
-      <artifactId>cucumber-java</artifactId>
-      <version>1.2.4</version>
-      <scope>test</scope>
-    </dependency>
-
-  </dependencies>
 </project>

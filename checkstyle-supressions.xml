@@ -6,5 +6,5 @@
 
 <suppressions>
   <suppress checks="NeedBraces|JavadocType|LineLength|Indentation|RedundantImport|RedundantModifier"
-            files="generated-sources"/>
+            files="generated"/>
 </suppressions>

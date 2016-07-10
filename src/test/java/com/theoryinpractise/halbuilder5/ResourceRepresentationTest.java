@@ -1,42 +1,50 @@
 package com.theoryinpractise.halbuilder5;
 
+import com.damnhandy.uri.template.UriTemplate;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
 import com.theoryinpractise.halbuilder5.json.JsonRepresentationReader;
 import com.theoryinpractise.halbuilder5.json.JsonRepresentationWriter;
 import javaslang.Function1;
 import javaslang.Function2;
-import javaslang.collection.TreeMap;
+import javaslang.control.Option;
 import okio.ByteString;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
+import java.io.IOException;
 import java.io.StringReader;
+import java.util.Collections;
+import java.util.Map;
+import java.util.function.Function;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
-import static javaslang.control.Option.some;
 
 public class ResourceRepresentationTest {
 
-  private final String noOp(String event) {
+  private static ObjectMapper objectMapper = new ObjectMapper();
+
+  private String noOp(String event) {
     return "";
   }
 
   @Test
   public void testBasicRepresentationUsage() {
 
-    Account account = new Account("0101232", "Test Account");
+    Account abstractAccount = Account.of("0101232", "Test Account");
 
-    ResourceRepresentation<Account> accountRep = ResourceRepresentation.create("/somewhere", account);
+    ResourceRepresentation<Account> accountRep = ResourceRepresentation.create("/somewhere", abstractAccount);
 
-    assertThat(accountRep.get().getName()).isEqualTo("Test Account");
+    assertThat(accountRep.get().name()).isEqualTo("Test Account");
 
-    ResourceRepresentation<String> nameRep = accountRep.map(Account::getName);
+    ResourceRepresentation<String> nameRep = accountRep.map(AbstractAccount::name);
     assertThat(nameRep.get()).isEqualTo("Test Account");
 
-    int lengthOfName = accountRep.transform(a -> a.getName().length());
+    int lengthOfName = accountRep.transform(a -> a.name().length());
 
     assertThat(lengthOfName).isEqualTo(12);
 
-    Account subAccount = new Account("87912312", "Sub Account");
+    Account subAccount = Account.of("87912312", "Sub Account");
     ResourceRepresentation<Account> subAccountRep = ResourceRepresentation.create("/subaccount", subAccount);
 
     ResourceRepresentation<Account> accountRepWithLinks = accountRep.withRepresentation("bank:associated-account", subAccountRep);
@@ -45,46 +53,60 @@ public class ResourceRepresentationTest {
 
     System.out.println(representation.utf8());
 
-    ResourceRepresentation<TreeMap<String, Object>> readRepresentation =
+    ResourceRepresentation<ByteString> byteStringResourceRepresentation =
         new JsonRepresentationReader().read(new StringReader(representation.utf8()));
 
+    ResourceRepresentation<Map> readRepresentation =
+        byteStringResourceRepresentation.map(uncheckedObjectMap(Map.class, Collections.emptyMap()));
+
     assertWithMessage("read representation should not be null").that(readRepresentation).isNotNull();
-    TreeMap<String, Object> readValue = readRepresentation.get();
-    assertWithMessage("account name should be Test Account").that(readValue.get("name")).isEqualTo(some("Test Account"));
+    Map<String, Object> readValue = readRepresentation.get();
+    assertWithMessage("account name should be Test Account").that(readValue.get("name")).isEqualTo("Test Account");
 
     ResourceRepresentation<Account> readAccountRepresentation =
-        new JsonRepresentationReader().read(Account.class, new StringReader(representation.utf8()));
+        byteStringResourceRepresentation.map(uncheckedObjectMap(Account.class, Account.of("", "")));
 
     assertWithMessage("read representation should not be null").that(readRepresentation).isNotNull();
     Account readAccount = readAccountRepresentation.get();
-    assertWithMessage("account name should be Test Account").that(readAccount.getName()).isEqualTo(some("Test Account"));
+    assertWithMessage("account name should be Test Account").that(readAccount.name()).isEqualTo("Test Account");
 
-    //    Option<String> subLink =
-    //        accountRepWithLinks
-    //            .getResourcesByRel("bank:associated-account")
-    //            .headOption()
-    //            .flatMap(ResourceRepresentation::getResourceLink)
-    //            .map(Links::getHref);
-    //
-    //    System.out.println(subLink);
-    //
-    //    Function1<String, String> deleteFunction = linkFunction(accountRepWithLinks, "self", this::deleteResource);
-    //
-    //    Function2<ResourceRepresentation<?>, String, String> deleteRepFunction = repFunction("self", this::deleteResource);
-    //
-    //    System.out.println(deleteFunction.apply("click-event"));
-    //    System.out.println(deleteRepFunction.apply(accountRepWithLinks, "click-event-on-rep"));
-    //
-    //    UriTemplate template =
-    //        UriTemplate.buildFromTemplate("http://api.smxemail.com/api/sp")
-    //            .literal("/mailbox")
-    //            .path("mailbox")
-    //            .literal("/updateAlias")
-    //            .build();
-    //
-    //    System.out.println(template.getTemplate());
-    //
-    //    System.out.println(template.expand(ImmutableMap.of("mailbox", "greg@amer.com")));
+    Option<String> subLink =
+        accountRepWithLinks
+            .getResourcesByRel("bank:associated-account")
+            .headOption()
+            .flatMap(ResourceRepresentation::getResourceLink)
+            .map(Links::getHref);
+
+    System.out.println(subLink);
+
+    Function1<String, String> deleteFunction = linkFunction(accountRepWithLinks, "self", this::deleteResource);
+
+    Function2<ResourceRepresentation<?>, String, String> deleteRepFunction = repFunction("self", this::deleteResource);
+
+    System.out.println(deleteFunction.apply("click-event"));
+    System.out.println(deleteRepFunction.apply(accountRepWithLinks, "click-event-on-rep"));
+
+    UriTemplate template =
+        UriTemplate.buildFromTemplate("http://api.smxemail.com/api/sp")
+            .literal("/mailbox")
+            .path("mailbox")
+            .literal("/updateAlias")
+            .build();
+
+    System.out.println(template.getTemplate());
+
+    System.out.println(template.expand(ImmutableMap.of("mailbox", "greg@amer.com")));
+  }
+
+  public <T> Function<ByteString, T> uncheckedObjectMap(Class<T> classType, T defaultValue) {
+    return bs -> {
+      try {
+        return objectMapper.readValue(bs.utf8(), classType);
+      } catch (IOException e) {
+        e.printStackTrace();
+        return defaultValue;
+      }
+    };
   }
 
   private String deleteResource(Link link, String event) {

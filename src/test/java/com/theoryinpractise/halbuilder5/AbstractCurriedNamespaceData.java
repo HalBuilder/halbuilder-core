@@ -2,8 +2,9 @@ package com.theoryinpractise.halbuilder5;
 
 import org.immutables.value.Value;
 
+@JsonSerializedValue
 @Value.Immutable
-public abstract class CurriedNamespaceData {
+public abstract class AbstractCurriedNamespaceData {
   @Value.Parameter
   public abstract String ns();
 

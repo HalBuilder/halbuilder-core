@@ -1,6 +1,6 @@
 package com.theoryinpractise.halbuilder5;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import static com.google.common.truth.Truth.assertThat;
 

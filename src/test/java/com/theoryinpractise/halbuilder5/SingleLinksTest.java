@@ -1,6 +1,6 @@
 package com.theoryinpractise.halbuilder5;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 public class SingleLinksTest {
 
@@ -17,19 +17,11 @@ public class SingleLinksTest {
     }
   }
 
-  @Test
+  @Test(expectedExceptions = IllegalStateException.class)
   public void testDuplicateSingleEmbedFails() {
-
-    try {
-      ResourceRepresentation.empty("/foo")
-          .withRel(Rels.singleton("bar"))
-          .withRepresentation("bar", ResourceRepresentation.empty())
-          .withRepresentation("bar", ResourceRepresentation.empty());
-
-      throw new AssertionError("This should have failed with an IllegalStateException.)");
-
-    } catch (IllegalStateException exected) {
-      //
-    }
+    ResourceRepresentation.empty("/foo")
+        .withRel(Rels.singleton("bar"))
+        .withRepresentation("bar", ResourceRepresentation.empty())
+        .withRepresentation("bar", ResourceRepresentation.empty());
   }
 }

@@ -2,8 +2,6 @@ package com.theoryinpractise.halbuilder5;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
-import javaslang.collection.HashSet;
-import javaslang.collection.Set;
 
 public interface Support {
 
@@ -19,7 +17,6 @@ public interface Support {
   String TITLE = "title";
   String HREFLANG = "hreflang";
   String TEMPLATED = "templated";
-  Set<String> RESERVED_JSON_PROPERTIES = HashSet.of(EMBEDDED, LINKS);
 
   String PROFILE = "profile";
 

@@ -1,14 +1,10 @@
 package com.theoryinpractise.halbuilder5;
 
-import org.junit.Test;
-import org.junit.experimental.theories.DataPoint;
-import org.junit.experimental.theories.Theories;
-import org.junit.experimental.theories.Theory;
-import org.junit.runner.RunWith;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
 import static com.google.common.truth.Truth.assertThat;
 
-@RunWith(Theories.class)
 public class NamespaceManagerTest {
 
   @Test
@@ -28,23 +24,24 @@ public class NamespaceManagerTest {
     }
   }
 
-  @DataPoint
-  public static CurriedNamespaceData NS1 =
-      ImmutableCurriedNamespaceData.of("tst", "http://localhost/test/{rel}", "http://localhost/test/foo", "tst:foo");
+  @DataProvider
+  public static Object[][] provideNamespaces() {
+    return new Object[][] {
+      {CurriedNamespaceData.of("tst", "http://localhost/test/{rel}", "http://localhost/test/foo", "tst:foo")},
+      {CurriedNamespaceData.of("tst", "http://localhost/test/{rel}/spec", "http://localhost/test/foo/spec", "tst:foo")}
+    };
+  }
 
-  @DataPoint
-  public static CurriedNamespaceData NS2 =
-      ImmutableCurriedNamespaceData.of("tst", "http://localhost/test/{rel}/spec", "http://localhost/test/foo/spec", "tst:foo");
-
-  @Theory
+  @Test(dataProvider = "provideNamespaces")
   public void testCurrieHref(CurriedNamespaceData data) throws Exception {
     NamespaceManager namespaceManager = NamespaceManager.EMPTY;
     NamespaceManager updatedNamespaceManager = namespaceManager.withNamespace(data.ns(), data.href());
+
     assertThat(namespaceManager.currieHref(data.original())).isEqualTo(data.original());
     assertThat(updatedNamespaceManager.currieHref(data.original())).isEqualTo(data.curried());
   }
 
-  @Theory
+  @Test(dataProvider = "provideNamespaces")
   public void testUnCurrieHref(CurriedNamespaceData data) throws Exception {
     NamespaceManager namespaceManager = NamespaceManager.EMPTY.withNamespace(data.ns(), data.href());
 

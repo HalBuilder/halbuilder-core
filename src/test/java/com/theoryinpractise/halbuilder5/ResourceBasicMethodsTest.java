@@ -2,8 +2,8 @@ package com.theoryinpractise.halbuilder5;
 
 import javaslang.collection.TreeMap;
 import javaslang.control.Option;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import static com.google.common.truth.Truth.assertThat;
 import static javaslang.control.Option.none;
@@ -15,7 +15,7 @@ public class ResourceBasicMethodsTest {
   private ResourceRepresentation<TreeMap<String, Option<String>>> otherResource;
   private int resourceHashCode;
 
-  @Before
+  @BeforeMethod
   public void setUpResources() {
     resource = createDefaultResource();
     otherResource = createDefaultResource();

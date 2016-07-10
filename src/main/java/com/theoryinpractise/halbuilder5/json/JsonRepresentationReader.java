@@ -1,20 +1,19 @@
 package com.theoryinpractise.halbuilder5.json;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Throwables;
 import com.google.common.io.CharStreams;
 import com.theoryinpractise.halbuilder5.Link;
 import com.theoryinpractise.halbuilder5.Links;
 import com.theoryinpractise.halbuilder5.RepresentationException;
 import com.theoryinpractise.halbuilder5.ResourceRepresentation;
-import com.theoryinpractise.halbuilder5.Support;
 import javaslang.collection.List;
-import javaslang.collection.TreeMap;
 import javaslang.control.Option;
 import okio.ByteString;
 
-import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.Iterator;
@@ -28,6 +27,7 @@ import static com.theoryinpractise.halbuilder5.Support.LINKS;
 import static com.theoryinpractise.halbuilder5.Support.NAME;
 import static com.theoryinpractise.halbuilder5.Support.PROFILE;
 import static com.theoryinpractise.halbuilder5.Support.TITLE;
+import static okio.ByteString.encodeUtf8;
 
 public class JsonRepresentationReader {
 
@@ -37,47 +37,33 @@ public class JsonRepresentationReader {
     this.mapper = new ObjectMapper();
   }
 
-  public ResourceRepresentation<TreeMap<String, Object>> read(Class klazz, Reader reader) {
+  public ResourceRepresentation<ByteString> read(Reader reader) {
     try {
       String source = CharStreams.toString(reader);
 
       JsonNode rootNode = mapper.readValue(new StringReader(source), JsonNode.class);
 
-      return readResource(klazz, rootNode).withContent(ByteString.encodeUtf8(source));
+      return readResource(rootNode).withContent(encodeUtf8(source));
 
     } catch (Exception e) {
       throw new RepresentationException(e.getMessage(), e);
     }
   }
 
-  public ResourceRepresentation<TreeMap<String, Object>> read(Reader reader) {
-    try {
-      String source = CharStreams.toString(reader);
+  private ResourceRepresentation<ByteString> readResource(JsonNode rootNode) {
 
-      JsonNode rootNode = mapper.readValue(new StringReader(source), JsonNode.class);
+    Option<ResourceRepresentation<Void>> resource = Option.of(ResourceRepresentation.empty());
 
-      return readResource(TreeMap.class, rootNode).withContent(ByteString.encodeUtf8(source));
-
-    } catch (Exception e) {
-      throw new RepresentationException(e.getMessage(), e);
-    }
+    return resource
+        .map(r -> readNamespaces(rootNode, r))
+        .map(r -> readLinks(rootNode, r))
+        .map(r -> readProperties(rootNode, r))
+        .map(r -> readResources(rootNode, r))
+        .get();
   }
 
-  private <T> ResourceRepresentation<T> readResource(Class<T> klass, JsonNode rootNode) {
-
-    Option<ResourceRepresentation<?>> resource = Option.of(ResourceRepresentation.empty());
-
-    return (ResourceRepresentation<T>)
-        resource
-            .map(r -> readNamespaces(rootNode, r))
-            .map(r -> readLinks(rootNode, r))
-            .map(r -> readProperties(rootNode, r))
-            .map(r -> readResources(rootNode, r))
-            .get();
-  }
-
-  private ResourceRepresentation readNamespaces(JsonNode rootNode, ResourceRepresentation resource) {
-    ResourceRepresentation newRep = resource;
+  private <T> ResourceRepresentation<T> readNamespaces(JsonNode rootNode, ResourceRepresentation<T> resource) {
+    ResourceRepresentation<T> newRep = resource;
     if (rootNode.has(LINKS)) {
       JsonNode linksNode = rootNode.get(LINKS);
       if (linksNode.has(CURIES)) {
@@ -97,7 +83,7 @@ public class JsonRepresentationReader {
     return newRep;
   }
 
-  private ResourceRepresentation readLinks(JsonNode rootNode, ResourceRepresentation resource) {
+  private <T> ResourceRepresentation<T> readLinks(JsonNode rootNode, ResourceRepresentation<T> resource) {
 
     List<Link> links = List.empty();
 
@@ -105,7 +91,7 @@ public class JsonRepresentationReader {
       Iterator<Entry<String, JsonNode>> fields = rootNode.get(LINKS).fields();
       while (fields.hasNext()) {
         Entry<String, JsonNode> keyNode = fields.next();
-        if (!CURIES.equals((keyNode.getKey()))) {
+        if (!CURIES.equals(keyNode.getKey())) {
           if (keyNode.getValue().isArray()) {
             Iterator<JsonNode> values = keyNode.getValue().elements();
             while (values.hasNext()) {
@@ -136,56 +122,21 @@ public class JsonRepresentationReader {
     return value != null ? value.asText() : "";
   }
 
-  private ResourceRepresentation<TreeMap<String, Object>> readProperties(JsonNode rootNode, ResourceRepresentation resource) {
+  private ResourceRepresentation<ByteString> readProperties(JsonNode rootNode, ResourceRepresentation<?> resource) {
+    ObjectNode propertyNode = rootNode.deepCopy();
+    propertyNode.remove("_links");
+    propertyNode.remove("_embedded");
+
     try {
-      TreeMap<String, Object> properties = TreeMap.empty();
-      Iterator<String> fieldNames = rootNode.fieldNames();
-      while (fieldNames.hasNext()) {
-        String fieldName = fieldNames.next();
-        if (!Support.RESERVED_JSON_PROPERTIES.contains(fieldName)) {
-          JsonNode field = rootNode.get(fieldName);
-          if (field.isArray()) {
-            List<Object> arrayValues = List.empty();
-            for (JsonNode arrayValue : field) {
-              arrayValues = arrayValues.append(valueFromNode(arrayValue));
-            }
-            properties = properties.put(fieldName, arrayValues);
-          } else {
-            properties = properties.put(fieldName, valueFromNode(field));
-          }
-        }
-      }
-      return resource.withValue(properties);
-    } catch (IOException e) {
+      return resource.withValue(encodeUtf8(mapper.writeValueAsString(propertyNode)));
+    } catch (JsonProcessingException e) {
       throw Throwables.propagate(e);
     }
   }
 
-  private Object valueFromNode(JsonNode field) throws IOException {
-    if (field.isNull()) {
-      return null;
-    } else {
-      if (field.isContainerNode()) {
-        return TreeMap.ofAll(mapper.readValue(field.toString(), java.util.Map.class));
-      } else {
-        if (field.isBigDecimal()) {
-          return field.decimalValue();
-        } else if (field.isBigInteger()) {
-          return field.bigIntegerValue();
-        } else if (field.isInt()) {
-          return field.intValue();
-        } else if (field.isBoolean()) {
-          return field.booleanValue();
-        } else {
-          return field.asText();
-        }
-      }
-    }
-  }
-
-  private ResourceRepresentation<?> readResources(JsonNode rootNode, ResourceRepresentation resource) {
+  private <T> ResourceRepresentation<T> readResources(JsonNode rootNode, ResourceRepresentation<T> resource) {
     if (rootNode.has(EMBEDDED)) {
-      ResourceRepresentation newResource = resource;
+      ResourceRepresentation<T> newResource = resource;
       Iterator<Entry<String, JsonNode>> fields = rootNode.get(EMBEDDED).fields();
       while (fields.hasNext()) {
         Entry<String, JsonNode> keyNode = fields.next();

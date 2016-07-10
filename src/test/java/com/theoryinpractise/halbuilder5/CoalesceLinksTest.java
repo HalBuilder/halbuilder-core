@@ -1,7 +1,7 @@
 package com.theoryinpractise.halbuilder5;
 
 import javaslang.collection.List;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.theoryinpractise.halbuilder5.LinkListSubject.assertAboutLinkLists;
