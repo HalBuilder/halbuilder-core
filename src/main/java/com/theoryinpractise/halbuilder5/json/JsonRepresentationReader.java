@@ -14,6 +14,7 @@ import javaslang.collection.List;
 import javaslang.control.Option;
 import okio.ByteString;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.Iterator;
@@ -37,14 +38,14 @@ public class JsonRepresentationReader {
     this.mapper = new ObjectMapper();
   }
 
-  public ResourceRepresentation<ByteString> read(Reader reader) {
+  public ResourceRepresentation<ByteString> read(Reader reader) throws IOException {
+    return read(ByteString.encodeUtf8(CharStreams.toString(reader)));
+  }
+
+  public ResourceRepresentation<ByteString> read(ByteString byteString) {
     try {
-      String source = CharStreams.toString(reader);
-
-      JsonNode rootNode = mapper.readValue(new StringReader(source), JsonNode.class);
-
-      return readResource(rootNode).withContent(encodeUtf8(source));
-
+      JsonNode rootNode = mapper.readValue(new StringReader(byteString.utf8()), JsonNode.class);
+      return readResource(rootNode).withContent(byteString);
     } catch (Exception e) {
       throw new RepresentationException(e.getMessage(), e);
     }

@@ -12,7 +12,7 @@
   <artifactId>halbuilder5</artifactId>
   <version>5.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
-  <name>halbuilder</name>
+  <name>halbuilder5</name>
   <description>Java based builder for the Hal specification http://stateless.co/hal_specification.html</description>
   <url>http://maven.apache.org</url>
   <prerequisites>

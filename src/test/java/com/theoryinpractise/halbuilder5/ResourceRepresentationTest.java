@@ -29,7 +29,7 @@ public class ResourceRepresentationTest {
   }
 
   @Test
-  public void testBasicRepresentationUsage() {
+  public void testBasicRepresentationUsage() throws IOException {
 
     Account abstractAccount = Account.of("0101232", "Test Account");
 
