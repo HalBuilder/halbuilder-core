@@ -1,37 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
+  <parent>
+    <groupId>com.theoryinpractise</groupId>
+    <artifactId>halbuilder-parent</artifactId>
+    <version>1.0.1</version>
+  </parent>
   <groupId>com.theoryinpractise</groupId>
-  <artifactId>halbuilder-core</artifactId>
+  <artifactId>halbuilder5</artifactId>
   <version>5.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
-
   <name>halbuilder</name>
   <description>Java based builder for the Hal specification http://stateless.co/hal_specification.html</description>
   <url>http://maven.apache.org</url>
-
   <prerequisites>
     <maven>3.3.9</maven>
   </prerequisites>
-
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <checkstyle.suppressions.location>checkstyle-supressions.xml</checkstyle.suppressions.location>
     <dependency.check.fastfail>false</dependency.check.fastfail>
     <jackson.version>2.8.0</jackson.version>
   </properties>
-
-  <repositories>
-    <repository>
-      <id>sonatype--snapshots</id>
-      <url>http://oss.sonatype.org/content/repositories/snapshots/</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-
   <dependencies>
     <dependency>
       <groupId>org.derive4j</groupId>
@@ -51,19 +43,16 @@
       <version>2.2.10</version>
       <scope>provided</scope>
     </dependency>
-
     <dependency>
       <groupId>com.squareup.okio</groupId>
       <artifactId>okio</artifactId>
       <version>1.9.0</version>
     </dependency>
-
     <dependency>
       <groupId>io.javaslang</groupId>
       <artifactId>javaslang</artifactId>
       <version>2.1.0-SNAPSHOT</version>
     </dependency>
-
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
@@ -80,10 +69,10 @@
       <version>${jackson.version}</version>
     </dependency>
     <dependency>
-        <groupId>com.damnhandy</groupId>
-        <artifactId>handy-uri-templates</artifactId>
-        <version>2.1.6</version>
-        <scope>test</scope>
+      <groupId>com.damnhandy</groupId>
+      <artifactId>handy-uri-templates</artifactId>
+      <version>2.1.6</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
@@ -98,7 +87,7 @@
     <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
-      <version>6.9.12</version>
+      <version>6.9.10</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -108,7 +97,6 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
   <build>
     <plugins>
       <plugin>
@@ -116,14 +104,21 @@
         <version>3.0.0</version>
       </plugin>
       <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.5.1</version>
+        <artifactId>maven-install-plugin</artifactId>
+        <version>2.5.2</version>
       </plugin>
       <plugin>
         <artifactId>maven-deploy-plugin</artifactId>
         <version>2.8.2</version>
       </plugin>
-
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.19.1</version>
+        <configuration>
+          <trimStackTrace>false</trimStackTrace>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>io.repaint.maven</groupId>
         <artifactId>tiles-maven-plugin</artifactId>
@@ -131,8 +126,7 @@
         <extensions>true</extensions>
         <configuration>
           <tiles>
-            <tile>com.theoryinpractise:halbuilder-release-tile:[1.0.5,2.0.0)</tile>
-            <tile>com.theoryinpractise:halbuilder-styleguide-tile:[1.0.5,2.0.0)</tile>
+            <tile>com.theoryinpractise:halbuilder-styleguide-tile:[1.0.4,2.0.0)</tile>
           </tiles>
         </configuration>
       </plugin>
