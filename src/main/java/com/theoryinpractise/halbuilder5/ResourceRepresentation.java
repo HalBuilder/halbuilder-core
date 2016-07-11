@@ -19,12 +19,7 @@ import javaslang.control.Option;
 import okio.ByteString;
 
 import javax.annotation.Nullable;
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -336,24 +331,6 @@ public final class ResourceRepresentation<V> implements Value<V> {
         Rels.cases((__) -> Boolean.TRUE, (__) -> Boolean.FALSE, (__) -> Boolean.FALSE, (__, id, comparator) -> Boolean.FALSE));
   }
 
-  private String toString(String contentType, final Set<URI> flags) {
-    try {
-      ByteArrayOutputStream boas = new ByteArrayOutputStream();
-      OutputStreamWriter osw = new OutputStreamWriter(boas, StandardCharsets.UTF_8);
-      toString(contentType, flags, osw);
-      return boas.toString(StandardCharsets.UTF_8.name());
-    } catch (UnsupportedEncodingException e) {
-      throw new RepresentationException("Unable to write representation: " + e.getMessage(), e);
-    }
-  }
-
-  private void toString(String contentType, Set<URI> flags, Writer writer) {
-    validateNamespaces();
-    // TODO this the evil casting, it now breaks
-    //    representationFactory.lookupRenderer(contentType).write((ReadableRepresentation) this, flags, writer);
-    throw new UnsupportedOperationException("Unsupported...");
-  }
-
   protected void validateNamespaces() {
     getCanonicalLinks().forEach(link -> namespaceManager.validateNamespaces(Links.getRel(link)));
 
@@ -421,24 +398,6 @@ public final class ResourceRepresentation<V> implements Value<V> {
 
   public Multimap<String, ResourceRepresentation<?>> getResources() {
     return resources;
-  }
-
-  public String toString(String contentType) {
-    return toString(contentType, HashSet.empty());
-  }
-
-  //  @Override
-  public String toString(String contentType, URI... flags) {
-    return toString(contentType, HashSet.of(flags));
-  }
-
-  public void toString(String contentType, Writer writer) {
-    toString(contentType, HashSet.empty(), writer);
-  }
-
-  //  @Override
-  public void toString(String contentType, Writer writer, URI... flags) {
-    toString(contentType, HashSet.of(flags), writer);
   }
 
   private List<Link> getCollatedLinks() {
