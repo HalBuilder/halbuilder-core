@@ -40,13 +40,13 @@ public class ResourceRepresentationTest {
   @Test
   public void testBasicRepresentationUsage() throws IOException {
 
-    Account abstractAccount = Account.of("0101232", "Test Account");
+    Account account = Account.of("0101232", "Test Account");
 
-    ResourceRepresentation<Account> accountRep = ResourceRepresentation.create("/somewhere", abstractAccount);
+    ResourceRepresentation<Account> accountRep = ResourceRepresentation.create("/somewhere", account);
 
     assertThat(accountRep.get().name()).isEqualTo("Test Account");
 
-    ResourceRepresentation<String> nameRep = accountRep.map(AbstractAccount::name);
+    ResourceRepresentation<String> nameRep = accountRep.map(Account::name);
     assertThat(nameRep.get()).isEqualTo("Test Account");
 
     int lengthOfName = accountRep.transform(a -> a.name().length());
