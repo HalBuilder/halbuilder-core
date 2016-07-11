@@ -20,7 +20,7 @@ public class LinkListSubject extends Subject<LinkListSubject, List<Link>> {
         }
       };
 
-  public LinkListSubject(FailureStrategy failureStrategy, List<Link> subject) {
+  private LinkListSubject(FailureStrategy failureStrategy, List<Link> subject) {
     super(failureStrategy, subject);
   }
 

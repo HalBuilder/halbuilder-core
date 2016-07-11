@@ -5,12 +5,11 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Table;
 import javaslang.Function1;
 import javaslang.Value;
-import javaslang.collection.HashSet;
+import javaslang.collection.Map;
+import javaslang.collection.HashMap;
 import javaslang.collection.Iterator;
 import javaslang.collection.List;
-import javaslang.collection.Map;
 import javaslang.collection.Multimap;
-import javaslang.collection.Set;
 import javaslang.collection.Traversable;
 import javaslang.collection.TreeMap;
 import javaslang.collection.TreeMultimap;
@@ -25,6 +24,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static com.theoryinpractise.halbuilder5.Link.SELF;
 import static com.theoryinpractise.halbuilder5.Rels.getRel;
 import static com.theoryinpractise.halbuilder5.Support.WHITESPACE_SPLITTER;
 
@@ -221,9 +221,10 @@ public final class ResourceRepresentation<V> implements Value<V> {
    *
    * @param rel
    * @param href The target href for the link, relative to the href of this resource.
+   * @param properties The properties to add to this link object
    */
-  public ResourceRepresentation<V> withLink(String rel, String href, String name, String title, String hreflang, String profile) {
-    return withLink(Links.full(rel, href, name, title, hreflang, profile));
+  public ResourceRepresentation<V> withLink(String rel, String href, Map<String, String> properties) {
+    return withLink(Links.full(rel, href, properties));
   }
 
   /**
@@ -346,7 +347,7 @@ public final class ResourceRepresentation<V> implements Value<V> {
   }
 
   public Option<Link> getResourceLink() {
-    return getLinkByRel(Support.SELF);
+    return getLinkByRel(SELF);
   }
 
   public Map<String, String> getNamespaces() {
@@ -411,18 +412,14 @@ public final class ResourceRepresentation<V> implements Value<V> {
     }
 
     for (String href : linkTable.rowKeySet()) {
-      List<String> relTypes = List.ofAll(linkTable.row(href).keySet());
       List<Link> hrefLinks = List.ofAll(linkTable.row(href).values());
+      Map<String, String> properties =
+          hrefLinks.foldLeft(HashMap.of(), (p, l) -> p.merge(Links.getProperties(l).getOrElse(HashMap.of())));
 
-      Function1<Function1<Link, String>, String> nameFunc = mkSortableJoiner(", ", hrefLinks);
-
-      String titles = nameFunc.apply(l -> Links.getTitle(l).getOrElse(""));
-      String names = nameFunc.apply(l -> Links.getName(l).getOrElse(""));
-      String hreflangs = nameFunc.apply(l -> Links.getHreflang(l).getOrElse(""));
-      String profile = nameFunc.apply(l -> Links.getProfile(l).getOrElse(""));
-
+      List<String> relTypes = List.ofAll(linkTable.row(href).keySet());
       String rels = mkSortableJoiner(" ", relTypes).apply(relType -> namespaceManager.currieHref(relType));
-      collatedLinks = collatedLinks.append(Links.full(rels, href, names, titles, hreflangs, profile));
+
+      collatedLinks = collatedLinks.append(Links.full(rels, href, properties));
     }
 
     return collatedLinks.sorted(RELATABLE_ORDERING);

@@ -18,9 +18,10 @@ import com.theoryinpractise.halbuilder5.Rels;
 import com.theoryinpractise.halbuilder5.RepresentationException;
 import com.theoryinpractise.halbuilder5.ResourceRepresentation;
 import javaslang.collection.HashSet;
+import javaslang.collection.HashMap;
 import javaslang.collection.List;
 import javaslang.collection.Set;
-import javaslang.control.Option;
+import javaslang.Tuple2;
 import okio.Buffer;
 import okio.ByteString;
 
@@ -33,15 +34,11 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
 
+import static com.theoryinpractise.halbuilder5.Link.HREF;
 import static com.theoryinpractise.halbuilder5.Support.CURIES;
 import static com.theoryinpractise.halbuilder5.Support.EMBEDDED;
-import static com.theoryinpractise.halbuilder5.Support.HREF;
-import static com.theoryinpractise.halbuilder5.Support.HREFLANG;
 import static com.theoryinpractise.halbuilder5.Support.LINKS;
-import static com.theoryinpractise.halbuilder5.Support.NAME;
-import static com.theoryinpractise.halbuilder5.Support.PROFILE;
 import static com.theoryinpractise.halbuilder5.Support.TEMPLATED;
-import static com.theoryinpractise.halbuilder5.Support.TITLE;
 
 public final class JsonRepresentationWriter {
 
@@ -180,7 +177,7 @@ public final class JsonRepresentationWriter {
 
       // Include namespaces as links when not embedded
       if (!embedded) {
-        links = links.appendAll(representation.getNamespaces().map(ns -> Links.named(CURIES, ns._2, ns._1)));
+        links = links.appendAll(representation.getNamespaces().map(ns -> Links.full(CURIES, ns._2, HashMap.of("name", ns._1))));
       }
 
       // Add representation links
@@ -215,19 +212,14 @@ public final class JsonRepresentationWriter {
   private ObjectNode writeJsonLinkContent(Link link) throws IOException {
     ObjectNode linkNode = codec.createObjectNode();
     linkNode.set(HREF, codec.getNodeFactory().textNode(Links.getHref(link)));
-    writeFieldIfDefined(linkNode, NAME, Links.getName(link));
-    writeFieldIfDefined(linkNode, TITLE, Links.getTitle(link));
-    writeFieldIfDefined(linkNode, HREFLANG, Links.getHreflang(link));
-    writeFieldIfDefined(linkNode, PROFILE, Links.getProfile(link));
+
+    javaslang.collection.Map<String, String> properties = Links.getProperties(link).getOrElse(HashMap.of());
+    for (Tuple2<String, String> prop : properties) {
+      linkNode.set(prop._1, codec.getNodeFactory().textNode(prop._2));
+    }
     if (link.hasTemplate()) {
       linkNode.set(TEMPLATED, codec.getNodeFactory().booleanNode(true));
     }
     return linkNode;
-  }
-
-  private void writeFieldIfDefined(ObjectNode linkNode, String field, Option<String> value) throws IOException {
-    if (value.isDefined()) {
-      linkNode.set(field, codec.getNodeFactory().textNode(value.get()));
-    }
   }
 }

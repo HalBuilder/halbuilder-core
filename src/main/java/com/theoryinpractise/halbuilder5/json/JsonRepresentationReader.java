@@ -11,7 +11,10 @@ import com.theoryinpractise.halbuilder5.Links;
 import com.theoryinpractise.halbuilder5.RepresentationException;
 import com.theoryinpractise.halbuilder5.ResourceRepresentation;
 import javaslang.collection.List;
+import javaslang.collection.Map;
+import javaslang.collection.HashMap;
 import javaslang.control.Option;
+
 import okio.ByteString;
 
 import java.io.IOException;
@@ -20,14 +23,11 @@ import java.io.StringReader;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
+import static com.theoryinpractise.halbuilder5.Link.HREF;
+import static com.theoryinpractise.halbuilder5.Link.NAME;
 import static com.theoryinpractise.halbuilder5.Support.CURIES;
 import static com.theoryinpractise.halbuilder5.Support.EMBEDDED;
-import static com.theoryinpractise.halbuilder5.Support.HREF;
-import static com.theoryinpractise.halbuilder5.Support.HREFLANG;
 import static com.theoryinpractise.halbuilder5.Support.LINKS;
-import static com.theoryinpractise.halbuilder5.Support.NAME;
-import static com.theoryinpractise.halbuilder5.Support.PROFILE;
-import static com.theoryinpractise.halbuilder5.Support.TITLE;
 import static okio.ByteString.encodeUtf8;
 
 public class JsonRepresentationReader {
@@ -110,17 +110,15 @@ public class JsonRepresentationReader {
 
   private Link jsonLink(String rel, JsonNode node) {
     String href = node.get(HREF).asText();
-    String name = optionalNodeValueAsText(node, NAME);
-    String title = optionalNodeValueAsText(node, TITLE);
-    String hreflang = optionalNodeValueAsText(node, HREFLANG);
-    String profile = optionalNodeValueAsText(node, PROFILE);
 
-    return Links.full(rel, href, name, title, hreflang, profile);
-  }
+    Map<String, String> properties = HashMap.of();
+    Iterator<Entry<String, JsonNode>> fields = node.fields();
+    while (fields.hasNext()) {
+      Entry<String, JsonNode> keyNode = fields.next();
+      properties = properties.put(keyNode.getKey(), keyNode.getValue().asText());
+    }
 
-  String optionalNodeValueAsText(JsonNode node, String key) {
-    JsonNode value = node.get(key);
-    return value != null ? value.asText() : "";
+    return Links.full(rel, href, properties);
   }
 
   private ResourceRepresentation<ByteString> readProperties(JsonNode rootNode, ResourceRepresentation<?> resource) {
