@@ -1,7 +1,9 @@
 package com.theoryinpractise.halbuilder5;
 
 import com.damnhandy.uri.template.UriTemplate;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.collect.ImmutableMap;
 import com.theoryinpractise.halbuilder5.json.JsonRepresentationReader;
 import com.theoryinpractise.halbuilder5.json.JsonRepresentationWriter;
@@ -22,7 +24,14 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 public class ResourceRepresentationTest {
 
-  private static ObjectMapper objectMapper = new ObjectMapper();
+  private static ObjectMapper objectMapper = getObjectMapper();
+
+  private static ObjectMapper getObjectMapper() {
+    ObjectMapper objectMapper = new ObjectMapper();
+    objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+    objectMapper.configure(SerializationFeature.WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED, false);
+    return objectMapper;
+  }
 
   private String noOp(String event) {
     return "";
@@ -49,7 +58,7 @@ public class ResourceRepresentationTest {
 
     ResourceRepresentation<Account> accountRepWithLinks = accountRep.withRepresentation("bank:associated-account", subAccountRep);
 
-    ByteString representation = JsonRepresentationWriter.create().print(accountRepWithLinks);
+    ByteString representation = JsonRepresentationWriter.create(objectMapper).print(accountRepWithLinks);
 
     System.out.println(representation.utf8());
 
