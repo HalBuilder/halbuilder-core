@@ -171,7 +171,7 @@ public final class JsonRepresentationWriter {
 
   private void renderJsonLinks(ObjectNode objectNode, ResourceRepresentation<?> representation, boolean embedded)
       throws IOException {
-    if (!representation.getCanonicalLinks().isEmpty() || (!embedded && !representation.getNamespaces().isEmpty())) {
+    if (!representation.getLinks().isEmpty() || (!embedded && !representation.getNamespaces().isEmpty())) {
 
       List<Link> links = List.empty();
 
@@ -181,7 +181,7 @@ public final class JsonRepresentationWriter {
       }
 
       // Add representation links
-      links = links.appendAll(representation.getLinks(false));
+      links = links.appendAll(representation.getLinks());
 
       // Partition representation links by rel
       Multimap<String, Link> linkMap = Multimaps.index(links, Links::getRel);

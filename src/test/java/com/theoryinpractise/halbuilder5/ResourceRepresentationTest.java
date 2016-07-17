@@ -9,8 +9,8 @@ import com.theoryinpractise.halbuilder5.json.JsonRepresentationReader;
 import com.theoryinpractise.halbuilder5.json.JsonRepresentationWriter;
 import javaslang.Function1;
 import javaslang.Function2;
-import javaslang.control.Option;
 import javaslang.collection.HashMap;
+import javaslang.control.Option;
 import okio.ByteString;
 import org.testng.annotations.Test;
 
@@ -47,7 +47,7 @@ public class ResourceRepresentationTest {
         ResourceRepresentation.create("/somewhere", account)
             .withLink("bible-verse", "https://www.bible.com/bible/1/mat.11.28", HashMap.of("content-type", "text/html"));
 
-    accountRep.getLinks(false).forEach(link -> System.out.println(" *** " + link.toString()));
+    accountRep.getLinks().forEach(link -> System.out.println(" *** " + link.toString()));
 
     assertThat(accountRep.get().name()).isEqualTo("Test Account");
 
@@ -63,7 +63,9 @@ public class ResourceRepresentationTest {
 
     ResourceRepresentation<Account> accountRepWithLinks = accountRep.withRepresentation("bank:associated-account", subAccountRep);
 
-    ByteString representation = JsonRepresentationWriter.create(objectMapper).print(accountRepWithLinks);
+    JsonRepresentationWriter jsonRepresentationWriter = JsonRepresentationWriter.create(objectMapper);
+
+    ByteString representation = jsonRepresentationWriter.print(accountRepWithLinks);
 
     System.out.println(representation.utf8());
 

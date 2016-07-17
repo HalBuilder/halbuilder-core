@@ -1,23 +1,17 @@
 package com.theoryinpractise.halbuilder5;
 
-import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Table;
-import javaslang.Function1;
 import javaslang.Value;
-import javaslang.collection.Map;
-import javaslang.collection.HashMap;
 import javaslang.collection.Iterator;
 import javaslang.collection.List;
+import javaslang.collection.Map;
 import javaslang.collection.Multimap;
 import javaslang.collection.Traversable;
 import javaslang.collection.TreeMap;
 import javaslang.collection.TreeMultimap;
 import javaslang.control.Option;
-
 import okio.ByteString;
 
-import javax.annotation.Nullable;
 import java.net.URI;
 import java.util.Comparator;
 import java.util.Objects;
@@ -31,8 +25,6 @@ import static com.theoryinpractise.halbuilder5.Support.WHITESPACE_SPLITTER;
 public final class ResourceRepresentation<V> implements Value<V> {
 
   public static final URI PRETTY_PRINT = URI.create("urn:halbuilder:prettyprint");
-
-  public static final URI COALESCE_LINKS = URI.create("urn:halbuilder:coalescelinks");
 
   public static final URI STRIP_NULLS = URI.create("urn:halbuilder:stripnulls");
 
@@ -147,16 +139,6 @@ public final class ResourceRepresentation<V> implements Value<V> {
 
   public static ResourceRepresentation<Void> empty() {
     return EMPTY;
-  }
-
-  private static <T> Function1<Function1<T, String>, String> mkSortableJoiner(final String join, final List<T> ts) {
-    return new Function1<Function1<T, String>, String>() {
-      @Nullable
-      @Override
-      public String apply(Function1<T, String> f) {
-        return ts.map(f::apply).sorted().distinct().mkString(join);
-      }
-    };
   }
 
   /**
@@ -332,8 +314,8 @@ public final class ResourceRepresentation<V> implements Value<V> {
         Rels.cases((__) -> Boolean.TRUE, (__) -> Boolean.FALSE, (__) -> Boolean.FALSE, (__, id, comparator) -> Boolean.FALSE));
   }
 
-  protected void validateNamespaces() {
-    getCanonicalLinks().forEach(link -> namespaceManager.validateNamespaces(Links.getRel(link)));
+  public void validateNamespaces() {
+    getLinks().forEach(link -> namespaceManager.validateNamespaces(Links.getRel(link)));
 
     resources.forEach(
         (key, rel) -> {
@@ -352,18 +334,6 @@ public final class ResourceRepresentation<V> implements Value<V> {
 
   public Map<String, String> getNamespaces() {
     return namespaceManager.getNamespaces();
-  }
-
-  public List<Link> getCanonicalLinks() {
-    return getNaturalLinks();
-  }
-
-  public List<Link> getLinks(boolean coalesce) {
-    if (coalesce) {
-      return getCollatedLinks();
-    } else {
-      return getNaturalLinks();
-    }
   }
 
   public Option<Link> getLinkByRel(String rel) {
@@ -401,38 +371,14 @@ public final class ResourceRepresentation<V> implements Value<V> {
     return resources;
   }
 
-  private List<Link> getCollatedLinks() {
-    List<Link> collatedLinks = List.empty();
-
-    // href, rel, link
-    Table<String, String, Link> linkTable = HashBasedTable.create();
-
-    for (Link link : links) {
-      linkTable.put(Links.getHref(link), Links.getRel(link), link);
-    }
-
-    for (String href : linkTable.rowKeySet()) {
-      List<Link> hrefLinks = List.ofAll(linkTable.row(href).values());
-      Map<String, String> properties =
-          hrefLinks.foldLeft(HashMap.of(), (p, l) -> p.merge(Links.getProperties(l).getOrElse(HashMap.of())));
-
-      List<String> relTypes = List.ofAll(linkTable.row(href).keySet());
-      String rels = mkSortableJoiner(" ", relTypes).apply(relType -> namespaceManager.currieHref(relType));
-
-      collatedLinks = collatedLinks.append(Links.full(rels, href, properties));
-    }
-
-    return collatedLinks.sorted(RELATABLE_ORDERING);
-  }
-
-  private List<Link> getNaturalLinks() {
+  public List<Link> getLinks() {
     return links.map(link -> Links.modRel(rel -> namespaceManager.currieHref(rel)).apply(link)).sorted(RELATABLE_ORDERING);
   }
 
   private List<Link> getLinksByRel(ResourceRepresentation<V> representation, String rel) {
     Support.checkRelType(rel);
     return representation
-        .getCanonicalLinks()
+        .getLinks()
         .filter(
             link -> {
               final String linkRel = Links.getRel(link);
