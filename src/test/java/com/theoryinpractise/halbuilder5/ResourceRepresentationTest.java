@@ -39,6 +39,16 @@ public class ResourceRepresentationTest {
   }
 
   @Test
+  public void testEmptyRepresentationIsEmpty() throws IOException {
+    assertThat(ResourceRepresentation.empty().isEmpty()).isTrue();
+  }
+
+  @Test
+  public void testNonEmptyRepresentationIsNotEmpty() throws IOException {
+    assertThat(ResourceRepresentation.create("value").isEmpty()).isFalse();
+  }
+
+  @Test
   public void testBasicRepresentationUsage() throws IOException {
 
     Account account = Account.of("0101232", "Test Account");

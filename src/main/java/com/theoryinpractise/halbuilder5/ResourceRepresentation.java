@@ -54,7 +54,7 @@ public final class ResourceRepresentation<V> implements Value<V> {
 
   @Override
   public boolean isEmpty() {
-    return false;
+    return value == null;
   }
 
   @Override
