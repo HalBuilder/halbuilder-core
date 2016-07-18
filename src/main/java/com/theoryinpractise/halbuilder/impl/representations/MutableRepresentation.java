@@ -82,8 +82,10 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
 
     private static Pattern propertyReadMethod = Pattern.compile("^(get|is|has)(.+)$");
 
+    private static Pattern ignoredMethod = Pattern.compile("^(getClass|hashCode|equals)$");
+
     static Optional<String> findPropertyReadMethod(String methodName) {
-        if (!methodName.equals("getClass")) {
+        if (!ignoredMethod.matcher(methodName).matches()) {
             Matcher matcher = propertyReadMethod.matcher(methodName);
             if (matcher.matches()) {
                 return Optional.of(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, matcher.group(2)));
