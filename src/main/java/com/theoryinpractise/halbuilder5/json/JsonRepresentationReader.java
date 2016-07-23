@@ -10,11 +10,9 @@ import com.theoryinpractise.halbuilder5.Link;
 import com.theoryinpractise.halbuilder5.Links;
 import com.theoryinpractise.halbuilder5.RepresentationException;
 import com.theoryinpractise.halbuilder5.ResourceRepresentation;
+import javaslang.collection.HashMap;
 import javaslang.collection.List;
 import javaslang.collection.Map;
-import javaslang.collection.HashMap;
-import javaslang.control.Option;
-
 import okio.ByteString;
 
 import java.io.IOException;
@@ -22,6 +20,8 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.Iterator;
 import java.util.Map.Entry;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static com.theoryinpractise.halbuilder5.Link.HREF;
 import static com.theoryinpractise.halbuilder5.Link.NAME;
@@ -34,12 +34,32 @@ public class JsonRepresentationReader {
 
   private final ObjectMapper mapper;
 
+  public static final <T> Function<ByteString, T> readByteStringAs(
+      ObjectMapper mapper, Class<T> classType, Supplier<T> defaultValue) {
+    return bs -> {
+      try {
+        return mapper.readValue(bs.utf8(), classType);
+      } catch (IOException e) {
+        return defaultValue.get();
+      }
+    };
+  }
+
   public JsonRepresentationReader() {
     this.mapper = new ObjectMapper();
   }
 
+  public <T> ResourceRepresentation<T> read(Reader reader, Class<T> classType, Supplier<T> defaultValue) throws IOException {
+    return read(encodeUtf8(CharStreams.toString(reader)), classType, defaultValue);
+  }
+
   public ResourceRepresentation<ByteString> read(Reader reader) throws IOException {
-    return read(ByteString.encodeUtf8(CharStreams.toString(reader)));
+    return read(encodeUtf8(CharStreams.toString(reader)));
+  }
+
+  public <T> ResourceRepresentation<T> read(ByteString byteString, Class<T> classType, Supplier<T> defaultValue)
+      throws IOException {
+    return read(byteString).map(readByteStringAs(mapper, classType, defaultValue));
   }
 
   public ResourceRepresentation<ByteString> read(ByteString byteString) {
