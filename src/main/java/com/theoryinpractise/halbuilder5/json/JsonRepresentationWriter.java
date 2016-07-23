@@ -48,12 +48,8 @@ public final class JsonRepresentationWriter {
     this.codec = codec;
   }
 
-  public static JsonRepresentationWriter create(Set<URI> flags, Module... modules) {
-    return create(getObjectMapper(flags, modules));
-  }
-
   public static JsonRepresentationWriter create(Module... modules) {
-    return create(getObjectMapper(HashSet.empty(), modules));
+    return create(getObjectMapper(modules));
   }
 
   public static JsonRepresentationWriter create(ObjectMapper objectMapper) {
@@ -79,15 +75,13 @@ public final class JsonRepresentationWriter {
     }
   }
 
-  private static ObjectMapper getObjectMapper(Set<URI> flags, Module[] modules) {
+  private static ObjectMapper getObjectMapper(Module[] modules) {
     JsonFactory f = new JsonFactory();
     f.enable(JsonGenerator.Feature.QUOTE_FIELD_NAMES);
 
     ObjectMapper objectMapper = new ObjectMapper(f);
     objectMapper.registerModules(modules);
-    if (flags.contains(ResourceRepresentation.STRIP_NULLS)) {
-      objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-    }
+    objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
     objectMapper.configure(SerializationFeature.WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED, false);
 
     return objectMapper;

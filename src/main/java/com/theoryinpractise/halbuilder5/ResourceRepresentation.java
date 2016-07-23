@@ -24,8 +24,6 @@ import static com.theoryinpractise.halbuilder5.Support.WHITESPACE_SPLITTER;
 
 public final class ResourceRepresentation<V> implements Value<V> {
 
-  public static final URI STRIP_NULLS = URI.create("urn:halbuilder:stripnulls");
-
   public static final URI SILENT_SORTING = URI.create("urn:halbuilder:silentsorting");
 
   public static final URI HYPERTEXT_CACHE_PATTERN = URI.create("urn:halbuild:hypertextcachepattern");
