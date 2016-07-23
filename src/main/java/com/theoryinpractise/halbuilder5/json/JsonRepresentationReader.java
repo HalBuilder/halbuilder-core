@@ -53,14 +53,12 @@ public class JsonRepresentationReader {
 
   private ResourceRepresentation<ByteString> readResource(JsonNode rootNode) {
 
-    Option<ResourceRepresentation<Void>> resource = Option.of(ResourceRepresentation.empty());
+    ResourceRepresentation<ByteString> representation = readProperties(rootNode, ResourceRepresentation.empty());
+    representation = readNamespaces(rootNode, representation);
+    representation = readLinks(rootNode, representation);
+    representation = readResources(rootNode, representation);
 
-    return resource
-        .map(r -> readNamespaces(rootNode, r))
-        .map(r -> readLinks(rootNode, r))
-        .map(r -> readProperties(rootNode, r))
-        .map(r -> readResources(rootNode, r))
-        .get();
+    return representation;
   }
 
   private <T> ResourceRepresentation<T> readNamespaces(JsonNode rootNode, ResourceRepresentation<T> resource) {
