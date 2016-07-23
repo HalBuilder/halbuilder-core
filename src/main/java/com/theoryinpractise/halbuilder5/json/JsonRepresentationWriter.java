@@ -61,7 +61,7 @@ public final class JsonRepresentationWriter {
   }
 
   public ByteString print(ResourceRepresentation<?> representation) {
-    return print(representation, HashSet.of(ResourceRepresentation.PRETTY_PRINT));
+    return print(representation, HashSet.of());
   }
 
   public ByteString print(ResourceRepresentation<?> representation, Set<URI> flags) {
