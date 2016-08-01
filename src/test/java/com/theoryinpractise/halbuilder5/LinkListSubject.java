@@ -35,7 +35,8 @@ public class LinkListSubject extends Subject<LinkListSubject, List<Link>> {
   public void containsRelCondition(String rel) {
     boolean hasMatch = false;
     for (Link link : getSubject()) {
-      if (rel.equals(getRel(link)) || Iterables.contains(WHITESPACE_SPLITTER.split(getRel(link)), rel)) {
+      if (rel.equals(getRel(link))
+          || Iterables.contains(WHITESPACE_SPLITTER.split(getRel(link)), rel)) {
         hasMatch = true;
       }
     }
@@ -47,7 +48,8 @@ public class LinkListSubject extends Subject<LinkListSubject, List<Link>> {
   public void doesNotContainRelCondition(String rel) {
     boolean hasMatch = false;
     for (Link link : getSubject()) {
-      if (rel.equals(getRel(link)) || Iterables.contains(WHITESPACE_SPLITTER.split(getRel(link)), rel)) {
+      if (rel.equals(getRel(link))
+          || Iterables.contains(WHITESPACE_SPLITTER.split(getRel(link)), rel)) {
         hasMatch = true;
       }
     }

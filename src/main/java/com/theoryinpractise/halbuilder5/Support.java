@@ -15,6 +15,7 @@ public interface Support {
     Preconditions.checkArgument(rel != null, "Provided rel should not be null.");
     Preconditions.checkArgument(
         !"".equals(rel) && !rel.contains(" "),
-        "Provided rel value should be a single rel type, as " + "defined by http://tools.ietf.org/html/rfc5988");
+        "Provided rel value should be a single rel type, as "
+            + "defined by http://tools.ietf.org/html/rfc5988");
   }
 }

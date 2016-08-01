@@ -60,7 +60,9 @@ public abstract class Link {
     List<Tuple2<String, String>> linkFragments =
         Links.cases()
             .simple((rel, href) -> List.of(Tuple.of("rel", rel), Tuple.of("href", href)))
-            .full((rel, href, properties) -> List.of(Tuple.of("rel", rel), Tuple.of("href", href)).appendAll(properties))
+            .full(
+                (rel, href, properties) ->
+                    List.of(Tuple.of("rel", rel), Tuple.of("href", href)).appendAll(properties))
             .apply(this);
 
     return linkFragments.appendAll(templateFragement());
@@ -68,7 +70,9 @@ public abstract class Link {
 
   @Override
   public String toString() {
-    return "<link " + generateLinkFragments().map(it -> it._1 + "=\"" + it._2 + "\"").mkString(" ") + "/>";
+    return "<link "
+        + generateLinkFragments().map(it -> it._1 + "=\"" + it._2 + "\"").mkString(" ")
+        + "/>";
   }
 
   @Override

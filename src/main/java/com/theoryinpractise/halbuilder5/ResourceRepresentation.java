@@ -18,15 +18,14 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import static com.theoryinpractise.halbuilder5.Link.SELF;
 import static com.theoryinpractise.halbuilder5.Rels.getRel;
 import static com.theoryinpractise.halbuilder5.Support.WHITESPACE_SPLITTER;
 
 public final class ResourceRepresentation<V> implements Value<V> {
 
-  public static final URI SILENT_SORTING = URI.create("urn:halbuilder:silentsorting");
+  public static Rel SELF = Rels.singleton("self");
 
-  public static final URI HYPERTEXT_CACHE_PATTERN = URI.create("urn:halbuild:hypertextcachepattern");
+  public static final URI SILENT_SORTING = URI.create("urn:halbuilder:silentsorting");
 
   public static final Comparator<Link> RELATABLE_ORDERING =
       Comparator.comparing(
@@ -60,7 +59,8 @@ public final class ResourceRepresentation<V> implements Value<V> {
 
   @Override
   public <U> ResourceRepresentation<U> map(Function<? super V, ? extends U> function) {
-    return new ResourceRepresentation<U>(content, links, rels, namespaceManager, function.apply(value), resources);
+    return new ResourceRepresentation<U>(
+        content, links, rels, namespaceManager, function.apply(value), resources);
   }
 
   @Override
@@ -127,8 +127,8 @@ public final class ResourceRepresentation<V> implements Value<V> {
   private static final ResourceRepresentation<Void> EMPTY =
       new ResourceRepresentation<>(
           Option.none(),
-          List.<Link>empty(),
-          TreeMap.of("self", Rels.singleton("self")),
+          List.empty(),
+          TreeMap.of("self", SELF),
           NamespaceManager.EMPTY,
           null,
           TreeMultimap.withSet().empty());
@@ -154,7 +154,8 @@ public final class ResourceRepresentation<V> implements Value<V> {
    * @return A new instance of a PersistentRepresentation with the namespace included.
    */
   public ResourceRepresentation<V> withContent(ByteString content) {
-    return new ResourceRepresentation<>(Option.of(content), links, rels, namespaceManager, value, resources);
+    return new ResourceRepresentation<>(
+        Option.of(content), links, rels, namespaceManager, value, resources);
   }
 
   /**
@@ -167,7 +168,8 @@ public final class ResourceRepresentation<V> implements Value<V> {
       throw new IllegalStateException(String.format("Rel %s is already declared.", rel.rel()));
     }
     final TreeMap<String, Rel> updatedRels = rels.put(rel.rel(), rel);
-    return new ResourceRepresentation<>(content, links, updatedRels, namespaceManager, value, resources);
+    return new ResourceRepresentation<>(
+        content, links, updatedRels, namespaceManager, value, resources);
   }
 
   /**
@@ -201,7 +203,8 @@ public final class ResourceRepresentation<V> implements Value<V> {
    * @param href The target href for the link, relative to the href of this resource.
    * @param properties The properties to add to this link object
    */
-  public ResourceRepresentation<V> withLink(String rel, String href, Map<String, String> properties) {
+  public ResourceRepresentation<V> withLink(
+      String rel, String href, Map<String, String> properties) {
     return withLink(Links.full(rel, href, properties));
   }
 
@@ -214,9 +217,11 @@ public final class ResourceRepresentation<V> implements Value<V> {
     String rel = Links.getRel(link);
     Support.checkRelType(rel);
     validateSingletonRel(rel);
-    final TreeMap<String, Rel> updatedRels = !rels.containsKey(rel) ? rels.put(rel, Rels.natural(rel)) : rels;
+    final TreeMap<String, Rel> updatedRels =
+        !rels.containsKey(rel) ? rels.put(rel, Rels.natural(rel)) : rels;
     final List<Link> updatedLinks = links.append(link);
-    return new ResourceRepresentation<>(content, updatedLinks, updatedRels, namespaceManager, value, resources);
+    return new ResourceRepresentation<>(
+        content, updatedLinks, updatedRels, namespaceManager, value, resources);
   }
 
   /**
@@ -235,10 +240,13 @@ public final class ResourceRepresentation<V> implements Value<V> {
     final TreeMap<String, Rel> updatedRels =
         links
             .map(Links::getRel)
-            .foldLeft(rels, (accum, rel) -> !accum.containsKey(rel) ? rels.put(rel, Rels.natural(rel)) : rels);
+            .foldLeft(
+                rels,
+                (accum, rel) -> !accum.containsKey(rel) ? rels.put(rel, Rels.natural(rel)) : rels);
 
     final List<Link> updatedLinks = links.appendAll(links);
-    return new ResourceRepresentation<>(content, updatedLinks, updatedRels, namespaceManager, value, resources);
+    return new ResourceRepresentation<>(
+        content, updatedLinks, updatedRels, namespaceManager, value, resources);
   }
 
   /**
@@ -249,14 +257,16 @@ public final class ResourceRepresentation<V> implements Value<V> {
    * @return The new resource
    */
   public <R> ResourceRepresentation<R> withValue(R newValue) {
-    return new ResourceRepresentation<>(Option.none(), links, rels, namespaceManager, newValue, resources);
+    return new ResourceRepresentation<>(
+        Option.none(), links, rels, namespaceManager, newValue, resources);
   }
 
   /**
    * Adds a new namespace.
    *
    * @param namespace The CURIE prefix for the namespace being added.
-   * @param href The target href of the namespace being added. This may be relative to the resourceFactories baseref
+   * @param href The target href of the namespace being added. This may be relative to the
+   * resourceFactories baseref
    *
    * @return A new instance of a PersistentRepresentation with the namespace included.
    */
@@ -265,11 +275,14 @@ public final class ResourceRepresentation<V> implements Value<V> {
       rels = rels.put("curies", Rels.collection("curies"));
     }
 
-    final NamespaceManager updatedNamespaceManager = namespaceManager.withNamespace(namespace, href);
-    return new ResourceRepresentation<>(content, links, rels, updatedNamespaceManager, value, resources);
+    final NamespaceManager updatedNamespaceManager =
+        namespaceManager.withNamespace(namespace, href);
+    return new ResourceRepresentation<>(
+        content, links, rels, updatedNamespaceManager, value, resources);
   }
 
-  public ResourceRepresentation<V> withRepresentation(String rel, ResourceRepresentation<?> resource) {
+  public ResourceRepresentation<V> withRepresentation(
+      String rel, ResourceRepresentation<?> resource) {
 
     if (resources.containsValue(resource)) {
       throw new IllegalStateException("Resource is already embedded.");
@@ -281,7 +294,8 @@ public final class ResourceRepresentation<V> implements Value<V> {
     Multimap<String, ResourceRepresentation<?>> updatedResources = resources.put(rel, resource);
 
     ResourceRepresentation<V> updatedRepresentation =
-        new ResourceRepresentation<>(content, links, rels, namespaceManager, value, updatedResources);
+        new ResourceRepresentation<>(
+            content, links, rels, namespaceManager, value, updatedResources);
     // Propagate null property flag to parent.
     if (resource.hasNullProperties()) {
       updatedRepresentation.hasNullProperties = true;
@@ -299,15 +313,21 @@ public final class ResourceRepresentation<V> implements Value<V> {
         .forEach(
             rel -> {
               // Rel is register, check for duplicate singleton
-              if (isSingleton(rel) && (!getLinksByRel(rel).isEmpty() || !getResourcesByRel(rel).isEmpty())) {
-                throw new IllegalStateException(String.format("%s is registered as a single rel and already exists.", rel));
+              if (isSingleton(rel)
+                  && (!getLinksByRel(rel).isEmpty() || !getResourcesByRel(rel).isEmpty())) {
+                throw new IllegalStateException(
+                    String.format("%s is registered as a single rel and already exists.", rel));
               }
             });
   }
 
   private static Boolean isSingleton(Rel rel) {
     return rel.match(
-        Rels.cases((__) -> Boolean.TRUE, (__) -> Boolean.FALSE, (__) -> Boolean.FALSE, (__, id, comparator) -> Boolean.FALSE));
+        Rels.cases(
+            (__) -> Boolean.TRUE,
+            (__) -> Boolean.FALSE,
+            (__) -> Boolean.FALSE,
+            (__, id, comparator) -> Boolean.FALSE));
   }
 
   public void validateNamespaces() {
@@ -368,7 +388,9 @@ public final class ResourceRepresentation<V> implements Value<V> {
   }
 
   public List<Link> getLinks() {
-    return links.map(link -> Links.modRel(rel -> namespaceManager.currieHref(rel)).apply(link)).sorted(RELATABLE_ORDERING);
+    return links
+        .map(link -> Links.modRel(rel -> namespaceManager.currieHref(rel)).apply(link))
+        .sorted(RELATABLE_ORDERING);
   }
 
   private List<Link> getLinksByRel(ResourceRepresentation<V> representation, String rel) {
@@ -378,7 +400,8 @@ public final class ResourceRepresentation<V> implements Value<V> {
         .filter(
             link -> {
               final String linkRel = Links.getRel(link);
-              return rel.equals(linkRel) || Iterables.contains(WHITESPACE_SPLITTER.split(linkRel), rel);
+              return rel.equals(linkRel)
+                  || Iterables.contains(WHITESPACE_SPLITTER.split(linkRel), rel);
             });
   }
 

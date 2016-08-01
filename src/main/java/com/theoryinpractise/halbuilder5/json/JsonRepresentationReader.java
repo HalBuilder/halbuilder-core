@@ -49,7 +49,8 @@ public class JsonRepresentationReader {
     this.mapper = new ObjectMapper();
   }
 
-  public <T> ResourceRepresentation<T> read(Reader reader, Class<T> classType, Supplier<T> defaultValue) throws IOException {
+  public <T> ResourceRepresentation<T> read(
+      Reader reader, Class<T> classType, Supplier<T> defaultValue) throws IOException {
     return read(encodeUtf8(CharStreams.toString(reader)), classType, defaultValue);
   }
 
@@ -57,8 +58,8 @@ public class JsonRepresentationReader {
     return read(encodeUtf8(CharStreams.toString(reader)));
   }
 
-  public <T> ResourceRepresentation<T> read(ByteString byteString, Class<T> classType, Supplier<T> defaultValue)
-      throws IOException {
+  public <T> ResourceRepresentation<T> read(
+      ByteString byteString, Class<T> classType, Supplier<T> defaultValue) throws IOException {
     return read(byteString).map(readByteStringAs(mapper, classType, defaultValue));
   }
 
@@ -73,7 +74,8 @@ public class JsonRepresentationReader {
 
   private ResourceRepresentation<ByteString> readResource(JsonNode rootNode) {
 
-    ResourceRepresentation<ByteString> representation = readProperties(rootNode, ResourceRepresentation.empty());
+    ResourceRepresentation<ByteString> representation =
+        readProperties(rootNode, ResourceRepresentation.empty());
     representation = readNamespaces(rootNode, representation);
     representation = readLinks(rootNode, representation);
     representation = readResources(rootNode, representation);
@@ -81,7 +83,8 @@ public class JsonRepresentationReader {
     return representation;
   }
 
-  private <T> ResourceRepresentation<T> readNamespaces(JsonNode rootNode, ResourceRepresentation<T> resource) {
+  private <T> ResourceRepresentation<T> readNamespaces(
+      JsonNode rootNode, ResourceRepresentation<T> resource) {
     ResourceRepresentation<T> newRep = resource;
     if (rootNode.has(LINKS)) {
       JsonNode linksNode = rootNode.get(LINKS);
@@ -92,7 +95,8 @@ public class JsonRepresentationReader {
           Iterator<JsonNode> values = curieNode.elements();
           while (values.hasNext()) {
             JsonNode valueNode = values.next();
-            newRep = newRep.withNamespace(valueNode.get(NAME).asText(), valueNode.get(HREF).asText());
+            newRep =
+                newRep.withNamespace(valueNode.get(NAME).asText(), valueNode.get(HREF).asText());
           }
         } else {
           newRep = newRep.withNamespace(curieNode.get(NAME).asText(), curieNode.get(HREF).asText());
@@ -102,7 +106,8 @@ public class JsonRepresentationReader {
     return newRep;
   }
 
-  private <T> ResourceRepresentation<T> readLinks(JsonNode rootNode, ResourceRepresentation<T> resource) {
+  private <T> ResourceRepresentation<T> readLinks(
+      JsonNode rootNode, ResourceRepresentation<T> resource) {
 
     List<Link> links = List.empty();
 
@@ -139,7 +144,8 @@ public class JsonRepresentationReader {
     return Links.full(rel, href, properties);
   }
 
-  private ResourceRepresentation<ByteString> readProperties(JsonNode rootNode, ResourceRepresentation<?> resource) {
+  private ResourceRepresentation<ByteString> readProperties(
+      JsonNode rootNode, ResourceRepresentation<?> resource) {
     ObjectNode propertyNode = rootNode.deepCopy();
     propertyNode.remove("_links");
     propertyNode.remove("_embedded");
@@ -151,7 +157,8 @@ public class JsonRepresentationReader {
     }
   }
 
-  private <T> ResourceRepresentation<T> readResources(JsonNode rootNode, ResourceRepresentation<T> resource) {
+  private <T> ResourceRepresentation<T> readResources(
+      JsonNode rootNode, ResourceRepresentation<T> resource) {
     if (rootNode.has(EMBEDDED)) {
       ResourceRepresentation<T> newResource = resource;
       Iterator<Entry<String, JsonNode>> fields = rootNode.get(EMBEDDED).fields();
@@ -164,7 +171,8 @@ public class JsonRepresentationReader {
             newResource = newResource.withRepresentation(keyNode.getKey(), readResource(valueNode));
           }
         } else {
-          newResource = newResource.withRepresentation(keyNode.getKey(), readResource(keyNode.getValue()));
+          newResource =
+              newResource.withRepresentation(keyNode.getKey(), readResource(keyNode.getValue()));
         }
       }
       return newResource;

@@ -23,7 +23,8 @@ public class ResourceBasicMethodsTest {
   }
 
   private ResourceRepresentation<TreeMap<String, Option<String>>> createDefaultResource() {
-    TreeMap<String, Option<String>> properties = TreeMap.of("testprop", some("value"), "nullprop", none());
+    TreeMap<String, Option<String>> properties =
+        TreeMap.of("testprop", some("value"), "nullprop", none());
     return ResourceRepresentation.create("http://localhost/test")
         .withNamespace("testns", "http://example.com/test/{rel}")
         .withLink("testlink", "http://example.com/link")
@@ -120,7 +121,8 @@ public class ResourceBasicMethodsTest {
 
   @Test
   public void testToStringRendersSelfHref() {
-    String toString = ResourceRepresentation.empty().withLink("self", "http://localhost/test").toString();
+    String toString =
+        ResourceRepresentation.empty().withLink("self", "http://localhost/test").toString();
     assertThat(toString).isEqualTo("<Representation: http://localhost/test>");
   }
 

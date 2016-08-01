@@ -26,13 +26,18 @@ public abstract class Rel {
 
   public String fullRel() {
     return this.match(
-        Rels.cases((rel) -> rel, (rel) -> rel, (rel) -> rel, (rel, id, comarator) -> String.format("%s sorted:%s", rel, id)));
+        Rels.cases(
+            (rel) -> rel,
+            (rel) -> rel,
+            (rel) -> rel,
+            (rel, id, comarator) -> String.format("%s sorted:%s", rel, id)));
   }
 
   public abstract <R> R match(Cases<R> cases);
 
   public String rel() {
-    return this.match(Rels.cases((rel) -> rel, (rel) -> rel, (rel) -> rel, (rel, id, comarator) -> rel));
+    return this.match(
+        Rels.cases((rel) -> rel, (rel) -> rel, (rel) -> rel, (rel, id, comarator) -> rel));
   }
 
   /**
@@ -43,31 +48,32 @@ public abstract class Rel {
   interface Cases<R> {
 
     /**
-     * `singleton` relationships are checked for uniqueness, and render directly as an object ( rather than array of objects )
-     * when rendered as JSON.
+     * `singleton` relationships are checked for uniqueness, and render directly as an object (
+     * rather than array of objects ) when rendered as JSON.
      *
      * @param rel The relationship type
      */
     R singleton(String rel);
 
     /**
-     * `natural` relationships are rendered in natural order, and are rendered as a list of objects, or a coalesced into a single
-     * object.
+     * `natural` relationships are rendered in natural order, and are rendered as a list of objects,
+     * or a coalesced into a single object.
      *
      * @param rel The relationship type
      */
     R natural(String rel);
 
     /**
-     * `collection` relationships are rendered in natural order, and are ALWAYS rendered as a list of objects.
+     * `collection` relationships are rendered in natural order, and are ALWAYS rendered as a list
+     * of objects.
      *
      * @param rel The relationship type
      */
     R collection(String rel);
 
     /**
-     * `sorted` relationships are rendered in the order mandated by the associated `Comparator` and are rendered as a list of
-     * objects.
+     * `sorted` relationships are rendered in the order mandated by the associated `Comparator` and
+     * are rendered as a list of objects.
      *
      * @param rel The relationship type
      * @param id An identifier to associate with the sorting technique used.

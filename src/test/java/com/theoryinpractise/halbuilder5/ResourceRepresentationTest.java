@@ -55,7 +55,10 @@ public class ResourceRepresentationTest {
 
     ResourceRepresentation<Account> accountRep =
         ResourceRepresentation.create("/somewhere", account)
-            .withLink("bible-verse", "https://www.bible.com/bible/1/mat.11.28", HashMap.of("content-type", "text/html"));
+            .withLink(
+                "bible-verse",
+                "https://www.bible.com/bible/1/mat.11.28",
+                HashMap.of("content-type", "text/html"));
 
     accountRep.getLinks().forEach(link -> System.out.println(" *** " + link.toString()));
 
@@ -69,11 +72,14 @@ public class ResourceRepresentationTest {
     assertThat(lengthOfName).isEqualTo(12);
 
     Account subAccount = Account.of("87912312", "Sub Account");
-    ResourceRepresentation<Account> subAccountRep = ResourceRepresentation.create("/subaccount", subAccount);
+    ResourceRepresentation<Account> subAccountRep =
+        ResourceRepresentation.create("/subaccount", subAccount);
 
-    ResourceRepresentation<Account> accountRepWithLinks = accountRep.withRepresentation("bank:associated-account", subAccountRep);
+    ResourceRepresentation<Account> accountRepWithLinks =
+        accountRep.withRepresentation("bank:associated-account", subAccountRep);
 
-    JsonRepresentationWriter jsonRepresentationWriter = JsonRepresentationWriter.create(objectMapper);
+    JsonRepresentationWriter jsonRepresentationWriter =
+        JsonRepresentationWriter.create(objectMapper);
 
     ByteString representation = jsonRepresentationWriter.print(accountRepWithLinks);
 
@@ -85,16 +91,24 @@ public class ResourceRepresentationTest {
     ResourceRepresentation<Map> readRepresentation =
         byteStringResourceRepresentation.map(uncheckedObjectMap(Map.class, Collections.emptyMap()));
 
-    assertWithMessage("read representation should not be null").that(readRepresentation).isNotNull();
+    assertWithMessage("read representation should not be null")
+        .that(readRepresentation)
+        .isNotNull();
     Map<String, Object> readValue = readRepresentation.get();
-    assertWithMessage("account name should be Test Account").that(readValue.get("name")).isEqualTo("Test Account");
+    assertWithMessage("account name should be Test Account")
+        .that(readValue.get("name"))
+        .isEqualTo("Test Account");
 
     ResourceRepresentation<Account> readAccountRepresentation =
         byteStringResourceRepresentation.map(uncheckedObjectMap(Account.class, Account.of("", "")));
 
-    assertWithMessage("read representation should not be null").that(readRepresentation).isNotNull();
+    assertWithMessage("read representation should not be null")
+        .that(readRepresentation)
+        .isNotNull();
     Account readAccount = readAccountRepresentation.get();
-    assertWithMessage("account name should be Test Account").that(readAccount.name()).isEqualTo("Test Account");
+    assertWithMessage("account name should be Test Account")
+        .that(readAccount.name())
+        .isEqualTo("Test Account");
 
     Option<String> subLink =
         accountRepWithLinks
@@ -105,9 +119,11 @@ public class ResourceRepresentationTest {
 
     System.out.println(subLink);
 
-    Function1<String, String> deleteFunction = linkFunction(accountRepWithLinks, "self", this::deleteResource);
+    Function1<String, String> deleteFunction =
+        linkFunction(accountRepWithLinks, "self", this::deleteResource);
 
-    Function2<ResourceRepresentation<?>, String, String> deleteRepFunction = repFunction("self", this::deleteResource);
+    Function2<ResourceRepresentation<?>, String, String> deleteRepFunction =
+        repFunction("self", this::deleteResource);
 
     System.out.println(deleteFunction.apply("click-event"));
     System.out.println(deleteRepFunction.apply(accountRepWithLinks, "click-event-on-rep"));
@@ -140,11 +156,14 @@ public class ResourceRepresentationTest {
     return String.format("deleted %s", Links.getHref(link));
   }
 
-  Function2<ResourceRepresentation<?>, String, String> repFunction(String rel, Function2<Link, String, String> fn) {
-    return (rep, event) -> rep.getLinkByRel(rel).map(link -> fn.apply(link, event)).getOrElse(() -> noOp(event));
+  Function2<ResourceRepresentation<?>, String, String> repFunction(
+      String rel, Function2<Link, String, String> fn) {
+    return (rep, event) ->
+        rep.getLinkByRel(rel).map(link -> fn.apply(link, event)).getOrElse(() -> noOp(event));
   }
 
-  Function1<String, String> linkFunction(ResourceRepresentation<?> rep, String rel, Function2<Link, String, String> fn) {
+  Function1<String, String> linkFunction(
+      ResourceRepresentation<?> rep, String rel, Function2<Link, String, String> fn) {
     return rep.getLinkByRel(rel).map(link -> fn.curried().apply(link)).getOrElse(this::noOp);
   }
 }

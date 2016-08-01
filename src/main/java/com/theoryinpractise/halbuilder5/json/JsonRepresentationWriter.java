@@ -88,14 +88,18 @@ public final class JsonRepresentationWriter {
   }
 
   private boolean isSingleton(Rel matcher) {
-    return matcher.match(Rels.cases((rel) -> true, (rel) -> false, (rel) -> false, (rel, key, comparator) -> false));
+    return matcher.match(
+        Rels.cases((rel) -> true, (rel) -> false, (rel) -> false, (rel, key, comparator) -> false));
   }
 
   private boolean isCollection(Rel matcher) {
-    return matcher.match(Rels.cases((rel) -> false, (rel) -> false, (rel) -> true, (rel, key, comparator) -> false));
+    return matcher.match(
+        Rels.cases((rel) -> false, (rel) -> false, (rel) -> true, (rel, key, comparator) -> false));
   }
 
-  private ObjectNode renderJson(Set<URI> flags, ResourceRepresentation<?> representation, boolean embedded) throws IOException {
+  private ObjectNode renderJson(
+      Set<URI> flags, ResourceRepresentation<?> representation, boolean embedded)
+      throws IOException {
 
     ObjectNode objectNode = codec.getNodeFactory().objectNode();
 
@@ -106,21 +110,25 @@ public final class JsonRepresentationWriter {
     return objectNode;
   }
 
-  private void renderJsonEmbeds(Set<URI> flags, ObjectNode objectNode, ResourceRepresentation<?> representation)
+  private void renderJsonEmbeds(
+      Set<URI> flags, ObjectNode objectNode, ResourceRepresentation<?> representation)
       throws IOException {
     if (!representation.getResources().isEmpty()) {
 
       // TODO toJavaMap is kinda nasty
-      Map<String, Collection<ResourceRepresentation<?>>> resourceMap = representation.getResources().toJavaMap();
+      Map<String, Collection<ResourceRepresentation<?>>> resourceMap =
+          representation.getResources().toJavaMap();
 
       ObjectNode embedsNode = codec.createObjectNode();
       objectNode.set(EMBEDDED, embedsNode);
 
-      for (Map.Entry<String, Collection<ResourceRepresentation<?>>> resourceEntry : resourceMap.entrySet()) {
+      for (Map.Entry<String, Collection<ResourceRepresentation<?>>> resourceEntry :
+          resourceMap.entrySet()) {
 
         Rel rel = representation.getRels().get(resourceEntry.getKey()).get();
 
-        boolean coalesce = !isCollection(rel) && (isSingleton(rel) || resourceEntry.getValue().size() == 1);
+        boolean coalesce =
+            !isCollection(rel) && (isSingleton(rel) || resourceEntry.getValue().size() == 1);
 
         if (coalesce) {
           ResourceRepresentation<?> subRepresentation = resourceEntry.getValue().iterator().next();
@@ -128,7 +136,8 @@ public final class JsonRepresentationWriter {
           embedsNode.set(resourceEntry.getKey(), embeddedNode);
         } else {
 
-          final Comparator<ResourceRepresentation<?>> repComparator = Rels.getComparator(rel).getOrElse(Rel.naturalComparator);
+          final Comparator<ResourceRepresentation<?>> repComparator =
+              Rels.getComparator(rel).getOrElse(Rel.naturalComparator);
 
           final List<ResourceRepresentation<?>> values =
               isSingleton(rel)
@@ -136,7 +145,9 @@ public final class JsonRepresentationWriter {
                   : List.ofAll(resourceEntry.getValue()).sorted(repComparator);
 
           final String collectionRel =
-              isSingleton(rel) || flags.contains(ResourceRepresentation.SILENT_SORTING) ? rel.rel() : rel.fullRel();
+              isSingleton(rel) || flags.contains(ResourceRepresentation.SILENT_SORTING)
+                  ? rel.rel()
+                  : rel.fullRel();
 
           ArrayNode embedArrayNode = codec.createArrayNode();
           objectNode.set(collectionRel, embedArrayNode);
@@ -150,7 +161,8 @@ public final class JsonRepresentationWriter {
     }
   }
 
-  private void renderJsonProperties(ObjectNode objectNode, ResourceRepresentation<?> representation) throws IOException {
+  private void renderJsonProperties(ObjectNode objectNode, ResourceRepresentation<?> representation)
+      throws IOException {
     JsonNode tree = codec.valueToTree(representation.get());
     if (tree.isObject()) {
       Iterator<Map.Entry<String, JsonNode>> fields = tree.fields();
@@ -163,15 +175,21 @@ public final class JsonRepresentationWriter {
     }
   }
 
-  private void renderJsonLinks(ObjectNode objectNode, ResourceRepresentation<?> representation, boolean embedded)
+  private void renderJsonLinks(
+      ObjectNode objectNode, ResourceRepresentation<?> representation, boolean embedded)
       throws IOException {
-    if (!representation.getLinks().isEmpty() || (!embedded && !representation.getNamespaces().isEmpty())) {
+    if (!representation.getLinks().isEmpty()
+        || (!embedded && !representation.getNamespaces().isEmpty())) {
 
       List<Link> links = List.empty();
 
       // Include namespaces as links when not embedded
       if (!embedded) {
-        links = links.appendAll(representation.getNamespaces().map(ns -> Links.full(CURIES, ns._2, HashMap.of("name", ns._1))));
+        links =
+            links.appendAll(
+                representation
+                    .getNamespaces()
+                    .map(ns -> Links.full(CURIES, ns._2, HashMap.of("name", ns._1))));
       }
 
       // Add representation links
@@ -185,7 +203,8 @@ public final class JsonRepresentationWriter {
       for (Map.Entry<String, Collection<Link>> linkEntry : linkMap.asMap().entrySet()) {
 
         Rel rel = representation.getRels().get(linkEntry.getKey()).get();
-        boolean coalesce = !isCollection(rel) && (isSingleton(rel) || linkEntry.getValue().size() == 1);
+        boolean coalesce =
+            !isCollection(rel) && (isSingleton(rel) || linkEntry.getValue().size() == 1);
 
         if (coalesce) {
           Link link = linkEntry.getValue().iterator().next();
@@ -207,7 +226,8 @@ public final class JsonRepresentationWriter {
     ObjectNode linkNode = codec.createObjectNode();
     linkNode.set(HREF, codec.getNodeFactory().textNode(Links.getHref(link)));
 
-    javaslang.collection.Map<String, String> properties = Links.getProperties(link).getOrElse(HashMap.of());
+    javaslang.collection.Map<String, String> properties =
+        Links.getProperties(link).getOrElse(HashMap.of());
     for (Tuple2<String, String> prop : properties) {
       linkNode.set(prop._1, codec.getNodeFactory().textNode(prop._2));
     }

@@ -11,7 +11,8 @@ public class RepresentationLinksTest {
   @Test
   public void testBasicLinks() {
 
-    ResourceRepresentation<Void> resource = ResourceRepresentation.empty("/foo").withLink("bar", "/bar").withLink("foo", "/bar");
+    ResourceRepresentation<Void> resource =
+        ResourceRepresentation.empty("/foo").withLink("bar", "/bar").withLink("foo", "/bar");
 
     List<Link> links = resource.getLinks();
     assertThat(links).isNotEmpty();
@@ -57,7 +58,8 @@ public class RepresentationLinksTest {
   @Test
   public void testRelLookupsWithNullFail() {
     try {
-      ResourceRepresentation<Void> resource = ResourceRepresentation.empty("/foo").withLink("bar foo", "/bar");
+      ResourceRepresentation<Void> resource =
+          ResourceRepresentation.empty("/foo").withLink("bar foo", "/bar");
 
       resource.getLinkByRel((String) null);
       throw new AssertionError("Should fail");
@@ -69,7 +71,8 @@ public class RepresentationLinksTest {
   @Test
   public void testRelLookupsWithEmptyRelFail() {
     try {
-      ResourceRepresentation<Void> resource = ResourceRepresentation.empty("/foo").withLink("bar", "/bar");
+      ResourceRepresentation<Void> resource =
+          ResourceRepresentation.empty("/foo").withLink("bar", "/bar");
 
       resource.getLinkByRel("");
 
@@ -82,7 +85,8 @@ public class RepresentationLinksTest {
   @Test
   public void testRelLookupsWithSpacesFail() {
     try {
-      ResourceRepresentation<Void> resource = ResourceRepresentation.empty("/foo").withLink("bar", "/bar");
+      ResourceRepresentation<Void> resource =
+          ResourceRepresentation.empty("/foo").withLink("bar", "/bar");
 
       resource.getLinkByRel("test fail");
       throw new AssertionError("Should fail");
