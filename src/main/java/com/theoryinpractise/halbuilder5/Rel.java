@@ -2,14 +2,19 @@ package com.theoryinpractise.halbuilder5;
 
 import org.derive4j.ArgOption;
 import org.derive4j.Data;
+import org.derive4j.Derive;
 import org.derive4j.Flavour;
+import org.derive4j.Make;
 
 import java.util.Comparator;
+import java.util.function.Function;
 
-/**
- * Rel defines the base class of a Algebraic Data Type for relationship semantics.
- */
-@Data(flavour = Flavour.Javaslang, arguments = ArgOption.checkedNotNull)
+/** Rel defines the base class of a Algebraic Data Type for relationship semantics. */
+@Data(
+  flavour = Flavour.Vavr,
+  arguments = ArgOption.checkedNotNull,
+  value = @Derive(make = {Make.constructors, Make.getters, Make.casesMatching})
+)
 public abstract class Rel {
 
   public static final Comparator<ResourceRepresentation<?>> naturalComparator =
@@ -24,20 +29,21 @@ public abstract class Rel {
   @Override
   public abstract int hashCode();
 
+  private static final Function<Rel, String> fullRellF =
+      Rels.cases()
+          .singleton(rel -> rel)
+          .natural(rel -> rel)
+          .collection(rel -> rel)
+          .sorted((rel, id, comarator) -> String.format("%s sorted:%s", rel, id));
+
   public String fullRel() {
-    return this.match(
-        Rels.cases(
-            (rel) -> rel,
-            (rel) -> rel,
-            (rel) -> rel,
-            (rel, id, comarator) -> String.format("%s sorted:%s", rel, id)));
+    return fullRellF.apply(this);
   }
 
   public abstract <R> R match(Cases<R> cases);
 
   public String rel() {
-    return this.match(
-        Rels.cases((rel) -> rel, (rel) -> rel, (rel) -> rel, (rel, id, comarator) -> rel));
+    return Rels.getRel(this);
   }
 
   /**

@@ -1,13 +1,13 @@
 package com.theoryinpractise.halbuilder5;
 
-import javaslang.collection.TreeMap;
-import javaslang.control.Option;
+import io.vavr.collection.TreeMap;
+import io.vavr.control.Option;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static com.google.common.truth.Truth.assertThat;
-import static javaslang.control.Option.none;
-import static javaslang.control.Option.some;
+import static io.vavr.control.Option.none;
+import static io.vavr.control.Option.some;
 
 public class ResourceBasicMethodsTest {
 

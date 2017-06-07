@@ -1,17 +1,21 @@
 package com.theoryinpractise.halbuilder5;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Iterables;
-import javaslang.Value;
-import javaslang.collection.Iterator;
-import javaslang.collection.List;
-import javaslang.collection.Map;
-import javaslang.collection.Multimap;
-import javaslang.collection.Traversable;
-import javaslang.collection.TreeMap;
-import javaslang.collection.TreeMultimap;
-import javaslang.control.Option;
+import io.vavr.Value;
+import io.vavr.collection.HashMap;
+import io.vavr.collection.Iterator;
+import io.vavr.collection.List;
+import io.vavr.collection.Map;
+import io.vavr.collection.Multimap;
+import io.vavr.collection.Traversable;
+import io.vavr.collection.TreeMap;
+import io.vavr.collection.TreeMultimap;
+import io.vavr.control.Option;
 import okio.ByteString;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.util.Comparator;
 import java.util.Objects;
@@ -40,8 +44,6 @@ public final class ResourceRepresentation<V> implements Value<V> {
             return r1.compareTo(r2);
           });
 
-  // Implement Javaslang Value<T> methods
-
   @Override
   public V get() {
     return value;
@@ -53,6 +55,16 @@ public final class ResourceRepresentation<V> implements Value<V> {
   }
 
   @Override
+  public boolean isAsync() {
+    return false;
+  }
+
+  @Override
+  public boolean isLazy() {
+    return false;
+  }
+
+  @Override
   public boolean isSingleValued() {
     return true;
   }
@@ -61,6 +73,28 @@ public final class ResourceRepresentation<V> implements Value<V> {
   public <U> ResourceRepresentation<U> map(Function<? super V, ? extends U> function) {
     return new ResourceRepresentation<U>(
         content, links, rels, namespaceManager, function.apply(value), resources);
+  }
+
+  public static <T> Function<ByteString, T> jsonByteStringTo(
+      ObjectMapper objectMapper, Class<T> classType, T defaultValue) {
+    return bs -> {
+      try {
+        return objectMapper.readValue(bs.utf8(), classType);
+      } catch (IOException e) {
+        return defaultValue;
+      }
+    };
+  }
+
+  public static <T> Function<ByteString, T> jsonByteStringTo(
+      ObjectMapper objectMapper, Class<T> classType) {
+    return bs -> {
+      try {
+        return objectMapper.readValue(bs.utf8(), classType);
+      } catch (IOException e) {
+        throw new UncheckedIOException(e);
+      }
+    };
   }
 
   @Override
@@ -150,7 +184,6 @@ public final class ResourceRepresentation<V> implements Value<V> {
    * Adds or replaces the content of the representation.
    *
    * @param content The source content of the representation.
-   *
    * @return A new instance of a PersistentRepresentation with the namespace included.
    */
   public ResourceRepresentation<V> withContent(ByteString content) {
@@ -177,11 +210,10 @@ public final class ResourceRepresentation<V> implements Value<V> {
    *
    * @param rel
    * @param href The target href for the link, relative to the href of this resource.
-   *
    * @return
    */
   public ResourceRepresentation<V> withLink(String rel, String href) {
-    return withLink(Links.simple(rel, href));
+    return withLink(Links.create(rel, href));
   }
 
   /**
@@ -189,7 +221,6 @@ public final class ResourceRepresentation<V> implements Value<V> {
    *
    * @param rel
    * @param uri The target URI for the link, possibly relative to the href of this resource.
-   *
    * @return
    */
   public ResourceRepresentation<V> withLink(String rel, URI uri) {
@@ -203,9 +234,32 @@ public final class ResourceRepresentation<V> implements Value<V> {
    * @param href The target href for the link, relative to the href of this resource.
    * @param properties The properties to add to this link object
    */
+  public ResourceRepresentation<V> withLink(String rel, String href, String... properties) {
+    return withLink(Links.create(rel, href, properties));
+  }
+
+  /**
+   * Add a link to this resource.
+   *
+   * @param rel
+   * @param href The target href for the link, relative to the href of this resource.
+   * @param properties The properties to add to this link object
+   */
   public ResourceRepresentation<V> withLink(
       String rel, String href, Map<String, String> properties) {
-    return withLink(Links.full(rel, href, properties));
+    return withLink(Links.create(rel, href, properties));
+  }
+
+  /**
+   * Add a link to this resource.
+   *
+   * @param rel
+   * @param href The target href for the link, relative to the href of this resource.
+   * @param properties The properties to add to this link object
+   */
+  public ResourceRepresentation<V> withLink(
+      String rel, String href, java.util.Map<String, String> properties) {
+    return withLink(Links.create(rel, href, HashMap.ofAll(properties)));
   }
 
   /**
@@ -266,8 +320,7 @@ public final class ResourceRepresentation<V> implements Value<V> {
    *
    * @param namespace The CURIE prefix for the namespace being added.
    * @param href The target href of the namespace being added. This may be relative to the
-   * resourceFactories baseref
-   *
+   *     resourceFactories baseref
    * @return A new instance of a PersistentRepresentation with the namespace included.
    */
   public ResourceRepresentation<V> withNamespace(String namespace, String href) {
@@ -321,13 +374,11 @@ public final class ResourceRepresentation<V> implements Value<V> {
             });
   }
 
+  private static final Function<Rel, Boolean> isSingletonF =
+      Rels.cases().singleton_(true).otherwise_(false);
+
   private static Boolean isSingleton(Rel rel) {
-    return rel.match(
-        Rels.cases(
-            (__) -> Boolean.TRUE,
-            (__) -> Boolean.FALSE,
-            (__) -> Boolean.FALSE,
-            (__, id, comparator) -> Boolean.FALSE));
+    return isSingletonF.apply(rel);
   }
 
   public void validateNamespaces() {
@@ -389,7 +440,7 @@ public final class ResourceRepresentation<V> implements Value<V> {
 
   public List<Link> getLinks() {
     return links
-        .map(link -> Links.modRel(rel -> namespaceManager.currieHref(rel)).apply(link))
+        .map(link -> Links.modHref0(rel -> namespaceManager.currieHref(rel)).apply(link))
         .sorted(RELATABLE_ORDERING);
   }
 

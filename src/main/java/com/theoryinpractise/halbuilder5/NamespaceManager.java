@@ -1,9 +1,9 @@
 package com.theoryinpractise.halbuilder5;
 
-import javaslang.Tuple2;
-import javaslang.collection.Map;
-import javaslang.collection.TreeMap;
-import javaslang.control.Either;
+import io.vavr.Tuple2;
+import io.vavr.collection.Map;
+import io.vavr.collection.TreeMap;
+import io.vavr.control.Either;
 
 import static com.theoryinpractise.halbuilder5.Support.WHITESPACE_SPLITTER;
 import static java.lang.String.format;
@@ -31,7 +31,6 @@ public class NamespaceManager {
    *
    * @param namespace Namespace curie identifier
    * @param href Namesapce URL
-   *
    * @return A new instance of the namespace manager with the additional namespace.
    */
   public NamespaceManager withNamespace(String namespace, String href) {

@@ -17,11 +17,11 @@ import com.theoryinpractise.halbuilder5.Rel;
 import com.theoryinpractise.halbuilder5.Rels;
 import com.theoryinpractise.halbuilder5.RepresentationException;
 import com.theoryinpractise.halbuilder5.ResourceRepresentation;
-import javaslang.collection.HashSet;
-import javaslang.collection.HashMap;
-import javaslang.collection.List;
-import javaslang.collection.Set;
-import javaslang.Tuple2;
+import io.vavr.Tuple2;
+import io.vavr.collection.HashMap;
+import io.vavr.collection.HashSet;
+import io.vavr.collection.List;
+import io.vavr.collection.Set;
 import okio.Buffer;
 import okio.ByteString;
 
@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -62,7 +63,10 @@ public final class JsonRepresentationWriter {
 
   public ByteString print(ResourceRepresentation<?> representation, Set<URI> flags) {
     Buffer buffer = new Buffer();
-    write(representation, flags, new OutputStreamWriter(buffer.outputStream()));
+    write(
+        representation,
+        flags,
+        new OutputStreamWriter(buffer.outputStream(), StandardCharsets.UTF_8));
     return buffer.readByteString();
   }
 
@@ -189,7 +193,7 @@ public final class JsonRepresentationWriter {
             links.appendAll(
                 representation
                     .getNamespaces()
-                    .map(ns -> Links.full(CURIES, ns._2, HashMap.of("name", ns._1))));
+                    .map(ns -> Links.create(CURIES, ns._2, "name", ns._1)));
       }
 
       // Add representation links
@@ -226,12 +230,12 @@ public final class JsonRepresentationWriter {
     ObjectNode linkNode = codec.createObjectNode();
     linkNode.set(HREF, codec.getNodeFactory().textNode(Links.getHref(link)));
 
-    javaslang.collection.Map<String, String> properties =
-        Links.getProperties(link).getOrElse(HashMap.of());
+    io.vavr.collection.Map<String, String> properties =
+        Links.getProperties(link).getOrElse(HashMap.empty());
     for (Tuple2<String, String> prop : properties) {
       linkNode.set(prop._1, codec.getNodeFactory().textNode(prop._2));
     }
-    if (link.hasTemplate()) {
+    if (Links.getTemplated(link)) {
       linkNode.set(TEMPLATED, codec.getNodeFactory().booleanNode(true));
     }
     return linkNode;
