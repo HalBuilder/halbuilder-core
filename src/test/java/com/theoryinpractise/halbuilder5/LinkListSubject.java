@@ -4,7 +4,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.truth.FailureStrategy;
 import com.google.common.truth.Subject;
 import com.google.common.truth.SubjectFactory;
-import javaslang.collection.List;
+import io.vavr.collection.List;
 
 import static com.google.common.truth.Truth.assertAbout;
 import static com.theoryinpractise.halbuilder5.Links.getRel;

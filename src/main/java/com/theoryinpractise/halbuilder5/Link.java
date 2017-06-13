@@ -1,21 +1,25 @@
 package com.theoryinpractise.halbuilder5;
 
-import javaslang.collection.List;
-import javaslang.collection.Map;
-import javaslang.Tuple;
-import javaslang.Tuple2;
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
+import io.vavr.collection.HashMap;
+import io.vavr.collection.List;
+import io.vavr.collection.Map;
 import org.derive4j.ArgOption;
 import org.derive4j.Data;
+import org.derive4j.Derive;
+import org.derive4j.ExportAsPublic;
 import org.derive4j.Flavour;
+import org.derive4j.Visibility;
 
 import java.util.regex.Pattern;
 
-import static com.theoryinpractise.halbuilder5.Links.getHref;
-
-/**
- * A Link to an external resource.
- */
-@Data(flavour = Flavour.Javaslang, arguments = ArgOption.checkedNotNull)
+/** A Link to an external resource. */
+@Data(
+  flavour = Flavour.Vavr,
+  arguments = ArgOption.checkedNotNull,
+  value = @Derive(withVisibility = Visibility.Smart)
+)
 public abstract class Link {
 
   public static final String NAME = "name";
@@ -27,41 +31,27 @@ public abstract class Link {
   public static final String LINK = "link";
   public static final String HREF = "href";
 
-  /**
-   * Pattern that will hit an RFC 6570 URI template.
-   */
+  /** Pattern that will hit an RFC 6570 URI template. */
   private static final Pattern URI_TEMPLATE_PATTERN = Pattern.compile("\\{.+\\}");
 
   interface Cases<R> {
-    R simple(String rel, String href);
+    R simple(String rel, String href, Boolean templated);
 
-    R full(String rel, String href, Map<String, String> properties);
+    R full(String rel, String href, Boolean templated, Map<String, String> properties);
   }
 
   public abstract <R> R match(Cases<R> cases);
 
-  private boolean hasTemplate = false;
-
-  /**
-   * Determine whether the argument href contains at least one URI template, as defined in RFC 6570.
-   *
-   * @return True if the href contains a template, false if not (or if the argument is null).
-   */
-  public boolean hasTemplate() {
-    CharSequence href = getHref(this);
-    return (href != null) && URI_TEMPLATE_PATTERN.matcher(href).find();
-  }
-
   private List<Tuple2<String, String>> templateFragement() {
-    return hasTemplate() ? List.of(Tuple.of("templated", "true")) : List.empty();
+    return Links.getTemplated(this) ? List.of(Tuple.of("templated", "true")) : List.empty();
   }
 
   private List<Tuple2<String, String>> generateLinkFragments() {
     List<Tuple2<String, String>> linkFragments =
         Links.cases()
-            .simple((rel, href) -> List.of(Tuple.of("rel", rel), Tuple.of("href", href)))
+            .simple((rel, href, templated) -> List.of(Tuple.of("rel", rel), Tuple.of("href", href)))
             .full(
-                (rel, href, properties) ->
+                (rel, href, templated, properties) ->
                     List.of(Tuple.of("rel", rel), Tuple.of("href", href)).appendAll(properties))
             .apply(this);
 
@@ -80,4 +70,28 @@ public abstract class Link {
 
   @Override
   public abstract int hashCode();
+
+  private static boolean isTemplated(String href) {
+    return (href != null) && URI_TEMPLATE_PATTERN.matcher(href).find();
+  }
+
+  @ExportAsPublic
+  static Link create(String rel, String href, String... properties) {
+    if (properties.length % 2 != 0) {
+      throw new IllegalArgumentException("Parameter count must be even");
+    }
+
+    Map<String, String> propertyMap = HashMap.empty();
+    for (int i = 0; i < properties.length; i = i + 2) {
+      String key = properties[i];
+      String value = properties[i + 1];
+      propertyMap = propertyMap.put(key, value);
+    }
+    return create(rel, href, propertyMap);
+  }
+
+  @ExportAsPublic
+  static Link create(String rel, String href, Map<String, String> properties) {
+    return Links.full0(rel, href, isTemplated(href), properties);
+  }
 }

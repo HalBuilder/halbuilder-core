@@ -10,9 +10,9 @@ import com.theoryinpractise.halbuilder5.Link;
 import com.theoryinpractise.halbuilder5.Links;
 import com.theoryinpractise.halbuilder5.RepresentationException;
 import com.theoryinpractise.halbuilder5.ResourceRepresentation;
-import javaslang.collection.HashMap;
-import javaslang.collection.List;
-import javaslang.collection.Map;
+import io.vavr.collection.HashMap;
+import io.vavr.collection.List;
+import io.vavr.collection.Map;
 import okio.ByteString;
 
 import java.io.IOException;
@@ -134,14 +134,14 @@ public class JsonRepresentationReader {
   private Link jsonLink(String rel, JsonNode node) {
     String href = node.get(HREF).asText();
 
-    Map<String, String> properties = HashMap.of();
+    Map<String, String> properties = HashMap.empty();
     Iterator<Entry<String, JsonNode>> fields = node.fields();
     while (fields.hasNext()) {
       Entry<String, JsonNode> keyNode = fields.next();
       properties = properties.put(keyNode.getKey(), keyNode.getValue().asText());
     }
 
-    return Links.full(rel, href, properties);
+    return Links.create(rel, href, properties);
   }
 
   private ResourceRepresentation<ByteString> readProperties(

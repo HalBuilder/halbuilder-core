@@ -7,10 +7,10 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.collect.ImmutableMap;
 import com.theoryinpractise.halbuilder5.json.JsonRepresentationReader;
 import com.theoryinpractise.halbuilder5.json.JsonRepresentationWriter;
-import javaslang.Function1;
-import javaslang.Function2;
-import javaslang.collection.HashMap;
-import javaslang.control.Option;
+import io.vavr.Function1;
+import io.vavr.Function2;
+import io.vavr.collection.HashMap;
+import io.vavr.control.Option;
 import okio.ByteString;
 import org.testng.annotations.Test;
 
@@ -18,10 +18,10 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Collections;
 import java.util.Map;
-import java.util.function.Function;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
+import static com.theoryinpractise.halbuilder5.ResourceRepresentation.jsonByteStringTo;
 
 public class ResourceRepresentationTest {
 
@@ -89,7 +89,8 @@ public class ResourceRepresentationTest {
         new JsonRepresentationReader().read(new StringReader(representation.utf8()));
 
     ResourceRepresentation<Map> readRepresentation =
-        byteStringResourceRepresentation.map(uncheckedObjectMap(Map.class, Collections.emptyMap()));
+        byteStringResourceRepresentation.map(
+            jsonByteStringTo(objectMapper, Map.class, Collections.emptyMap()));
 
     assertWithMessage("read representation should not be null")
         .that(readRepresentation)
@@ -100,7 +101,8 @@ public class ResourceRepresentationTest {
         .isEqualTo("Test Account");
 
     ResourceRepresentation<Account> readAccountRepresentation =
-        byteStringResourceRepresentation.map(uncheckedObjectMap(Account.class, Account.of("", "")));
+        byteStringResourceRepresentation.map(
+            jsonByteStringTo(objectMapper, Account.class, Account.of("", "")));
 
     assertWithMessage("read representation should not be null")
         .that(readRepresentation)
@@ -138,17 +140,6 @@ public class ResourceRepresentationTest {
     System.out.println(template.getTemplate());
 
     System.out.println(template.expand(ImmutableMap.of("mailbox", "greg@amer.com")));
-  }
-
-  public <T> Function<ByteString, T> uncheckedObjectMap(Class<T> classType, T defaultValue) {
-    return bs -> {
-      try {
-        return objectMapper.readValue(bs.utf8(), classType);
-      } catch (IOException e) {
-        e.printStackTrace();
-        return defaultValue;
-      }
-    };
   }
 
   private String deleteResource(Link link, String event) {

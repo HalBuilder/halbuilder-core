@@ -17,22 +17,21 @@ import com.theoryinpractise.halbuilder5.Rel;
 import com.theoryinpractise.halbuilder5.Rels;
 import com.theoryinpractise.halbuilder5.RepresentationException;
 import com.theoryinpractise.halbuilder5.ResourceRepresentation;
-import javaslang.collection.HashSet;
-import javaslang.collection.HashMap;
-import javaslang.collection.List;
-import javaslang.collection.Set;
-import javaslang.Tuple2;
+import io.vavr.Tuple2;
+import io.vavr.collection.HashMap;
+import io.vavr.collection.List;
 import okio.Buffer;
 import okio.ByteString;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.function.Function;
 
 import static com.theoryinpractise.halbuilder5.Link.HREF;
 import static com.theoryinpractise.halbuilder5.Support.CURIES;
@@ -57,18 +56,14 @@ public final class JsonRepresentationWriter {
   }
 
   public ByteString print(ResourceRepresentation<?> representation) {
-    return print(representation, HashSet.of());
-  }
-
-  public ByteString print(ResourceRepresentation<?> representation, Set<URI> flags) {
     Buffer buffer = new Buffer();
-    write(representation, flags, new OutputStreamWriter(buffer.outputStream()));
+    write(representation, new OutputStreamWriter(buffer.outputStream(), StandardCharsets.UTF_8));
     return buffer.readByteString();
   }
 
-  public void write(ResourceRepresentation representation, Set<URI> flags, Writer writer) {
+  public void write(ResourceRepresentation representation, Writer writer) {
     try {
-      ObjectNode resourceNode = renderJson(flags, representation, false);
+      ObjectNode resourceNode = renderJson(representation, false);
       codec.writerWithDefaultPrettyPrinter().writeValue(writer, resourceNode);
     } catch (IOException e) {
       throw new RepresentationException(e);
@@ -87,31 +82,33 @@ public final class JsonRepresentationWriter {
     return objectMapper;
   }
 
-  private boolean isSingleton(Rel matcher) {
-    return matcher.match(
-        Rels.cases((rel) -> true, (rel) -> false, (rel) -> false, (rel, key, comparator) -> false));
+  private static final Function<Rel, Boolean> isSingletonF =
+      Rels.cases().singleton_(true).otherwise_(false);
+
+  private boolean isSingleton(Rel rel) {
+    return isSingletonF.apply(rel);
   }
 
-  private boolean isCollection(Rel matcher) {
-    return matcher.match(
-        Rels.cases((rel) -> false, (rel) -> false, (rel) -> true, (rel, key, comparator) -> false));
+  private static final Function<Rel, Boolean> isCollectionF =
+      Rels.cases().collection_(true).sorted_(true).otherwise_(false);
+
+  private boolean isCollection(Rel rel) {
+    return isCollectionF.apply(rel);
   }
 
-  private ObjectNode renderJson(
-      Set<URI> flags, ResourceRepresentation<?> representation, boolean embedded)
+  private ObjectNode renderJson(ResourceRepresentation<?> representation, boolean embedded)
       throws IOException {
 
     ObjectNode objectNode = codec.getNodeFactory().objectNode();
 
     renderJsonProperties(objectNode, representation);
     renderJsonLinks(objectNode, representation, embedded);
-    renderJsonEmbeds(flags, objectNode, representation);
+    renderJsonEmbeds(objectNode, representation);
 
     return objectNode;
   }
 
-  private void renderJsonEmbeds(
-      Set<URI> flags, ObjectNode objectNode, ResourceRepresentation<?> representation)
+  private void renderJsonEmbeds(ObjectNode objectNode, ResourceRepresentation<?> representation)
       throws IOException {
     if (!representation.getResources().isEmpty()) {
 
@@ -132,7 +129,7 @@ public final class JsonRepresentationWriter {
 
         if (coalesce) {
           ResourceRepresentation<?> subRepresentation = resourceEntry.getValue().iterator().next();
-          ObjectNode embeddedNode = renderJson(flags, subRepresentation, true);
+          ObjectNode embeddedNode = renderJson(subRepresentation, true);
           embedsNode.set(resourceEntry.getKey(), embeddedNode);
         } else {
 
@@ -144,16 +141,11 @@ public final class JsonRepresentationWriter {
                   ? List.ofAll(resourceEntry.getValue())
                   : List.ofAll(resourceEntry.getValue()).sorted(repComparator);
 
-          final String collectionRel =
-              isSingleton(rel) || flags.contains(ResourceRepresentation.SILENT_SORTING)
-                  ? rel.rel()
-                  : rel.fullRel();
-
           ArrayNode embedArrayNode = codec.createArrayNode();
-          objectNode.set(collectionRel, embedArrayNode);
+          objectNode.set(rel.rel(), embedArrayNode);
 
           for (ResourceRepresentation<?> subRepresentation : values) {
-            ObjectNode embeddedNode = renderJson(flags, subRepresentation, true);
+            ObjectNode embeddedNode = renderJson(subRepresentation, true);
             embedArrayNode.add(embeddedNode);
           }
         }
@@ -189,7 +181,7 @@ public final class JsonRepresentationWriter {
             links.appendAll(
                 representation
                     .getNamespaces()
-                    .map(ns -> Links.full(CURIES, ns._2, HashMap.of("name", ns._1))));
+                    .map(ns -> Links.create(CURIES, ns._2, "name", ns._1)));
       }
 
       // Add representation links
@@ -226,12 +218,12 @@ public final class JsonRepresentationWriter {
     ObjectNode linkNode = codec.createObjectNode();
     linkNode.set(HREF, codec.getNodeFactory().textNode(Links.getHref(link)));
 
-    javaslang.collection.Map<String, String> properties =
-        Links.getProperties(link).getOrElse(HashMap.of());
+    io.vavr.collection.Map<String, String> properties =
+        Links.getProperties(link).getOrElse(HashMap.empty());
     for (Tuple2<String, String> prop : properties) {
       linkNode.set(prop._1, codec.getNodeFactory().textNode(prop._2));
     }
-    if (link.hasTemplate()) {
+    if (Links.getTemplated(link)) {
       linkNode.set(TEMPLATED, codec.getNodeFactory().booleanNode(true));
     }
     return linkNode;
