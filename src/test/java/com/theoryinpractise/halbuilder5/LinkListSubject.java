@@ -1,6 +1,5 @@
 package com.theoryinpractise.halbuilder5;
 
-import com.google.common.collect.Iterables;
 import com.google.common.truth.FailureStrategy;
 import com.google.common.truth.Subject;
 import com.google.common.truth.SubjectFactory;
@@ -8,7 +7,6 @@ import io.vavr.collection.List;
 
 import static com.google.common.truth.Truth.assertAbout;
 import static com.theoryinpractise.halbuilder5.Links.getRel;
-import static com.theoryinpractise.halbuilder5.Support.WHITESPACE_SPLITTER;
 
 public class LinkListSubject extends Subject<LinkListSubject, List<Link>> {
 
@@ -35,8 +33,7 @@ public class LinkListSubject extends Subject<LinkListSubject, List<Link>> {
   public void containsRelCondition(String rel) {
     boolean hasMatch = false;
     for (Link link : getSubject()) {
-      if (rel.equals(getRel(link))
-          || Iterables.contains(WHITESPACE_SPLITTER.split(getRel(link)), rel)) {
+      if (rel.equals(getRel(link))) {
         hasMatch = true;
       }
     }
@@ -48,8 +45,7 @@ public class LinkListSubject extends Subject<LinkListSubject, List<Link>> {
   public void doesNotContainRelCondition(String rel) {
     boolean hasMatch = false;
     for (Link link : getSubject()) {
-      if (rel.equals(getRel(link))
-          || Iterables.contains(WHITESPACE_SPLITTER.split(getRel(link)), rel)) {
+      if (rel.equals(getRel(link))) {
         hasMatch = true;
       }
     }

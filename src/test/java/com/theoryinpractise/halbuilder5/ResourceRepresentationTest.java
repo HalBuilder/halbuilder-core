@@ -21,7 +21,7 @@ import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
-import static com.theoryinpractise.halbuilder5.ResourceRepresentation.jsonByteStringTo;
+import static com.theoryinpractise.halbuilder5.json.JsonRepresentationReader.readByteStringAs;
 
 public class ResourceRepresentationTest {
 
@@ -90,7 +90,7 @@ public class ResourceRepresentationTest {
 
     ResourceRepresentation<Map> readRepresentation =
         byteStringResourceRepresentation.map(
-            jsonByteStringTo(objectMapper, Map.class, Collections.emptyMap()));
+            readByteStringAs(objectMapper, Map.class, () -> Collections.emptyMap()));
 
     assertWithMessage("read representation should not be null")
         .that(readRepresentation)
@@ -102,7 +102,7 @@ public class ResourceRepresentationTest {
 
     ResourceRepresentation<Account> readAccountRepresentation =
         byteStringResourceRepresentation.map(
-            jsonByteStringTo(objectMapper, Account.class, Account.of("", "")));
+            readByteStringAs(objectMapper, Account.class, () -> Account.of("", "")));
 
     assertWithMessage("read representation should not be null")
         .that(readRepresentation)

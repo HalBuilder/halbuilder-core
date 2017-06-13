@@ -1,7 +1,5 @@
 package com.theoryinpractise.halbuilder5;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Iterables;
 import io.vavr.Value;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.Iterator;
@@ -14,8 +12,6 @@ import io.vavr.collection.TreeMultimap;
 import io.vavr.control.Option;
 import okio.ByteString;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.net.URI;
 import java.util.Comparator;
 import java.util.Objects;
@@ -23,7 +19,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static com.theoryinpractise.halbuilder5.Rels.getRel;
-import static com.theoryinpractise.halbuilder5.Support.WHITESPACE_SPLITTER;
 
 public final class ResourceRepresentation<V> implements Value<V> {
 
@@ -73,28 +68,6 @@ public final class ResourceRepresentation<V> implements Value<V> {
   public <U> ResourceRepresentation<U> map(Function<? super V, ? extends U> function) {
     return new ResourceRepresentation<U>(
         content, links, rels, namespaceManager, function.apply(value), resources);
-  }
-
-  public static <T> Function<ByteString, T> jsonByteStringTo(
-      ObjectMapper objectMapper, Class<T> classType, T defaultValue) {
-    return bs -> {
-      try {
-        return objectMapper.readValue(bs.utf8(), classType);
-      } catch (IOException e) {
-        return defaultValue;
-      }
-    };
-  }
-
-  public static <T> Function<ByteString, T> jsonByteStringTo(
-      ObjectMapper objectMapper, Class<T> classType) {
-    return bs -> {
-      try {
-        return objectMapper.readValue(bs.utf8(), classType);
-      } catch (IOException e) {
-        throw new UncheckedIOException(e);
-      }
-    };
   }
 
   @Override
@@ -411,22 +384,21 @@ public final class ResourceRepresentation<V> implements Value<V> {
     return getLinkByRel(getRel(rel));
   }
 
-  public List<Link> getLinksByRel(final String rel) {
+  public List<Link> getLinksByRel(String rel) {
     Support.checkRelType(rel);
-    final String curiedRel = namespaceManager.currieHref(rel);
-    return getLinksByRel(this, curiedRel);
+    return getLinksByRel(this, rel);
   }
 
-  public List<Link> getLinksByRel(final Rel rel) {
+  public List<Link> getLinksByRel(Rel rel) {
     return getLinksByRel(getRel(rel));
   }
 
-  public Traversable<ResourceRepresentation<?>> getResourcesByRel(final String rel) {
+  public Traversable<ResourceRepresentation<?>> getResourcesByRel(String rel) {
     Support.checkRelType(rel);
     return resources.get(rel).getOrElse(List.empty());
   }
 
-  public Traversable<ResourceRepresentation<?>> getResourcesByRel(final Rel rel) {
+  public Traversable<ResourceRepresentation<?>> getResourcesByRel(Rel rel) {
     return getResourcesByRel(getRel(rel));
   }
 
@@ -439,9 +411,7 @@ public final class ResourceRepresentation<V> implements Value<V> {
   }
 
   public List<Link> getLinks() {
-    return links
-        .map(link -> Links.modHref0(rel -> namespaceManager.currieHref(rel)).apply(link))
-        .sorted(RELATABLE_ORDERING);
+    return links.sorted(RELATABLE_ORDERING);
   }
 
   private List<Link> getLinksByRel(ResourceRepresentation<V> representation, String rel) {
@@ -450,9 +420,7 @@ public final class ResourceRepresentation<V> implements Value<V> {
         .getLinks()
         .filter(
             link -> {
-              final String linkRel = Links.getRel(link);
-              return rel.equals(linkRel)
-                  || Iterables.contains(WHITESPACE_SPLITTER.split(linkRel), rel);
+              return rel.equals(Links.getRel(link));
             });
   }
 

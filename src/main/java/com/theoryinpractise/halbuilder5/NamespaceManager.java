@@ -5,7 +5,6 @@ import io.vavr.collection.Map;
 import io.vavr.collection.TreeMap;
 import io.vavr.control.Either;
 
-import static com.theoryinpractise.halbuilder5.Support.WHITESPACE_SPLITTER;
 import static java.lang.String.format;
 
 /**
@@ -45,14 +44,12 @@ public class NamespaceManager {
     return new NamespaceManager(namespaces.put(namespace, href));
   }
 
-  public void validateNamespaces(String sourceRel) {
-    for (String rel : WHITESPACE_SPLITTER.split(sourceRel)) {
-      if (!rel.contains("://") && rel.contains(":")) {
-        String[] relPart = rel.split(":");
-        if (!namespaces.containsKey(relPart[0])) {
-          throw new RepresentationException(
-              format("Undeclared namespace in rel %s for resource", rel));
-        }
+  public void validateNamespaces(String rel) {
+    if (!rel.contains("://") && rel.contains(":")) {
+      String[] relPart = rel.split(":");
+      if (!namespaces.containsKey(relPart[0])) {
+        throw new RepresentationException(
+            format("Undeclared namespace in rel %s for resource", rel));
       }
     }
   }

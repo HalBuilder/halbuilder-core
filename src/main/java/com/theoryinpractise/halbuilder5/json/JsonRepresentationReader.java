@@ -18,6 +18,7 @@ import okio.ByteString;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.UncheckedIOException;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.function.Function;
@@ -45,22 +46,54 @@ public class JsonRepresentationReader {
     };
   }
 
+  public static final <T> Function<ByteString, T> readByteStringAs(
+      ObjectMapper mapper, Class<T> classType) {
+    return bs -> {
+      try {
+        return mapper.readValue(bs.utf8(), classType);
+      } catch (IOException e) {
+        throw new UncheckedIOException(e);
+      }
+    };
+  }
+
   public JsonRepresentationReader() {
     this.mapper = new ObjectMapper();
   }
 
+  public <T> ResourceRepresentation<T> read(Reader reader, Class<T> classType) {
+    try {
+      return read(encodeUtf8(CharStreams.toString(reader)), classType);
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
+  }
+
   public <T> ResourceRepresentation<T> read(
-      Reader reader, Class<T> classType, Supplier<T> defaultValue) throws IOException {
-    return read(encodeUtf8(CharStreams.toString(reader)), classType, defaultValue);
+      Reader reader, Class<T> classType, Supplier<T> defaultValue) {
+    try {
+      return read(encodeUtf8(CharStreams.toString(reader)), classType, defaultValue);
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 
   public ResourceRepresentation<ByteString> read(Reader reader) throws IOException {
-    return read(encodeUtf8(CharStreams.toString(reader)));
+    try {
+      return read(encodeUtf8(CharStreams.toString(reader)));
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 
   public <T> ResourceRepresentation<T> read(
-      ByteString byteString, Class<T> classType, Supplier<T> defaultValue) throws IOException {
+      ByteString byteString, Class<T> classType, Supplier<T> defaultValue) {
     return read(byteString).map(readByteStringAs(mapper, classType, defaultValue));
+  }
+
+  public <T> ResourceRepresentation<T> read(ByteString byteString, Class<T> classType)
+      throws IOException {
+    return read(byteString).map(readByteStringAs(mapper, classType));
   }
 
   public ResourceRepresentation<ByteString> read(ByteString byteString) {

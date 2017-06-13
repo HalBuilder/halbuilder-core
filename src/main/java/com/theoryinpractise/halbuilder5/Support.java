@@ -1,11 +1,10 @@
 package com.theoryinpractise.halbuilder5;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
 
 public interface Support {
 
-  Splitter WHITESPACE_SPLITTER = Splitter.onPattern("\\s").omitEmptyStrings();
+  // Splitter WHITESPACE_SPLITTER = Splitter.onPattern("\\s").omitEmptyStrings();
   String LINKS = "_links";
   String EMBEDDED = "_embedded";
   String CURIES = "curies";
