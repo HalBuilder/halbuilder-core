@@ -7,7 +7,6 @@ import org.derive4j.Flavour;
 import org.derive4j.Make;
 
 import java.util.Comparator;
-import java.util.function.Function;
 
 /** Rel defines the base class of a Algebraic Data Type for relationship semantics. */
 @Data(
@@ -28,17 +27,6 @@ public abstract class Rel {
 
   @Override
   public abstract int hashCode();
-
-  private static final Function<Rel, String> fullRellF =
-      Rels.cases()
-          .singleton(rel -> rel)
-          .natural(rel -> rel)
-          .collection(rel -> rel)
-          .sorted((rel, id, comarator) -> String.format("%s sorted:%s", rel, id));
-
-  public String fullRel() {
-    return fullRellF.apply(this);
-  }
 
   public abstract <R> R match(Cases<R> cases);
 
