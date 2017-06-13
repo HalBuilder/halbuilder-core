@@ -4,33 +4,45 @@ Halbuilder is a simple Java API for generating and consuming HAL documents confo
 ### Generating Local Resources
 
 ```java
-RepresentationFactory representationFactory = new StandardRepresentationFactory();
+Map<String,Object> friend = HashMap.of("name", "Mike", "age", 36);
+Representation<Map<String,Object>> owner =
+  ResourceRepresentation.create("http://example.com/mike", friend)
+    .withLink("td:friend", "http://example.com/mamund")
 
-Representation owner = representationFactory.newRepresentation("http://example.com/mike")
-  .withLink("td:friend", "http://example.com/mamund")
-  .withProperty("name", "Mike")
-  .withProperty("age", "36");
+Map<String,Object> todoMeta = HashMap.of(
+  "created_at", "2010-01-16", "updated_at", "2017-06-13",
+  "summary", "An example list");
 
-Representation halResource = representationFactory.newRepresentation("http://example.com/todo-list")
-  .withNamespace("td", "http://example.com/todoapp/rels/{rel}")
-  .withLink("td:search", "/todo-list/search;{searchterm}")
-  .withLink("td:description", "/todo-list/description")
-  .withProperty("created_at", "2010-01-16")
-  .withProperty("updated_at", "2010-02-21")
-  .withProperty("summary", "An example list")
-  .withRepresentation("td:owner", owner);
+Representation<Map<String,Object>> halResource =
+  RepresentationFactory.crate("http://example.com/todo-list", todoMeta)
+    .withLink("td:search", "/todo-list/search;{searchterm}")
+    .withLink("td:description", "/todo-list/description")
+    .withRepresentation("td:owner", owner);
 
-String xml = halResource.toString(RepresentationFactory.HAL_XML);
-String json = halResource.toString(RepresentationFactory.HAL_JSON);
+JsonRepresentationWriter jsonRepresentationWriter =
+  JsonRepresentationWriter.create(new ObjectMapper());
+
+ByteString representation = jsonRepresentationWriter.print(accountRepWithLinks);
+System.out.println(representation.utf8());
 ```
 
 ### Reading Local Resources
 
 ```java
-RepresentationFactory representationFactory = new RepresentationFactory();
+JsonRepresentationReader jsonRepresentationReader =
+  JsonRepresentationReader.create(objectMapper);
 
-Representation representation = representationFactory.readRepresentation(
-                  new InputStreamReader(Some.class.getResourceAsStream("/test.xml")));
+Representation<ByteString> representation =
+  jsonRepresentationReader.readRepresentation(
+    new InputStreamReader(Some.class.getResourceAsStream("/test.json")));
+
+// or as a type
+
+Representation<Person> personRepresentation =
+  jsonRepresentationReader.readRepresentation(
+    new InputStreamReader(Some.class.getResourceAsStream("/test.json")),
+    Person.class);
+
 ```
 
 ### Apache Maven
@@ -40,8 +52,8 @@ HalBuilder is deployed to Apache Maven Central under the following coordinates:
 ```xml
 <dependency>
   <groupId>com.theoryinpractise</groupId>
-  <artifactId>halbuilder-standard</artifactId>
-  <version>3.0.1</version>
+  <artifactId>halbuilder5</artifactId>
+  <version>5.0.1-SNAPSHOT</version>
 </dependency>
 ```
 
