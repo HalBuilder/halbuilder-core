@@ -4,7 +4,6 @@ import com.google.common.base.Preconditions;
 
 public interface Support {
 
-  // Splitter WHITESPACE_SPLITTER = Splitter.onPattern("\\s").omitEmptyStrings();
   String LINKS = "_links";
   String EMBEDDED = "_embedded";
   String CURIES = "curies";
