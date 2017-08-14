@@ -22,14 +22,16 @@ import java.util.regex.Pattern;
 )
 public abstract class Link {
 
-  public static final String NAME = "name";
-  public static final String TITLE = "title";
+  public static final String HREF = "href";
   public static final String HREFLANG = "hreflang";
+  public static final String LINK = "link";
+  public static final String METHOD = "method";
+  public static final String NAME = "name";
   public static final String PROFILE = "profile";
   public static final String REL = "rel";
   public static final String SELF = "self";
-  public static final String LINK = "link";
-  public static final String HREF = "href";
+  public static final String TEMPLATED = "templated";
+  public static final String TITLE = "title";
 
   /** Pattern that will hit an RFC 6570 URI template. */
   private static final Pattern URI_TEMPLATE_PATTERN = Pattern.compile("\\{.+\\}");
@@ -43,16 +45,16 @@ public abstract class Link {
   public abstract <R> R match(Cases<R> cases);
 
   private List<Tuple2<String, String>> templateFragement() {
-    return Links.getTemplated(this) ? List.of(Tuple.of("templated", "true")) : List.empty();
+    return Links.getTemplated(this) ? List.of(Tuple.of(TEMPLATED, "true")) : List.empty();
   }
 
   private List<Tuple2<String, String>> generateLinkFragments() {
     List<Tuple2<String, String>> linkFragments =
         Links.cases()
-            .simple((rel, href, templated) -> List.of(Tuple.of("rel", rel), Tuple.of("href", href)))
+            .simple((rel, href, templated) -> List.of(Tuple.of(REL, rel), Tuple.of(HREF, href)))
             .full(
                 (rel, href, templated, properties) ->
-                    List.of(Tuple.of("rel", rel), Tuple.of("href", href)).appendAll(properties))
+                    List.of(Tuple.of(REL, rel), Tuple.of(HREF, href)).appendAll(properties))
             .apply(this);
 
     return linkFragments.appendAll(templateFragement());
@@ -61,7 +63,7 @@ public abstract class Link {
   @Override
   public String toString() {
     return "<link "
-        + generateLinkFragments().map(it -> it._1 + "=\"" + it._2 + "\"").mkString(" ")
+        + generateLinkFragments().map(it -> String.format("%s=\"%s\"", it._1, it._2)).mkString(" ")
         + "/>";
   }
 
@@ -94,4 +96,10 @@ public abstract class Link {
   static Link create(String rel, String href, Map<String, String> properties) {
     return Links.full0(rel, href, isTemplated(href), properties);
   }
+
+  @ExportAsPublic
+  static Link create(String rel, String href, java.util.Map<String, String> properties) {
+    return Links.full0(rel, href, isTemplated(href), HashMap.ofAll(properties));
+  }
+
 }
