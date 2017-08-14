@@ -25,7 +25,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <checkstyle.suppressions.location>checkstyle-supressions.xml</checkstyle.suppressions.location>
     <dependency.check.fastfail>false</dependency.check.fastfail>
-    <jackson.version>2.8.9</jackson.version>
+    <jackson.version>2.9.0</jackson.version>
     <jacoco.check.skip>true</jacoco.check.skip>
     <jacoco.check.ratio>0.50</jacoco.check.ratio>
     <jacoco.check.missed>0</jacoco.check.missed>
@@ -47,7 +47,7 @@
     <dependency>
       <groupId>org.immutables</groupId>
       <artifactId>value</artifactId>
-      <version>2.5.3</version>
+      <version>2.5.6</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -94,13 +94,13 @@
     <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
-      <version>6.11</version>
+      <version>6.12</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.google.truth</groupId>
       <artifactId>truth</artifactId>
-      <version>0.33</version>
+      <version>0.34</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -134,7 +134,7 @@
         <extensions>true</extensions>
         <configuration>
           <tiles>
-            <tile>com.theoryinpractise:halbuilder-styleguide-tile:[1.0.4,2.0.0)</tile>
+            <tile>com.theoryinpractise:halbuilder-styleguide-tile:[1.0.11,2.0.0)</tile>
           </tiles>
         </configuration>
       </plugin>
