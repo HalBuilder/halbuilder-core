@@ -142,7 +142,7 @@ public final class JsonRepresentationWriter {
                   : List.ofAll(resourceEntry.getValue()).sorted(repComparator);
 
           ArrayNode embedArrayNode = codec.createArrayNode();
-          objectNode.set(rel.rel(), embedArrayNode);
+          embedsNode.set(rel.rel(), embedArrayNode);
 
           for (ResourceRepresentation<?> subRepresentation : values) {
             ObjectNode embeddedNode = renderJson(subRepresentation, true);

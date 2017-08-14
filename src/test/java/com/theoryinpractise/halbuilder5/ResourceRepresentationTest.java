@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.collect.ImmutableMap;
+import com.jayway.jsonpath.JsonPath;
 import com.theoryinpractise.halbuilder5.json.JsonRepresentationReader;
 import com.theoryinpractise.halbuilder5.json.JsonRepresentationWriter;
 import io.vavr.Function1;
@@ -46,6 +47,42 @@ public class ResourceRepresentationTest {
   @Test
   public void testNonEmptyRepresentationIsNotEmpty() throws IOException {
     assertThat(ResourceRepresentation.create("value").isEmpty()).isFalse();
+  }
+
+  @Test
+  public void testMultipleEmbeddedRepresentations() throws IOException {
+
+    Account account = Account.of("0101232", "Test Account");
+
+    ResourceRepresentation<Account> accountRep =
+        ResourceRepresentation.create("/somewhere", account)
+            .withLink(
+                "bible-verse",
+                "https://www.bible.com/bible/1/mat.11.28",
+                HashMap.of("content-type", "text/html"));
+
+    Account subAccountA = Account.of("87912312-a", "Sub Account A");
+    ResourceRepresentation<Account> subAccountRepA =
+        ResourceRepresentation.create("/subaccount/a", subAccountA);
+
+    Account subAccountB = Account.of("87912312-b", "Sub Account B");
+    ResourceRepresentation<Account> subAccountRepB =
+        ResourceRepresentation.create("/subaccount/a", subAccountB);
+
+    accountRep = accountRep.withRepresentation("bank:associated-account", subAccountRepA);
+    accountRep = accountRep.withRepresentation("bank:associated-account", subAccountRepB);
+
+    JsonRepresentationWriter jsonRepresentationWriter =
+        JsonRepresentationWriter.create(objectMapper);
+
+    String representation = jsonRepresentationWriter.print(accountRep).utf8();
+
+    System.out.println(representation);
+
+    String accountNumberPath = "$['_embedded']['bank:associated-account'][1]['accountNumber']";
+    String accountNumber = JsonPath.parse(representation).read(accountNumberPath);
+
+    assertThat(accountNumber).isEqualTo("87912312-b");
   }
 
   @Test
