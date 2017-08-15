@@ -153,17 +153,19 @@ public final class JsonRepresentationWriter {
     }
   }
 
-  private void renderJsonProperties(ObjectNode objectNode, ResourceRepresentation<?> representation)
-      throws IOException {
+  private void renderJsonProperties(
+      ObjectNode objectNode, ResourceRepresentation<?> representation) {
     JsonNode tree = codec.valueToTree(representation.get());
-    if (tree.isObject()) {
-      Iterator<Map.Entry<String, JsonNode>> fields = tree.fields();
-      while (fields.hasNext()) {
-        Map.Entry<String, JsonNode> next = fields.next();
-        objectNode.set(next.getKey(), next.getValue());
+    if (tree != null) {
+      if (tree.isObject()) {
+        Iterator<Map.Entry<String, JsonNode>> fields = tree.fields();
+        while (fields.hasNext()) {
+          Map.Entry<String, JsonNode> next = fields.next();
+          objectNode.set(next.getKey(), next.getValue());
+        }
+      } else {
+        throw new IllegalStateException("Unable to serialise a non Object Node");
       }
-    } else {
-      throw new IllegalStateException("Unable to serialise a non Object Node");
     }
   }
 

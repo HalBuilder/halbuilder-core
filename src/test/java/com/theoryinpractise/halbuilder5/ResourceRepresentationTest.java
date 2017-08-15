@@ -45,6 +45,12 @@ public class ResourceRepresentationTest {
   }
 
   @Test
+  public void testEmptyRepresentationRendersJsonCorrectly() throws IOException {
+    ResourceRepresentation<?> resource = ResourceRepresentation.empty().withLink("foo", "/foo");
+    JsonRepresentationWriter.create(getObjectMapper()).print(resource);
+  }
+
+  @Test
   public void testNonEmptyRepresentationIsNotEmpty() throws IOException {
     assertThat(ResourceRepresentation.create("value").isEmpty()).isFalse();
   }
