@@ -6,14 +6,21 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 
+import java.nio.charset.Charset;
+
 public interface Support {
+
+  Charset DEFAULT_ENCODING = Charsets.UTF_8;
 
   String LINKS = "_links";
   String EMBEDDED = "_embedded";
   String CURIES = "curies";
   String TEMPLATED = "templated";
+  String HAL_JSON = "application/hal+json";
+  String HAL_XML = "application/hal+xml";
 
   static void checkRelType(String rel) {
     Preconditions.checkArgument(rel != null, "Provided rel should not be null.");
