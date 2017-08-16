@@ -1,12 +1,8 @@
 package com.theoryinpractise.halbuilder5.json;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Multimap;
@@ -38,6 +34,7 @@ import static com.theoryinpractise.halbuilder5.Support.CURIES;
 import static com.theoryinpractise.halbuilder5.Support.EMBEDDED;
 import static com.theoryinpractise.halbuilder5.Support.LINKS;
 import static com.theoryinpractise.halbuilder5.Support.TEMPLATED;
+import static com.theoryinpractise.halbuilder5.Support.defaultObjectMapper;
 
 public final class JsonRepresentationWriter {
 
@@ -47,8 +44,12 @@ public final class JsonRepresentationWriter {
     this.codec = codec;
   }
 
+  public static JsonRepresentationWriter create() {
+    return create(defaultObjectMapper());
+  }
+
   public static JsonRepresentationWriter create(Module... modules) {
-    return create(getObjectMapper(modules));
+    return create(defaultObjectMapper(modules));
   }
 
   public static JsonRepresentationWriter create(ObjectMapper objectMapper) {
@@ -68,18 +69,6 @@ public final class JsonRepresentationWriter {
     } catch (IOException e) {
       throw new RepresentationException(e);
     }
-  }
-
-  private static ObjectMapper getObjectMapper(Module[] modules) {
-    JsonFactory f = new JsonFactory();
-    f.enable(JsonGenerator.Feature.QUOTE_FIELD_NAMES);
-
-    ObjectMapper objectMapper = new ObjectMapper(f);
-    objectMapper.registerModules(modules);
-    objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-    objectMapper.configure(SerializationFeature.WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED, false);
-
-    return objectMapper;
   }
 
   private static final Function<Rel, Boolean> isSingletonF =

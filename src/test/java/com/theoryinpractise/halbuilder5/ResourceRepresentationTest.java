@@ -1,9 +1,6 @@
 package com.theoryinpractise.halbuilder5;
 
 import com.damnhandy.uri.template.UriTemplate;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.collect.ImmutableMap;
 import com.jayway.jsonpath.JsonPath;
 import com.theoryinpractise.halbuilder5.json.JsonRepresentationReader;
@@ -15,48 +12,39 @@ import io.vavr.control.Option;
 import okio.ByteString;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
 import java.io.StringReader;
 import java.util.Collections;
 import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
+import static com.theoryinpractise.halbuilder5.Support.defaultObjectMapper;
 import static com.theoryinpractise.halbuilder5.json.JsonRepresentationReader.readByteStringAs;
 
 public class ResourceRepresentationTest {
-
-  private static ObjectMapper objectMapper = getObjectMapper();
-
-  private static ObjectMapper getObjectMapper() {
-    ObjectMapper objectMapper = new ObjectMapper();
-    objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-    objectMapper.configure(SerializationFeature.WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED, false);
-    return objectMapper;
-  }
 
   private String noOp(String event) {
     return "";
   }
 
   @Test
-  public void testEmptyRepresentationIsEmpty() throws IOException {
+  public void testEmptyRepresentationIsEmpty() {
     assertThat(ResourceRepresentation.empty().isEmpty()).isTrue();
   }
 
   @Test
-  public void testEmptyRepresentationRendersJsonCorrectly() throws IOException {
+  public void testEmptyRepresentationRendersJsonCorrectly() {
     ResourceRepresentation<?> resource = ResourceRepresentation.empty().withLink("foo", "/foo");
-    JsonRepresentationWriter.create(getObjectMapper()).print(resource);
+    JsonRepresentationWriter.create().print(resource);
   }
 
   @Test
-  public void testNonEmptyRepresentationIsNotEmpty() throws IOException {
+  public void testNonEmptyRepresentationIsNotEmpty() {
     assertThat(ResourceRepresentation.create("value").isEmpty()).isFalse();
   }
 
   @Test
-  public void testMultipleEmbeddedRepresentations() throws IOException {
+  public void testMultipleEmbeddedRepresentations() {
 
     Account account = Account.of("0101232", "Test Account");
 
@@ -78,8 +66,7 @@ public class ResourceRepresentationTest {
     accountRep = accountRep.withRepresentation("bank:associated-account", subAccountRepA);
     accountRep = accountRep.withRepresentation("bank:associated-account", subAccountRepB);
 
-    JsonRepresentationWriter jsonRepresentationWriter =
-        JsonRepresentationWriter.create(objectMapper);
+    JsonRepresentationWriter jsonRepresentationWriter = JsonRepresentationWriter.create();
 
     String representation = jsonRepresentationWriter.print(accountRep).utf8();
 
@@ -92,7 +79,7 @@ public class ResourceRepresentationTest {
   }
 
   @Test
-  public void testBasicRepresentationUsage() throws IOException {
+  public void testBasicRepresentationUsage() {
 
     Account account = Account.of("0101232", "Test Account");
 
@@ -121,19 +108,19 @@ public class ResourceRepresentationTest {
     ResourceRepresentation<Account> accountRepWithLinks =
         accountRep.withRepresentation("bank:associated-account", subAccountRep);
 
-    JsonRepresentationWriter jsonRepresentationWriter =
-        JsonRepresentationWriter.create(objectMapper);
+    JsonRepresentationWriter jsonRepresentationWriter = JsonRepresentationWriter.create();
 
     ByteString representation = jsonRepresentationWriter.print(accountRepWithLinks);
 
     System.out.println(representation.utf8());
 
     ResourceRepresentation<ByteString> byteStringResourceRepresentation =
-        new JsonRepresentationReader().read(new StringReader(representation.utf8()));
+        JsonRepresentationReader.create(defaultObjectMapper())
+            .read(new StringReader(representation.utf8()));
 
     ResourceRepresentation<Map> readRepresentation =
         byteStringResourceRepresentation.map(
-            readByteStringAs(objectMapper, Map.class, () -> Collections.emptyMap()));
+            readByteStringAs(defaultObjectMapper(), Map.class, () -> Collections.emptyMap()));
 
     assertWithMessage("read representation should not be null")
         .that(readRepresentation)
@@ -145,7 +132,7 @@ public class ResourceRepresentationTest {
 
     ResourceRepresentation<Account> readAccountRepresentation =
         byteStringResourceRepresentation.map(
-            readByteStringAs(objectMapper, Account.class, () -> Account.of("", "")));
+            readByteStringAs(defaultObjectMapper(), Account.class, () -> Account.of("", "")));
 
     assertWithMessage("read representation should not be null")
         .that(readRepresentation)

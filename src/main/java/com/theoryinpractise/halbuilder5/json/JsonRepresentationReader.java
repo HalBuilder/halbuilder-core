@@ -2,6 +2,7 @@ package com.theoryinpractise.halbuilder5.json;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Throwables;
@@ -29,6 +30,7 @@ import static com.theoryinpractise.halbuilder5.Link.NAME;
 import static com.theoryinpractise.halbuilder5.Support.CURIES;
 import static com.theoryinpractise.halbuilder5.Support.EMBEDDED;
 import static com.theoryinpractise.halbuilder5.Support.LINKS;
+import static com.theoryinpractise.halbuilder5.Support.defaultObjectMapper;
 import static okio.ByteString.encodeUtf8;
 
 public class JsonRepresentationReader {
@@ -57,8 +59,20 @@ public class JsonRepresentationReader {
     };
   }
 
-  public JsonRepresentationReader() {
-    this.mapper = new ObjectMapper();
+  private JsonRepresentationReader(ObjectMapper objectMapper) {
+    this.mapper = objectMapper;
+  }
+
+  public static JsonRepresentationReader create() {
+    return create(defaultObjectMapper());
+  }
+
+  public static JsonRepresentationReader create(Module... modules) {
+    return create(defaultObjectMapper(modules));
+  }
+
+  public static JsonRepresentationReader create(ObjectMapper objectMapper) {
+    return new JsonRepresentationReader(objectMapper);
   }
 
   public <T> ResourceRepresentation<T> read(Reader reader, Class<T> classType) {
@@ -78,7 +92,7 @@ public class JsonRepresentationReader {
     }
   }
 
-  public ResourceRepresentation<ByteString> read(Reader reader) throws IOException {
+  public ResourceRepresentation<ByteString> read(Reader reader) {
     try {
       return read(encodeUtf8(CharStreams.toString(reader)));
     } catch (IOException e) {
@@ -91,8 +105,7 @@ public class JsonRepresentationReader {
     return read(byteString).map(readByteStringAs(mapper, classType, defaultValue));
   }
 
-  public <T> ResourceRepresentation<T> read(ByteString byteString, Class<T> classType)
-      throws IOException {
+  public <T> ResourceRepresentation<T> read(ByteString byteString, Class<T> classType) {
     return read(byteString).map(readByteStringAs(mapper, classType));
   }
 
