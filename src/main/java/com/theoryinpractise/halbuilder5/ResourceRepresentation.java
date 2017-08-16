@@ -24,8 +24,6 @@ public final class ResourceRepresentation<V> implements Value<V> {
 
   public static Rel SELF = Rels.singleton("self");
 
-  public static final URI SILENT_SORTING = URI.create("urn:halbuilder:silentsorting");
-
   public static final Comparator<Link> RELATABLE_ORDERING =
       Comparator.comparing(
           Links::getRel,
