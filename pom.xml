@@ -26,10 +26,31 @@
     <checkstyle.suppressions.location>checkstyle-supressions.xml</checkstyle.suppressions.location>
     <dependency.check.fastfail>false</dependency.check.fastfail>
     <jackson.version>2.9.0</jackson.version>
-    <jacoco.check.skip>true</jacoco.check.skip>
+    <jacoco.check.skip>false</jacoco.check.skip>
     <jacoco.check.ratio>0.50</jacoco.check.ratio>
-    <jacoco.check.missed>0</jacoco.check.missed>
+    <jacoco.check.missed>9</jacoco.check.missed>
   </properties>
+
+  <repositories>
+    <repository>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <id>jcenter</id>
+      <name>bintray</name>
+      <url>http://jcenter.bintray.com</url>
+    </repository>
+  </repositories>
+  <pluginRepositories>
+  <pluginRepository>
+    <snapshots>
+      <enabled>false</enabled>
+    </snapshots>
+    <id>jcenter</id>
+    <name>bintray-plugins</name>
+    <url>http://jcenter.bintray.com</url>
+    </pluginRepository>
+  </pluginRepositories>
 
   <dependencies>
     <dependency>
