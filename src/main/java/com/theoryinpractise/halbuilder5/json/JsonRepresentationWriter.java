@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 import com.theoryinpractise.halbuilder5.Link;
 import com.theoryinpractise.halbuilder5.Links;
 import com.theoryinpractise.halbuilder5.Rel;
@@ -179,27 +177,26 @@ public final class JsonRepresentationWriter {
       links = links.appendAll(representation.getLinks());
 
       // Partition representation links by rel
-      Multimap<String, Link> linkMap = Multimaps.index(links, Links::getRel);
+
       ObjectNode linksNode = codec.createObjectNode();
       objectNode.set(LINKS, linksNode);
 
-      for (Map.Entry<String, Collection<Link>> linkEntry : linkMap.asMap().entrySet()) {
+      for (Tuple2<String, List<Link>> linkEntry : links.groupBy(Links::getRel).toList()) {
 
-        Rel rel = representation.getRels().get(linkEntry.getKey()).get();
-        boolean coalesce =
-            !isCollection(rel) && (isSingleton(rel) || linkEntry.getValue().size() == 1);
+        Rel rel = representation.getRels().get(linkEntry._1).get();
+        boolean coalesce = !isCollection(rel) && (isSingleton(rel) || linkEntry._2.size() == 1);
 
         if (coalesce) {
-          Link link = linkEntry.getValue().iterator().next();
+          Link link = linkEntry._2.iterator().next();
 
           ObjectNode linkNode = writeJsonLinkContent(link);
-          linksNode.set(linkEntry.getKey(), linkNode);
+          linksNode.set(linkEntry._1, linkNode);
         } else {
           ArrayNode linkArrayNode = codec.createArrayNode();
-          for (Link link : linkEntry.getValue()) {
+          for (Link link : linkEntry._2) {
             linkArrayNode.add(writeJsonLinkContent(link));
           }
-          linksNode.set(linkEntry.getKey(), linkArrayNode);
+          linksNode.set(linkEntry._1, linkArrayNode);
         }
       }
     }

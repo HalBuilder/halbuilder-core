@@ -6,14 +6,14 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.google.common.base.Charsets;
-import com.google.common.base.Preconditions;
 
+import java.util.Objects;
+import java.nio.charset.StandardCharsets;
 import java.nio.charset.Charset;
 
 public interface Support {
 
-  Charset DEFAULT_ENCODING = Charsets.UTF_8;
+  Charset DEFAULT_ENCODING = StandardCharsets.UTF_8;
 
   String LINKS = "_links";
   String EMBEDDED = "_embedded";
@@ -23,11 +23,12 @@ public interface Support {
   String HAL_XML = "application/hal+xml";
 
   static void checkRelType(String rel) {
-    Preconditions.checkArgument(rel != null, "Provided rel should not be null.");
-    Preconditions.checkArgument(
-        !"".equals(rel) && !rel.contains(" "),
-        "Provided rel value should be a single rel type, as "
-            + "defined by http://tools.ietf.org/html/rfc5988");
+    Objects.requireNonNull(rel, "Provided rel should not be null.");
+    if ("".equals(rel) || rel.contains(" ")) {
+      throw new IllegalArgumentException(
+          "Provided rel value should be a single rel type, as "
+              + "defined by http://tools.ietf.org/html/rfc5988");
+    }
   }
 
   static ObjectMapper defaultObjectMapper(Module... modules) {

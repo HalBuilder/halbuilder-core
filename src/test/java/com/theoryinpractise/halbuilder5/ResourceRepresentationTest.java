@@ -1,7 +1,6 @@
 package com.theoryinpractise.halbuilder5;
 
 import com.damnhandy.uri.template.UriTemplate;
-import com.google.common.collect.ImmutableMap;
 import com.jayway.jsonpath.JsonPath;
 import com.theoryinpractise.halbuilder5.json.JsonRepresentationReader;
 import com.theoryinpractise.halbuilder5.json.JsonRepresentationWriter;
@@ -169,7 +168,8 @@ public class ResourceRepresentationTest {
 
     System.out.println(template.getTemplate());
 
-    System.out.println(template.expand(ImmutableMap.of("mailbox", "greg@amer.com")));
+    System.out.println(
+        template.expand(HashMap.<String, Object>of("mailbox", "greg@amer.com").toJavaMap()));
   }
 
   private String deleteResource(Link link, String event) {

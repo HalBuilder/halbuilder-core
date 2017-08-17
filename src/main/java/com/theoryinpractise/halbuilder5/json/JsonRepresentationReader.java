@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.Throwables;
-import com.google.common.io.CharStreams;
 import com.theoryinpractise.halbuilder5.Link;
 import com.theoryinpractise.halbuilder5.Links;
 import com.theoryinpractise.halbuilder5.RepresentationException;
@@ -21,6 +19,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.UncheckedIOException;
 import java.util.Iterator;
+import java.util.Scanner;
 import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -75,29 +74,21 @@ public class JsonRepresentationReader {
     return new JsonRepresentationReader(objectMapper);
   }
 
+  private static String readContent(Reader reader) {
+    return new Scanner(reader).useDelimiter("\\Z").next();
+  }
+
   public <T> ResourceRepresentation<T> read(Reader reader, Class<T> classType) {
-    try {
-      return read(encodeUtf8(CharStreams.toString(reader)), classType);
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
-    }
+    return read(encodeUtf8(readContent(reader)), classType);
   }
 
   public <T> ResourceRepresentation<T> read(
       Reader reader, Class<T> classType, Supplier<T> defaultValue) {
-    try {
-      return read(encodeUtf8(CharStreams.toString(reader)), classType, defaultValue);
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
-    }
+    return read(encodeUtf8(readContent(reader)), classType, defaultValue);
   }
 
   public ResourceRepresentation<ByteString> read(Reader reader) {
-    try {
-      return read(encodeUtf8(CharStreams.toString(reader)));
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
-    }
+    return read(encodeUtf8(readContent(reader)));
   }
 
   public <T> ResourceRepresentation<T> read(
@@ -199,7 +190,7 @@ public class JsonRepresentationReader {
     try {
       return resource.withValue(encodeUtf8(mapper.writeValueAsString(propertyNode)));
     } catch (JsonProcessingException e) {
-      throw Throwables.propagate(e);
+      throw new UncheckedIOException(e);
     }
   }
 
