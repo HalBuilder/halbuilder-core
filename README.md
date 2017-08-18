@@ -1,6 +1,7 @@
 Halbuilder is a simple Java API for generating and consuming HAL documents conforming to the
 [HAL Specification](http://stateless.co/hal_specification.html).
 
+[![travis](https://travis-ci.org/HalBuilder/halbuilder-core.svg?branch=develop)](https://travis-ci.org/HalBuilder/halbuilder-core)
 [![codecov](https://codecov.io/gh/HalBuilder/halbuilder-core/branch/develop/graph/badge.svg)](https://codecov.io/gh/HalBuilder/halbuilder-core)
 
 ### Generating Local Resources
