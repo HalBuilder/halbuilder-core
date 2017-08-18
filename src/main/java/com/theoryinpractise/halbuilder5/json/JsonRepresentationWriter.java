@@ -22,7 +22,6 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Function;
@@ -83,8 +82,7 @@ public final class JsonRepresentationWriter {
     return isCollectionF.apply(rel);
   }
 
-  private ObjectNode renderJson(ResourceRepresentation<?> representation, boolean embedded)
-      throws IOException {
+  private ObjectNode renderJson(ResourceRepresentation<?> representation, boolean embedded) {
 
     ObjectNode objectNode = codec.getNodeFactory().objectNode();
 
@@ -95,8 +93,7 @@ public final class JsonRepresentationWriter {
     return objectNode;
   }
 
-  private void renderJsonEmbeds(ObjectNode objectNode, ResourceRepresentation<?> representation)
-      throws IOException {
+  private void renderJsonEmbeds(ObjectNode objectNode, ResourceRepresentation<?> representation) {
     if (!representation.getResources().isEmpty()) {
 
       // TODO toJavaMap is kinda nasty
@@ -120,13 +117,13 @@ public final class JsonRepresentationWriter {
           embedsNode.set(resourceEntry.getKey(), embeddedNode);
         } else {
 
-          final Comparator<ResourceRepresentation<?>> repComparator =
-              Rels.getComparator(rel).getOrElse(Rel.naturalComparator);
-
-          final List<ResourceRepresentation<?>> values =
-              isSingleton(rel)
-                  ? List.ofAll(resourceEntry.getValue())
-                  : List.ofAll(resourceEntry.getValue()).sorted(repComparator);
+          List<ResourceRepresentation<?>> values =
+              Rels.getComparator(rel)
+                  .transform(
+                      comp ->
+                          comp.isDefined()
+                              ? List.ofAll(resourceEntry.getValue()).sorted(comp.get())
+                              : List.ofAll(resourceEntry.getValue()));
 
           ArrayNode embedArrayNode = codec.createArrayNode();
           embedsNode.set(rel.rel(), embedArrayNode);
@@ -157,8 +154,7 @@ public final class JsonRepresentationWriter {
   }
 
   private void renderJsonLinks(
-      ObjectNode objectNode, ResourceRepresentation<?> representation, boolean embedded)
-      throws IOException {
+      ObjectNode objectNode, ResourceRepresentation<?> representation, boolean embedded) {
     if (!representation.getLinks().isEmpty()
         || (!embedded && !representation.getNamespaces().isEmpty())) {
 
@@ -202,7 +198,7 @@ public final class JsonRepresentationWriter {
     }
   }
 
-  private ObjectNode writeJsonLinkContent(Link link) throws IOException {
+  private ObjectNode writeJsonLinkContent(Link link) {
     ObjectNode linkNode = codec.createObjectNode();
     linkNode.set(HREF, codec.getNodeFactory().textNode(Links.getHref(link)));
 

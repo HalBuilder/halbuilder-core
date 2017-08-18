@@ -98,7 +98,7 @@ public final class ResourceRepresentation<V> implements Value<V> {
 
   protected V value;
 
-  protected Multimap<String, ResourceRepresentation<?>> resources = TreeMultimap.withSet().empty();
+  protected Multimap<String, ResourceRepresentation<?>> resources = TreeMultimap.withSeq().empty();
 
   protected boolean hasNullProperties = false;
 
@@ -136,7 +136,7 @@ public final class ResourceRepresentation<V> implements Value<V> {
           TreeMap.of("self", SELF),
           NamespaceManager.EMPTY,
           null,
-          TreeMultimap.withSet().empty());
+          TreeMultimap.withSeq().empty());
 
   public static ResourceRepresentation<Void> empty() {
     return EMPTY;

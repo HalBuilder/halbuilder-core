@@ -66,15 +66,56 @@ public class ResourceRepresentationTest {
     accountRep = accountRep.withRepresentation("bank:associated-account", subAccountRepB);
 
     JsonRepresentationWriter jsonRepresentationWriter = JsonRepresentationWriter.create();
-
     String representation = jsonRepresentationWriter.print(accountRep).utf8();
+
+    String accountNumber =
+        jsonPath(representation, "$['_embedded']['bank:associated-account'][1]['accountNumber']");
+
+    assertThat(accountNumber).isEqualTo("87912312-b");
+  }
+
+  private String jsonPath(String json, String path) {
+    return JsonPath.parse(json).read(path);
+  }
+
+  @Test
+  public void testEmbeddedRepresentationNaturalOrdering() {
+    ResourceRepresentation<?> resource =
+        ResourceRepresentation.empty()
+            .withLink("foo", "/foo/1")
+            .withRepresentation("foo", ResourceRepresentation.empty().withLink("self", "/foo/1"))
+            .withLink("foo", "/foo/2")
+            .withRepresentation("foo", ResourceRepresentation.empty().withLink("self", "/foo/2"))
+            .withLink("foo", "/foo/3")
+            .withRepresentation("foo", ResourceRepresentation.empty().withLink("self", "/foo/3"));
+
+    JsonRepresentationWriter jsonRepresentationWriter = JsonRepresentationWriter.create();
+    String representation = jsonRepresentationWriter.print(resource).utf8();
+
+    System.out.println("java map");
+    System.out.println(resource.getResources().toJavaMap());
+
+    System.out.println("vavr list");
+    System.out.println(resource.getResources().toList());
+
+    System.out.println("vavr multimap");
+    System.out.println(resource.getResources());
+
+    System.out.println("vavr multimap->foo");
+    System.out.println(resource.getResources().get("foo"));
 
     System.out.println(representation);
 
-    String accountNumberPath = "$['_embedded']['bank:associated-account'][1]['accountNumber']";
-    String accountNumber = JsonPath.parse(representation).read(accountNumberPath);
+    assertThat(jsonPath(representation, "$['_links']['foo'][0]['href']")).isEqualTo("/foo/1");
+    assertThat(jsonPath(representation, "$['_links']['foo'][1]['href']")).isEqualTo("/foo/2");
+    assertThat(jsonPath(representation, "$['_links']['foo'][2]['href']")).isEqualTo("/foo/3");
 
-    assertThat(accountNumber).isEqualTo("87912312-b");
+    assertThat(jsonPath(representation, "$['_embedded']['foo'][0]['_links']['self']['href']"))
+        .isEqualTo("/foo/1");
+    assertThat(jsonPath(representation, "$['_embedded']['foo'][1]['_links']['self']['href']"))
+        .isEqualTo("/foo/2");
+    assertThat(jsonPath(representation, "$['_embedded']['foo'][2]['_links']['self']['href']"))
+        .isEqualTo("/foo/3");
   }
 
   @Test
