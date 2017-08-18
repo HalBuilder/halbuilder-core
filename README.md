@@ -8,7 +8,7 @@ Halbuilder is a simple Java API for generating and consuming HAL documents confo
 
 ```java
 Map<String,Object> friend = HashMap.of("name", "Mike", "age", 36);
-Representation<Map<String,Object>> owner =
+ResourceRepresentation<Map<String,Object>> owner =
   ResourceRepresentation.create("http://example.com/mike", friend)
     .withLink("td:friend", "http://example.com/mamund")
 
@@ -16,8 +16,8 @@ Map<String,Object> todoMeta = HashMap.of(
   "created_at", "2010-01-16", "updated_at", "2017-06-13",
   "summary", "An example list");
 
-Representation<Map<String,Object>> halResource =
-  RepresentationFactory.create("http://example.com/todo-list", todoMeta)
+ResourceRepresentation<Map<String,Object>> halResource =
+  ResourceRepresentation.create("http://example.com/todo-list", todoMeta)
     .withLink("td:search", "/todo-list/search;{searchterm}")
     .withLink("td:description", "/todo-list/description")
     .withRepresentation("td:owner", owner);
@@ -35,14 +35,14 @@ System.out.println(representation.utf8());
 JsonRepresentationReader jsonRepresentationReader =
   JsonRepresentationReader.create();
 
-Representation<ByteString> representation =
-  jsonRepresentationReader.readRepresentation(
+ResourceRepresentation<ByteString> representation =
+  jsonRepresentationReader.read(
     new InputStreamReader(Some.class.getResourceAsStream("/test.json")));
 
 // or as a type
 
-Representation<Person> personRepresentation =
-  jsonRepresentationReader.readRepresentation(
+ResourceRepresentation<Person> personRepresentation =
+  jsonRepresentationReader.read(
     new InputStreamReader(Some.class.getResourceAsStream("/test.json")),
     Person.class);
 
