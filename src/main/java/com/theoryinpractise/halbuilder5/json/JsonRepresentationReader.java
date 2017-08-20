@@ -2,10 +2,9 @@ package com.theoryinpractise.halbuilder5.json;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.Throwables;
-import com.google.common.io.CharStreams;
 import com.theoryinpractise.halbuilder5.Link;
 import com.theoryinpractise.halbuilder5.Links;
 import com.theoryinpractise.halbuilder5.RepresentationException;
@@ -20,6 +19,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.UncheckedIOException;
 import java.util.Iterator;
+import java.util.Scanner;
 import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -29,6 +29,7 @@ import static com.theoryinpractise.halbuilder5.Link.NAME;
 import static com.theoryinpractise.halbuilder5.Support.CURIES;
 import static com.theoryinpractise.halbuilder5.Support.EMBEDDED;
 import static com.theoryinpractise.halbuilder5.Support.LINKS;
+import static com.theoryinpractise.halbuilder5.Support.defaultObjectMapper;
 import static okio.ByteString.encodeUtf8;
 
 public class JsonRepresentationReader {
@@ -57,33 +58,37 @@ public class JsonRepresentationReader {
     };
   }
 
-  public JsonRepresentationReader() {
-    this.mapper = new ObjectMapper();
+  private JsonRepresentationReader(ObjectMapper objectMapper) {
+    this.mapper = objectMapper;
+  }
+
+  public static JsonRepresentationReader create() {
+    return create(defaultObjectMapper());
+  }
+
+  public static JsonRepresentationReader create(Module... modules) {
+    return create(defaultObjectMapper(modules));
+  }
+
+  public static JsonRepresentationReader create(ObjectMapper objectMapper) {
+    return new JsonRepresentationReader(objectMapper);
+  }
+
+  private static String readContent(Reader reader) {
+    return new Scanner(reader).useDelimiter("\\Z").next();
   }
 
   public <T> ResourceRepresentation<T> read(Reader reader, Class<T> classType) {
-    try {
-      return read(encodeUtf8(CharStreams.toString(reader)), classType);
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
-    }
+    return read(encodeUtf8(readContent(reader)), classType);
   }
 
   public <T> ResourceRepresentation<T> read(
       Reader reader, Class<T> classType, Supplier<T> defaultValue) {
-    try {
-      return read(encodeUtf8(CharStreams.toString(reader)), classType, defaultValue);
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
-    }
+    return read(encodeUtf8(readContent(reader)), classType, defaultValue);
   }
 
-  public ResourceRepresentation<ByteString> read(Reader reader) throws IOException {
-    try {
-      return read(encodeUtf8(CharStreams.toString(reader)));
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
-    }
+  public ResourceRepresentation<ByteString> read(Reader reader) {
+    return read(encodeUtf8(readContent(reader)));
   }
 
   public <T> ResourceRepresentation<T> read(
@@ -91,8 +96,7 @@ public class JsonRepresentationReader {
     return read(byteString).map(readByteStringAs(mapper, classType, defaultValue));
   }
 
-  public <T> ResourceRepresentation<T> read(ByteString byteString, Class<T> classType)
-      throws IOException {
+  public <T> ResourceRepresentation<T> read(ByteString byteString, Class<T> classType) {
     return read(byteString).map(readByteStringAs(mapper, classType));
   }
 
@@ -186,7 +190,7 @@ public class JsonRepresentationReader {
     try {
       return resource.withValue(encodeUtf8(mapper.writeValueAsString(propertyNode)));
     } catch (JsonProcessingException e) {
-      throw Throwables.propagate(e);
+      throw new UncheckedIOException(e);
     }
   }
 

@@ -1,10 +1,6 @@
 package com.theoryinpractise.halbuilder5;
 
 import com.damnhandy.uri.template.UriTemplate;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.google.common.collect.ImmutableMap;
 import com.jayway.jsonpath.JsonPath;
 import com.theoryinpractise.halbuilder5.json.JsonRepresentationReader;
 import com.theoryinpractise.halbuilder5.json.JsonRepresentationWriter;
@@ -15,42 +11,39 @@ import io.vavr.control.Option;
 import okio.ByteString;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
 import java.io.StringReader;
 import java.util.Collections;
 import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
+import static com.theoryinpractise.halbuilder5.Support.defaultObjectMapper;
 import static com.theoryinpractise.halbuilder5.json.JsonRepresentationReader.readByteStringAs;
 
 public class ResourceRepresentationTest {
-
-  private static ObjectMapper objectMapper = getObjectMapper();
-
-  private static ObjectMapper getObjectMapper() {
-    ObjectMapper objectMapper = new ObjectMapper();
-    objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-    objectMapper.configure(SerializationFeature.WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED, false);
-    return objectMapper;
-  }
 
   private String noOp(String event) {
     return "";
   }
 
   @Test
-  public void testEmptyRepresentationIsEmpty() throws IOException {
+  public void testEmptyRepresentationIsEmpty() {
     assertThat(ResourceRepresentation.empty().isEmpty()).isTrue();
   }
 
   @Test
-  public void testNonEmptyRepresentationIsNotEmpty() throws IOException {
+  public void testEmptyRepresentationRendersJsonCorrectly() {
+    ResourceRepresentation<?> resource = ResourceRepresentation.empty().withLink("foo", "/foo");
+    JsonRepresentationWriter.create().print(resource);
+  }
+
+  @Test
+  public void testNonEmptyRepresentationIsNotEmpty() {
     assertThat(ResourceRepresentation.create("value").isEmpty()).isFalse();
   }
 
   @Test
-  public void testMultipleEmbeddedRepresentations() throws IOException {
+  public void testMultipleEmbeddedRepresentations() {
 
     Account account = Account.of("0101232", "Test Account");
 
@@ -72,21 +65,61 @@ public class ResourceRepresentationTest {
     accountRep = accountRep.withRepresentation("bank:associated-account", subAccountRepA);
     accountRep = accountRep.withRepresentation("bank:associated-account", subAccountRepB);
 
-    JsonRepresentationWriter jsonRepresentationWriter =
-        JsonRepresentationWriter.create(objectMapper);
-
+    JsonRepresentationWriter jsonRepresentationWriter = JsonRepresentationWriter.create();
     String representation = jsonRepresentationWriter.print(accountRep).utf8();
 
-    System.out.println(representation);
-
-    String accountNumberPath = "$['_embedded']['bank:associated-account'][1]['accountNumber']";
-    String accountNumber = JsonPath.parse(representation).read(accountNumberPath);
+    String accountNumber =
+        jsonPath(representation, "$['_embedded']['bank:associated-account'][1]['accountNumber']");
 
     assertThat(accountNumber).isEqualTo("87912312-b");
   }
 
+  private String jsonPath(String json, String path) {
+    return JsonPath.parse(json).read(path);
+  }
+
   @Test
-  public void testBasicRepresentationUsage() throws IOException {
+  public void testEmbeddedRepresentationNaturalOrdering() {
+    ResourceRepresentation<?> resource =
+        ResourceRepresentation.empty()
+            .withLink("foo", "/foo/1")
+            .withRepresentation("foo", ResourceRepresentation.empty().withLink("self", "/foo/1"))
+            .withLink("foo", "/foo/2")
+            .withRepresentation("foo", ResourceRepresentation.empty().withLink("self", "/foo/2"))
+            .withLink("foo", "/foo/3")
+            .withRepresentation("foo", ResourceRepresentation.empty().withLink("self", "/foo/3"));
+
+    JsonRepresentationWriter jsonRepresentationWriter = JsonRepresentationWriter.create();
+    String representation = jsonRepresentationWriter.print(resource).utf8();
+
+    System.out.println("java map");
+    System.out.println(resource.getResources().toJavaMap());
+
+    System.out.println("vavr list");
+    System.out.println(resource.getResources().toList());
+
+    System.out.println("vavr multimap");
+    System.out.println(resource.getResources());
+
+    System.out.println("vavr multimap->foo");
+    System.out.println(resource.getResources().get("foo"));
+
+    System.out.println(representation);
+
+    assertThat(jsonPath(representation, "$['_links']['foo'][0]['href']")).isEqualTo("/foo/1");
+    assertThat(jsonPath(representation, "$['_links']['foo'][1]['href']")).isEqualTo("/foo/2");
+    assertThat(jsonPath(representation, "$['_links']['foo'][2]['href']")).isEqualTo("/foo/3");
+
+    assertThat(jsonPath(representation, "$['_embedded']['foo'][0]['_links']['self']['href']"))
+        .isEqualTo("/foo/1");
+    assertThat(jsonPath(representation, "$['_embedded']['foo'][1]['_links']['self']['href']"))
+        .isEqualTo("/foo/2");
+    assertThat(jsonPath(representation, "$['_embedded']['foo'][2]['_links']['self']['href']"))
+        .isEqualTo("/foo/3");
+  }
+
+  @Test
+  public void testBasicRepresentationUsage() {
 
     Account account = Account.of("0101232", "Test Account");
 
@@ -115,19 +148,19 @@ public class ResourceRepresentationTest {
     ResourceRepresentation<Account> accountRepWithLinks =
         accountRep.withRepresentation("bank:associated-account", subAccountRep);
 
-    JsonRepresentationWriter jsonRepresentationWriter =
-        JsonRepresentationWriter.create(objectMapper);
+    JsonRepresentationWriter jsonRepresentationWriter = JsonRepresentationWriter.create();
 
     ByteString representation = jsonRepresentationWriter.print(accountRepWithLinks);
 
     System.out.println(representation.utf8());
 
     ResourceRepresentation<ByteString> byteStringResourceRepresentation =
-        new JsonRepresentationReader().read(new StringReader(representation.utf8()));
+        JsonRepresentationReader.create(defaultObjectMapper())
+            .read(new StringReader(representation.utf8()));
 
     ResourceRepresentation<Map> readRepresentation =
         byteStringResourceRepresentation.map(
-            readByteStringAs(objectMapper, Map.class, () -> Collections.emptyMap()));
+            readByteStringAs(defaultObjectMapper(), Map.class, () -> Collections.emptyMap()));
 
     assertWithMessage("read representation should not be null")
         .that(readRepresentation)
@@ -139,7 +172,7 @@ public class ResourceRepresentationTest {
 
     ResourceRepresentation<Account> readAccountRepresentation =
         byteStringResourceRepresentation.map(
-            readByteStringAs(objectMapper, Account.class, () -> Account.of("", "")));
+            readByteStringAs(defaultObjectMapper(), Account.class, () -> Account.of("", "")));
 
     assertWithMessage("read representation should not be null")
         .that(readRepresentation)
@@ -176,7 +209,8 @@ public class ResourceRepresentationTest {
 
     System.out.println(template.getTemplate());
 
-    System.out.println(template.expand(ImmutableMap.of("mailbox", "greg@amer.com")));
+    System.out.println(
+        template.expand(HashMap.<String, Object>of("mailbox", "greg@amer.com").toJavaMap()));
   }
 
   private String deleteResource(Link link, String event) {

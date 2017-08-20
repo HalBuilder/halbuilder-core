@@ -24,8 +24,6 @@ public final class ResourceRepresentation<V> implements Value<V> {
 
   public static Rel SELF = Rels.singleton("self");
 
-  public static final URI SILENT_SORTING = URI.create("urn:halbuilder:silentsorting");
-
   public static final Comparator<Link> RELATABLE_ORDERING =
       Comparator.comparing(
           Links::getRel,
@@ -100,7 +98,7 @@ public final class ResourceRepresentation<V> implements Value<V> {
 
   protected V value;
 
-  protected Multimap<String, ResourceRepresentation<?>> resources = TreeMultimap.withSet().empty();
+  protected Multimap<String, ResourceRepresentation<?>> resources = TreeMultimap.withSeq().empty();
 
   protected boolean hasNullProperties = false;
 
@@ -138,7 +136,7 @@ public final class ResourceRepresentation<V> implements Value<V> {
           TreeMap.of("self", SELF),
           NamespaceManager.EMPTY,
           null,
-          TreeMultimap.withSet().empty());
+          TreeMultimap.withSeq().empty());
 
   public static ResourceRepresentation<Void> empty() {
     return EMPTY;

@@ -16,9 +16,6 @@ import java.util.Comparator;
 )
 public abstract class Rel {
 
-  public static final Comparator<ResourceRepresentation<?>> naturalComparator =
-      Comparator.comparing(rep -> rep.getResourceLink().map(Links::getRel).getOrElse(""));
-
   @Override
   public abstract String toString();
 

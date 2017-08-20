@@ -1,16 +1,10 @@
 package com.theoryinpractise.halbuilder5.json;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 import com.theoryinpractise.halbuilder5.Link;
 import com.theoryinpractise.halbuilder5.Links;
 import com.theoryinpractise.halbuilder5.Rel;
@@ -28,7 +22,6 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Function;
@@ -38,6 +31,7 @@ import static com.theoryinpractise.halbuilder5.Support.CURIES;
 import static com.theoryinpractise.halbuilder5.Support.EMBEDDED;
 import static com.theoryinpractise.halbuilder5.Support.LINKS;
 import static com.theoryinpractise.halbuilder5.Support.TEMPLATED;
+import static com.theoryinpractise.halbuilder5.Support.defaultObjectMapper;
 
 public final class JsonRepresentationWriter {
 
@@ -47,8 +41,12 @@ public final class JsonRepresentationWriter {
     this.codec = codec;
   }
 
+  public static JsonRepresentationWriter create() {
+    return create(defaultObjectMapper());
+  }
+
   public static JsonRepresentationWriter create(Module... modules) {
-    return create(getObjectMapper(modules));
+    return create(defaultObjectMapper(modules));
   }
 
   public static JsonRepresentationWriter create(ObjectMapper objectMapper) {
@@ -70,18 +68,6 @@ public final class JsonRepresentationWriter {
     }
   }
 
-  private static ObjectMapper getObjectMapper(Module[] modules) {
-    JsonFactory f = new JsonFactory();
-    f.enable(JsonGenerator.Feature.QUOTE_FIELD_NAMES);
-
-    ObjectMapper objectMapper = new ObjectMapper(f);
-    objectMapper.registerModules(modules);
-    objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-    objectMapper.configure(SerializationFeature.WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED, false);
-
-    return objectMapper;
-  }
-
   private static final Function<Rel, Boolean> isSingletonF =
       Rels.cases().singleton_(true).otherwise_(false);
 
@@ -96,8 +82,7 @@ public final class JsonRepresentationWriter {
     return isCollectionF.apply(rel);
   }
 
-  private ObjectNode renderJson(ResourceRepresentation<?> representation, boolean embedded)
-      throws IOException {
+  private ObjectNode renderJson(ResourceRepresentation<?> representation, boolean embedded) {
 
     ObjectNode objectNode = codec.getNodeFactory().objectNode();
 
@@ -108,8 +93,7 @@ public final class JsonRepresentationWriter {
     return objectNode;
   }
 
-  private void renderJsonEmbeds(ObjectNode objectNode, ResourceRepresentation<?> representation)
-      throws IOException {
+  private void renderJsonEmbeds(ObjectNode objectNode, ResourceRepresentation<?> representation) {
     if (!representation.getResources().isEmpty()) {
 
       // TODO toJavaMap is kinda nasty
@@ -133,13 +117,13 @@ public final class JsonRepresentationWriter {
           embedsNode.set(resourceEntry.getKey(), embeddedNode);
         } else {
 
-          final Comparator<ResourceRepresentation<?>> repComparator =
-              Rels.getComparator(rel).getOrElse(Rel.naturalComparator);
-
-          final List<ResourceRepresentation<?>> values =
-              isSingleton(rel)
-                  ? List.ofAll(resourceEntry.getValue())
-                  : List.ofAll(resourceEntry.getValue()).sorted(repComparator);
+          List<ResourceRepresentation<?>> values =
+              Rels.getComparator(rel)
+                  .transform(
+                      comp ->
+                          comp.isDefined()
+                              ? List.ofAll(resourceEntry.getValue()).sorted(comp.get())
+                              : List.ofAll(resourceEntry.getValue()));
 
           ArrayNode embedArrayNode = codec.createArrayNode();
           embedsNode.set(rel.rel(), embedArrayNode);
@@ -153,23 +137,24 @@ public final class JsonRepresentationWriter {
     }
   }
 
-  private void renderJsonProperties(ObjectNode objectNode, ResourceRepresentation<?> representation)
-      throws IOException {
+  private void renderJsonProperties(
+      ObjectNode objectNode, ResourceRepresentation<?> representation) {
     JsonNode tree = codec.valueToTree(representation.get());
-    if (tree.isObject()) {
-      Iterator<Map.Entry<String, JsonNode>> fields = tree.fields();
-      while (fields.hasNext()) {
-        Map.Entry<String, JsonNode> next = fields.next();
-        objectNode.set(next.getKey(), next.getValue());
+    if (tree != null) {
+      if (tree.isObject()) {
+        Iterator<Map.Entry<String, JsonNode>> fields = tree.fields();
+        while (fields.hasNext()) {
+          Map.Entry<String, JsonNode> next = fields.next();
+          objectNode.set(next.getKey(), next.getValue());
+        }
+      } else {
+        throw new IllegalStateException("Unable to serialise a non Object Node");
       }
-    } else {
-      throw new IllegalStateException("Unable to serialise a non Object Node");
     }
   }
 
   private void renderJsonLinks(
-      ObjectNode objectNode, ResourceRepresentation<?> representation, boolean embedded)
-      throws IOException {
+      ObjectNode objectNode, ResourceRepresentation<?> representation, boolean embedded) {
     if (!representation.getLinks().isEmpty()
         || (!embedded && !representation.getNamespaces().isEmpty())) {
 
@@ -188,33 +173,32 @@ public final class JsonRepresentationWriter {
       links = links.appendAll(representation.getLinks());
 
       // Partition representation links by rel
-      Multimap<String, Link> linkMap = Multimaps.index(links, Links::getRel);
+
       ObjectNode linksNode = codec.createObjectNode();
       objectNode.set(LINKS, linksNode);
 
-      for (Map.Entry<String, Collection<Link>> linkEntry : linkMap.asMap().entrySet()) {
+      for (Tuple2<String, List<Link>> linkEntry : links.groupBy(Links::getRel).toList()) {
 
-        Rel rel = representation.getRels().get(linkEntry.getKey()).get();
-        boolean coalesce =
-            !isCollection(rel) && (isSingleton(rel) || linkEntry.getValue().size() == 1);
+        Rel rel = representation.getRels().get(linkEntry._1).get();
+        boolean coalesce = !isCollection(rel) && (isSingleton(rel) || linkEntry._2.size() == 1);
 
         if (coalesce) {
-          Link link = linkEntry.getValue().iterator().next();
+          Link link = linkEntry._2.iterator().next();
 
           ObjectNode linkNode = writeJsonLinkContent(link);
-          linksNode.set(linkEntry.getKey(), linkNode);
+          linksNode.set(linkEntry._1, linkNode);
         } else {
           ArrayNode linkArrayNode = codec.createArrayNode();
-          for (Link link : linkEntry.getValue()) {
+          for (Link link : linkEntry._2) {
             linkArrayNode.add(writeJsonLinkContent(link));
           }
-          linksNode.set(linkEntry.getKey(), linkArrayNode);
+          linksNode.set(linkEntry._1, linkArrayNode);
         }
       }
     }
   }
 
-  private ObjectNode writeJsonLinkContent(Link link) throws IOException {
+  private ObjectNode writeJsonLinkContent(Link link) {
     ObjectNode linkNode = codec.createObjectNode();
     linkNode.set(HREF, codec.getNodeFactory().textNode(Links.getHref(link)));
 

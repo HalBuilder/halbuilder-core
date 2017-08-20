@@ -101,5 +101,4 @@ public abstract class Link {
   static Link create(String rel, String href, java.util.Map<String, String> properties) {
     return Links.full0(rel, href, isTemplated(href), HashMap.ofAll(properties));
   }
-
 }
