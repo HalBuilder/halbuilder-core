@@ -269,7 +269,7 @@ public final class ResourceRepresentation<V> implements Value<V> {
                 rels,
                 (accum, rel) -> !accum.containsKey(rel) ? rels.put(rel, Rels.natural(rel)) : rels);
 
-    final List<Link> updatedLinks = links.appendAll(links);
+    final List<Link> updatedLinks = this.links.appendAll(links);
     return new ResourceRepresentation<>(
         content, updatedLinks, updatedRels, namespaceManager, value, resources);
   }
