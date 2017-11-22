@@ -10,7 +10,7 @@
 
   <groupId>com.theoryinpractise</groupId>
   <artifactId>halbuilder5</artifactId>
-  <version>5.1.2-SNAPSHOT</version>
+  <version>5.1.2</version>
   <packaging>jar</packaging>
 
   <name>halbuilder5</name>
@@ -162,4 +162,8 @@
       </plugin>
     </plugins>
   </build>
+
+  <scm>
+    <tag>halbuilder5-5.1.2</tag>
+  </scm>
 </project>
