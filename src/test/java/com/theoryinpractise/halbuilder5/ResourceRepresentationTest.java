@@ -4,6 +4,7 @@ import com.damnhandy.uri.template.UriTemplate;
 import com.jayway.jsonpath.JsonPath;
 import com.theoryinpractise.halbuilder5.json.JsonRepresentationReader;
 import com.theoryinpractise.halbuilder5.json.JsonRepresentationWriter;
+import io.vavr.collection.List;
 import io.vavr.Function1;
 import io.vavr.Function2;
 import io.vavr.collection.HashMap;
@@ -40,6 +41,26 @@ public class ResourceRepresentationTest {
   @Test
   public void testNonEmptyRepresentationIsNotEmpty() {
     assertThat(ResourceRepresentation.create("value").isEmpty()).isFalse();
+  }
+
+  @Test
+  public void testRepresentationLinks() {
+    assertThat(
+            ResourceRepresentation.create("value")
+                .withLink("link", "/link")
+                .getLinkByRel("link")
+                .map(Links::getHref)
+                .get())
+        .isEqualTo("/link");
+
+    assertThat(
+            ResourceRepresentation.create("/self", "value")
+                .withLinks(
+                    List.of(Links.create("link1", "/link1"), Links.create("link2", "/link2")))
+                .getLinkByRel(ResourceRepresentation.SELF)
+                .map(Links::getHref)
+                .get())
+        .isEqualTo("/self");
   }
 
   @Test
