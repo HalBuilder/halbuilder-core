@@ -4,7 +4,7 @@ import io.vavr.collection.List;
 import org.testng.annotations.Test;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.theoryinpractise.halbuilder5.LinkListSubject.assertAboutLinkLists;
+import static com.theoryinpractise.halbuilder5.LinkListSubject.assertThatLinkLists;
 
 public class RepresentationLinksTest {
 
@@ -17,16 +17,16 @@ public class RepresentationLinksTest {
     List<Link> links = resource.getLinks();
     assertThat(links).isNotEmpty();
 
-    assertAboutLinkLists(links).containsRelCondition("bar");
-    assertAboutLinkLists(links).containsRelCondition("foo");
+    assertThatLinkLists(links).containsRelCondition("bar");
+    assertThatLinkLists(links).containsRelCondition("foo");
 
     assertThat(resource.getLinksByRel("bar")).isNotNull();
-    assertAboutLinkLists(resource.getLinksByRel("bar")).containsRelCondition("bar");
-    assertAboutLinkLists(resource.getLinksByRel("bar")).doesNotContainRelCondition("foo");
+    assertThatLinkLists(resource.getLinksByRel("bar")).containsRelCondition("bar");
+    assertThatLinkLists(resource.getLinksByRel("bar")).doesNotContainRelCondition("foo");
 
     assertThat(resource.getLinksByRel("foo")).isNotNull();
-    assertAboutLinkLists(resource.getLinksByRel("foo")).containsRelCondition("foo");
-    assertAboutLinkLists(resource.getLinksByRel("foo")).doesNotContainRelCondition("bar");
+    assertThatLinkLists(resource.getLinksByRel("foo")).containsRelCondition("foo");
+    assertThatLinkLists(resource.getLinksByRel("foo")).doesNotContainRelCondition("bar");
   }
 
   @Test
