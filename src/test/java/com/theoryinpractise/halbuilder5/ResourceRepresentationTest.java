@@ -234,6 +234,18 @@ public class ResourceRepresentationTest {
         template.expand(HashMap.<String, Object>of("mailbox", "greg@amer.com").toJavaMap()));
   }
 
+  @Test
+  public void testMultipleLinks() {
+    ResourceRepresentation<HashMap<Object, Object>> withLinks =
+        ResourceRepresentation.create("/self", HashMap.empty())
+            .withLinks(List.of(Links.create("link1", "/link1"), Links.create("link2", "/link2")));
+
+    JsonRepresentationWriter jsonRepresentationWriter = JsonRepresentationWriter.create();
+    ByteString representation = jsonRepresentationWriter.print(withLinks);
+
+    assertThat(withLinks.getLinks()).hasSize(3);
+  }
+
   private String deleteResource(Link link, String event) {
     System.out.printf("Deleting %s due to %s\n", Links.getHref(link), event);
     return String.format("deleted %s", Links.getHref(link));

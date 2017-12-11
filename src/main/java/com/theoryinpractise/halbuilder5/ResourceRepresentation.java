@@ -267,7 +267,8 @@ public final class ResourceRepresentation<V> implements Value<V> {
             .map(Links::getRel)
             .foldLeft(
                 rels,
-                (accum, rel) -> !accum.containsKey(rel) ? rels.put(rel, Rels.natural(rel)) : rels);
+                (accum, rel) ->
+                    !accum.containsKey(rel) ? accum.put(rel, Rels.natural(rel)) : accum);
 
     final List<Link> updatedLinks = this.links.appendAll(links);
     return new ResourceRepresentation<>(
