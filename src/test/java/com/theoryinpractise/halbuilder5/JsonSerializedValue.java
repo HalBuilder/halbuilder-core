@@ -5,10 +5,9 @@ import org.immutables.value.Value;
 
 @JsonSerialize
 @Value.Style(
-  typeAbstract = {"Abstract*"},
-  typeImmutable = "*",
-  visibility = Value.Style.ImplementationVisibility.PUBLIC,
-  jdkOnly = true,
-  defaults = @Value.Immutable(intern = true, builder = false, copy = false)
-)
+    typeAbstract = {"Abstract*"},
+    typeImmutable = "*",
+    visibility = Value.Style.ImplementationVisibility.PUBLIC,
+    jdkOnly = true,
+    defaults = @Value.Immutable(intern = true, builder = false, copy = false))
 @interface JsonSerializedValue {}

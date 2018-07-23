@@ -16,10 +16,9 @@ import java.util.regex.Pattern;
 
 /** A Link to an external resource. */
 @Data(
-  flavour = Flavour.Vavr,
-  arguments = ArgOption.checkedNotNull,
-  value = @Derive(withVisibility = Visibility.Smart)
-)
+    flavour = Flavour.Vavr,
+    arguments = ArgOption.checkedNotNull,
+    value = @Derive(withVisibility = Visibility.Smart))
 public abstract class Link {
 
   public static final String HREF = "href";

@@ -10,10 +10,9 @@ import java.util.Comparator;
 
 /** Rel defines the base class of a Algebraic Data Type for relationship semantics. */
 @Data(
-  flavour = Flavour.Vavr,
-  arguments = ArgOption.checkedNotNull,
-  value = @Derive(make = {Make.constructors, Make.getters, Make.casesMatching})
-)
+    flavour = Flavour.Vavr,
+    arguments = ArgOption.checkedNotNull,
+    value = @Derive(make = {Make.constructors, Make.getters, Make.casesMatching}))
 public abstract class Rel {
 
   @Override
