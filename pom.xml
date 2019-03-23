@@ -79,6 +79,10 @@
         <project.build.sourceEncoding>${project.custom.encoding}</project.build.sourceEncoding>
         <project.build.outputEncoding>${project.custom.encoding}</project.build.outputEncoding>
         <project.reporting.outputEncoding>${project.custom.encoding}</project.reporting.outputEncoding>
+        <!-- java version -->
+        <project.custom.java.version>1.6</project.custom.java.version>
+        <maven.compiler.source>${project.custom.java.version}</maven.compiler.source>
+        <maven.compiler.target>${project.custom.java.version}</maven.compiler.target>
    </properties>
 
     <build>
