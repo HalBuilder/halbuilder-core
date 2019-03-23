@@ -2,4 +2,5 @@
 *.ipr
 *.iws
 .idea/
+pom.xml.releaseBackup
 target/
