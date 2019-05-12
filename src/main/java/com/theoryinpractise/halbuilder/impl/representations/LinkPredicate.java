@@ -8,17 +8,17 @@ import javax.annotation.Nullable;
 
 public class LinkPredicate implements Predicate<Link> {
 
-    private final String rel;
+  private final String rel;
 
-    private LinkPredicate(final String rel) {
-        this.rel = Preconditions.checkNotNull(rel, "rel must not be null");
-    }
+  private LinkPredicate(final String rel) {
+    this.rel = Preconditions.checkNotNull(rel, "rel must not be null");
+  }
 
-    public static LinkPredicate newLinkPredicate(final String rel) {
-        return new LinkPredicate(rel);
-    }
+  public static LinkPredicate newLinkPredicate(final String rel) {
+    return new LinkPredicate(rel);
+  }
 
-    public boolean apply(@Nullable Link relatable) {
-        return relatable.getRel().toLowerCase().contains(rel.toLowerCase());
-    }
+  public boolean apply(@Nullable Link relatable) {
+    return relatable.getRel().toLowerCase().contains(rel.toLowerCase());
+  }
 }

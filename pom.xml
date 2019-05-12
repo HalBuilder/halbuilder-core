@@ -1,21 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.theoryinpractise</groupId>
     <artifactId>halbuilder-core</artifactId>
     <version>4.1.1-SNAPSHOT</version>
-    <description>Java based builder for the Hal specification http://stateless.co/hal_specification.html</description>
     <packaging>jar</packaging>
 
     <name>halbuilder</name>
+    <description>Java based builder for the Hal specification http://stateless.co/hal_specification.html</description>
     <url>http://maven.apache.org</url>
-
-    <scm>
-        <connection>scm:git:git@github.com:HalBuilder/halbuilder-core.git</connection>
-        <developerConnection>scm:git:git@github.com:HalBuilder/halbuilder-core.git</developerConnection>
-        <url>http://gotohal.net</url>
-      <tag>HEAD</tag>
-  </scm>
+    <licenses>
+        <license>
+            <name>Apache License</name>
+        </license>
+    </licenses>
 
     <developers>
         <developer>
@@ -26,12 +25,12 @@
         </developer>
     </developers>
 
-    <licenses>
-        <license>
-            <name>Apache License</name>
-        </license>
-    </licenses>
-
+    <scm>
+        <connection>scm:git:git@github.com:HalBuilder/halbuilder-core.git</connection>
+        <developerConnection>scm:git:git@github.com:HalBuilder/halbuilder-core.git</developerConnection>
+        <url>http://gotohal.net</url>
+      <tag>HEAD</tag>
+  </scm>
     <distributionManagement>
         <repository>
             <id>sonatype-staging</id>
@@ -45,65 +44,9 @@
         </snapshotRepository>
     </distributionManagement>
 
-    <profiles>
-        <profile>
-            <id>release</id>
-            <activation>
-                <property>
-                    <name>performRelease</name>
-                    <value>true</value>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
-
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
    </properties>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>io.repaint.maven</groupId>
-                <artifactId>tiles-maven-plugin</artifactId>
-                <version>2.14</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <tiles>
-                        <tile>com.theoryinpractise:halbuilder-styleguide-tile:[1.0.18, 2)</tile>
-                    </tiles>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>2.5</version>
-                <configuration>
-                    <preparationGoals>clean install</preparationGoals>
-                    <goals>deploy</goals>
-                    <pushChanges>false</pushChanges>
-                    <localCheckout>true</localCheckout>
-                    <allowTimestampedSnapshots>true</allowTimestampedSnapshots>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 
     <dependencies>
 
@@ -148,4 +91,60 @@
             <version>3.0.0</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>io.repaint.maven</groupId>
+                <artifactId>tiles-maven-plugin</artifactId>
+                <version>2.14</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <tiles>
+                        <tile>com.theoryinpractise:halbuilder-styleguide-tile:[1.0.18, 2)</tile>
+                    </tiles>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5</version>
+                <configuration>
+                    <preparationGoals>clean install</preparationGoals>
+                    <goals>deploy</goals>
+                    <pushChanges>false</pushChanges>
+                    <localCheckout>true</localCheckout>
+                    <allowTimestampedSnapshots>true</allowTimestampedSnapshots>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

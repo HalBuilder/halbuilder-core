@@ -15,15 +15,15 @@ public class RepresentationFactoryTest {
 
   @Test
   public void testWithCustomReader() throws IOException {
-    RepresentationFactory representationFactory = new DefaultRepresentationFactory()
-        .withReader(TEXT_X_JAVA_PROPERTIES, PropertiesRepresentationReader.class);
+    RepresentationFactory representationFactory =
+        new DefaultRepresentationFactory()
+            .withReader(TEXT_X_JAVA_PROPERTIES, PropertiesRepresentationReader.class);
 
     String source = "name=dummy";
 
-    ContentRepresentation representation = representationFactory.readRepresentation(TEXT_X_JAVA_PROPERTIES, new StringReader(source));
+    ContentRepresentation representation =
+        representationFactory.readRepresentation(TEXT_X_JAVA_PROPERTIES, new StringReader(source));
     assertThat(representation.getProperties().get("name")).isEqualTo("dummy");
     assertThat(representation.getContent()).isEqualTo(source);
-
   }
-
 }

@@ -11,9 +11,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.Properties;
 
-/**
- * RepresentationReader for java.util.Properties like files.
- */
+/** RepresentationReader for java.util.Properties like files. */
 public class PropertiesRepresentationReader implements RepresentationReader {
   private final AbstractRepresentationFactory representationFactory;
 
@@ -24,7 +22,8 @@ public class PropertiesRepresentationReader implements RepresentationReader {
   public ContentRepresentation read(Reader reader) {
     try {
       String source = CharStreams.toString(reader);
-      ContentBasedRepresentation sbr = new ContentBasedRepresentation(representationFactory, source);
+      ContentBasedRepresentation sbr =
+          new ContentBasedRepresentation(representationFactory, source);
       Properties properties = new Properties();
       properties.load(new StringReader(source));
       for (String key : properties.stringPropertyNames()) {

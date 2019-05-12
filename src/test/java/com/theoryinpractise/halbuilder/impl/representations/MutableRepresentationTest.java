@@ -18,5 +18,4 @@ public class MutableRepresentationTest {
     assertThat(findPropertyReadMethod("equals")).isEqualTo(Optional.<String>absent());
     assertThat(findPropertyReadMethod("setDisplayName")).isEqualTo(Optional.<String>absent());
   }
-
 }

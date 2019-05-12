@@ -11,27 +11,31 @@ import java.util.Map;
 
 public class ImmutableRepresentation extends BaseRepresentation {
 
-    private final Link resourceLink;
+  private final Link resourceLink;
 
-    public ImmutableRepresentation(AbstractRepresentationFactory representationFactory,
-                                   NamespaceManager namespaceManager, List<Link> links, Map<String, Object> properties, Collection<Map.Entry<String, ReadableRepresentation>> resources, boolean hasNullProperties) {
-        super(representationFactory);
-        this.namespaceManager = namespaceManager;
-        this.links = links;
-        this.properties = properties;
+  public ImmutableRepresentation(
+      AbstractRepresentationFactory representationFactory,
+      NamespaceManager namespaceManager,
+      List<Link> links,
+      Map<String, Object> properties,
+      Collection<Map.Entry<String, ReadableRepresentation>> resources,
+      boolean hasNullProperties) {
+    super(representationFactory);
+    this.namespaceManager = namespaceManager;
+    this.links = links;
+    this.properties = properties;
 
-        ImmutableMultimap.Builder<String, ReadableRepresentation> resourceBuilder = ImmutableMultimap.builder();
-        for (Map.Entry<String, ReadableRepresentation> entry : resources) {
-            resourceBuilder.putAll(entry.getKey(), entry.getValue());
-        }
-        this.resources = resourceBuilder.build();
-        this.resourceLink = super.getResourceLink();
-        this.hasNullProperties = hasNullProperties;
+    ImmutableMultimap.Builder<String, ReadableRepresentation> resourceBuilder =
+        ImmutableMultimap.builder();
+    for (Map.Entry<String, ReadableRepresentation> entry : resources) {
+      resourceBuilder.putAll(entry.getKey(), entry.getValue());
     }
+    this.resources = resourceBuilder.build();
+    this.resourceLink = super.getResourceLink();
+    this.hasNullProperties = hasNullProperties;
+  }
 
-    public Link getResourceLink() {
-        return resourceLink;
-    }
-
-
+  public Link getResourceLink() {
+    return resourceLink;
+  }
 }
