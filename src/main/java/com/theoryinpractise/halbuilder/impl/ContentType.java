@@ -13,6 +13,9 @@ public class ContentType {
     if (matcher.find()) {
       type = matcher.group(1);
       subType = matcher.group(2);
+    } else {
+      type = contentType;
+      subType = "";
     }
   }
 
@@ -26,13 +29,21 @@ public class ContentType {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
 
     ContentType that = (ContentType) o;
 
-    if (!subType.equals(that.subType)) return false;
-    if (!type.equals(that.type)) return false;
+    if (!subType.equals(that.subType)) {
+      return false;
+    }
+    if (!type.equals(that.type)) {
+      return false;
+    }
 
     return true;
   }
@@ -60,6 +71,6 @@ public class ContentType {
   }
 
   private boolean typeMatches(String left, String right) {
-    return (left.equals(right) || "*".equals(right));
+    return left.equals(right) || "*".equals(right);
   }
 }

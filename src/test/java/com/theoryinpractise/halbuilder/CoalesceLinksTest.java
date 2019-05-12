@@ -1,17 +1,16 @@
 package com.theoryinpractise.halbuilder;
 
+import static com.theoryinpractise.halbuilder.impl.api.Support.WHITESPACE_SPLITTER;
+import static org.fest.assertions.api.Assertions.assertThat;
+import static org.fest.assertions.api.Assertions.fail;
+
 import com.google.common.collect.Iterables;
 import com.theoryinpractise.halbuilder.api.Link;
 import com.theoryinpractise.halbuilder.api.Representation;
 import com.theoryinpractise.halbuilder.api.RepresentationFactory;
+import java.util.List;
 import org.fest.assertions.core.Condition;
 import org.testng.annotations.Test;
-
-import java.util.List;
-
-import static com.theoryinpractise.halbuilder.impl.api.Support.WHITESPACE_SPLITTER;
-import static org.fest.assertions.api.Assertions.assertThat;
-import static org.fest.assertions.api.Assertions.fail;
 
 public class CoalesceLinksTest {
 
@@ -93,6 +92,7 @@ public class CoalesceLinksTest {
   }
 
   @Test(expectedExceptions = IllegalArgumentException.class)
+  @SuppressWarnings("NullAway")
   public void testRelLookupsWithNullFail() {
     Representation resource =
         new DefaultRepresentationFactory().newRepresentation("/foo").withLink("bar foo", "/bar");
@@ -120,7 +120,7 @@ public class CoalesceLinksTest {
 
     private final String rel;
 
-    public ContainsRelCondition(final String rel) {
+    ContainsRelCondition(final String rel) {
       this.rel = rel;
     }
 

@@ -2,7 +2,6 @@ package com.theoryinpractise.halbuilder.impl.representations;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
-import com.google.common.base.Predicate;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.HashBasedTable;
@@ -30,12 +29,11 @@ import com.theoryinpractise.halbuilder.impl.bytecode.InterfaceRenderer;
 import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -50,12 +48,14 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
 
   public static final Ordering<Link> RELATABLE_ORDERING =
       Ordering.from(
-          new Comparator<Link>() {
-            public int compare(Link l1, Link l2) {
-              if (l1.getRel().contains("self")) return -1;
-              if (l2.getRel().contains("self")) return 1;
-              return l1.getRel().compareTo(l2.getRel());
+          (l1, l2) -> {
+            if (l1.getRel().contains("self")) {
+              return -1;
             }
+            if (l2.getRel().contains("self")) {
+              return 1;
+            }
+            return l1.getRel().compareTo(l2.getRel());
           });
 
   protected NamespaceManager namespaceManager = new NamespaceManager();
@@ -71,22 +71,27 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
     this.representationFactory = representationFactory;
   }
 
+  @Override
   public Link getResourceLink() {
     return Iterables.find(getLinks(), LinkPredicate.newLinkPredicate(Support.SELF), null);
   }
 
+  @Override
   public Map<String, String> getNamespaces() {
     return ImmutableMap.copyOf(namespaceManager.getNamespaces());
   }
 
+  @Override
   public List<Link> getCanonicalLinks() {
     return ImmutableList.copyOf(getNaturalLinks());
   }
 
+  @Override
   public Link getLinkByRel(String rel) {
     return Iterables.getFirst(getLinksByRel(rel), null);
   }
 
+  @Override
   public List<Link> getLinksByRel(final String rel) {
     Support.checkRelType(rel);
 
@@ -98,12 +103,14 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
     return linkBuilder.build();
   }
 
+  @Override
   public List<? extends ReadableRepresentation> getResourcesByRel(final String rel) {
     Support.checkRelType(rel);
 
     return ImmutableList.copyOf(resources.get(rel));
   }
 
+  @Override
   public Object getValue(String name) {
     if (properties.containsKey(name)) {
       return properties.get(name);
@@ -112,6 +119,7 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
     }
   }
 
+  @Override
   public Object getValue(String name, Object defaultValue) {
     try {
       return getValue(name);
@@ -125,14 +133,12 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
     return ImmutableList.copyOf(
         Iterables.filter(
             representation.getCanonicalLinks(),
-            new Predicate<Link>() {
-              public boolean apply(@Nullable Link relatable) {
-                return rel.equals(relatable.getRel())
-                    || Iterables.contains(WHITESPACE_SPLITTER.split(relatable.getRel()), rel);
-              }
-            }));
+            relatable ->
+                rel.equals(relatable.getRel())
+                    || Iterables.contains(WHITESPACE_SPLITTER.split(relatable.getRel()), rel)));
   }
 
+  @Override
   public List<Link> getLinks() {
     if (representationFactory.getFlags().contains(RepresentationFactory.COALESCE_LINKS)) {
       return getCollatedLinks();
@@ -144,20 +150,15 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
   private List<Link> getNaturalLinks() {
     return FluentIterable.from(links)
         .transform(
-            new Function<Link, Link>() {
-              @Nullable
-              @Override
-              public Link apply(@Nullable Link link) {
-                return new Link(
+            link ->
+                new Link(
                     representationFactory,
                     namespaceManager.currieHref(link.getRel()),
                     link.getHref(),
                     link.getName(),
                     link.getTitle(),
                     link.getHreflang(),
-                    link.getProfile());
-              }
-            })
+                    link.getProfile()))
         .toSortedList(RELATABLE_ORDERING);
   }
 
@@ -177,47 +178,18 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
 
       String rels =
           mkSortableJoinerForIterable(" ", relTypes)
-              .apply(
-                  new Function<String, String>() {
-                    public String apply(@Nullable String relType) {
-                      return namespaceManager.currieHref(relType);
-                    }
-                  });
+              .apply(relType -> namespaceManager.currieHref(relType));
 
       Function<Function<Link, String>, String> nameFunc =
           mkSortableJoinerForIterable(", ", hrefLinks);
 
-      String titles =
-          nameFunc.apply(
-              new Function<Link, String>() {
-                public String apply(@Nullable Link link) {
-                  return link.getTitle();
-                }
-              });
+      String titles = nameFunc.apply(link -> link.getTitle());
 
-      String names =
-          nameFunc.apply(
-              new Function<Link, String>() {
-                public String apply(@Nullable Link link) {
-                  return link.getName();
-                }
-              });
+      String names = nameFunc.apply(link -> link.getName());
 
-      String hreflangs =
-          nameFunc.apply(
-              new Function<Link, String>() {
-                public String apply(@Nullable Link link) {
-                  return link.getHreflang();
-                }
-              });
+      String hreflangs = nameFunc.apply(link -> link.getHreflang());
 
-      String profile =
-          nameFunc.apply(
-              new Function<Link, String>() {
-                public String apply(@Nullable Link link) {
-                  return link.getProfile();
-                }
-              });
+      String profile = nameFunc.apply(link -> link.getProfile());
 
       collatedLinks.add(
           new Link(
@@ -246,14 +218,17 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
     };
   }
 
+  @Override
   public Map<String, Object> getProperties() {
     return Collections.unmodifiableMap(properties);
   }
 
+  @Override
   public Collection<Map.Entry<String, ReadableRepresentation>> getResources() {
     return ImmutableMultimap.copyOf(resources).entries();
   }
 
+  @Override
   public Map<String, Collection<ReadableRepresentation>> getResourceMap() {
     return ImmutableMap.copyOf(resources.asMap());
   }
@@ -274,10 +249,12 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
    * @param contract The interface we wish to check
    * @return Is that Representation satisfied by the supplied contract?
    */
+  @Override
   public boolean isSatisfiedBy(Contract contract) {
     return contract.isSatisfiedBy(this);
   }
 
+  @Override
   public boolean hasNullProperties() {
     return hasNullProperties;
   }
@@ -299,6 +276,7 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
    * @return A Guava Optional of the rendered class, this will be absent if the interface doesn't
    *     satisfy the interface
    */
+  @Override
   public <T> T toClass(Class<T> anInterface) {
     if (InterfaceContract.newInterfaceContract(anInterface).isSatisfiedBy(this)) {
       return InterfaceRenderer.newInterfaceRenderer(anInterface).render(this);
@@ -308,26 +286,28 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
     }
   }
 
+  @Override
   public String toString(String contentType) {
-    return toString(contentType, Collections.<URI>emptySet());
+    return toString(contentType, Collections.emptySet());
   }
 
+  /** @deprecated */
+  @Override
   @Deprecated
   public String toString(String contentType, final Set<URI> flags) {
-    try {
-      ByteArrayOutputStream boas = new ByteArrayOutputStream();
-      OutputStreamWriter osw = new OutputStreamWriter(boas, "UTF-8");
-      toString(contentType, flags, osw);
-      return boas.toString();
-    } catch (UnsupportedEncodingException e) {
-      throw new RepresentationException("Unable to write representation: " + e.getMessage());
-    }
+    ByteArrayOutputStream boas = new ByteArrayOutputStream();
+    OutputStreamWriter osw = new OutputStreamWriter(boas, StandardCharsets.UTF_8);
+    toString(contentType, flags, osw);
+    return boas.toString();
   }
 
+  @Override
   public void toString(String contentType, Writer writer) {
-    toString(contentType, Collections.<URI>emptySet(), writer);
+    toString(contentType, Collections.emptySet(), writer);
   }
 
+  /** @deprecated */
+  @Override
   @Deprecated
   public void toString(String contentType, Set<URI> flags, Writer writer) {
     validateNamespaces(this);
@@ -335,7 +315,9 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
         representationFactory.lookupRenderer(contentType);
     ImmutableSet.Builder<URI> uriBuilder =
         ImmutableSet.<URI>builder().addAll(representationFactory.getFlags());
-    if (flags != null) uriBuilder.addAll(flags);
+    if (flags != null) {
+      uriBuilder.addAll(flags);
+    }
     representationWriter.write(this, uriBuilder.build(), writer);
   }
 

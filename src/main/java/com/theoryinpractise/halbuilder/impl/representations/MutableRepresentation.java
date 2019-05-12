@@ -1,5 +1,7 @@
 package com.theoryinpractise.halbuilder.impl.representations;
 
+import static java.lang.String.format;
+
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Optional;
 import com.theoryinpractise.halbuilder.AbstractRepresentationFactory;
@@ -9,7 +11,6 @@ import com.theoryinpractise.halbuilder.api.Representable;
 import com.theoryinpractise.halbuilder.api.Representation;
 import com.theoryinpractise.halbuilder.api.RepresentationException;
 import com.theoryinpractise.halbuilder.impl.api.Support;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -17,14 +18,13 @@ import java.lang.reflect.Modifier;
 import java.net.URI;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static java.lang.String.format;
+import javax.annotation.Nullable;
 
 public class MutableRepresentation extends BaseRepresentation implements Representation {
 
   public MutableRepresentation(AbstractRepresentationFactory representationFactory, String href) {
     super(representationFactory);
-    if (href != null) {
+    if (href != null && !"".equals(href)) {
       this.links.add(new Link(representationFactory, "self", href));
     }
   }
@@ -40,8 +40,9 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
    * @param href The target href for the link, relative to the href of this resource.
    * @return
    */
+  @Override
   public MutableRepresentation withLink(String rel, String href) {
-    withLink(rel, href, null, null, null, null);
+    withLink(rel, href, "", "", "", "");
     return this;
   }
 
@@ -51,6 +52,7 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
    * @param rel
    * @param href The target href for the link, relative to the href of this resource.
    */
+  @Override
   public MutableRepresentation withLink(
       String rel, String href, String name, String title, String hreflang, String profile) {
     Support.checkRelType(rel);
@@ -65,11 +67,13 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
    * @param uri The target URI for the link, possibly relative to the href of this resource.
    * @return
    */
+  @Override
   public MutableRepresentation withLink(String rel, URI uri) {
     return withLink(rel, uri.toASCIIString());
   }
 
-  public Representation withProperty(String name, Object value) {
+  @Override
+  public Representation withProperty(String name, @Nullable Object value) {
     if (properties.containsKey(name)) {
       throw new RepresentationException(format("Duplicate property '%s' found for resource", name));
     }
@@ -94,6 +98,7 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
     return Optional.absent();
   }
 
+  @Override
   public Representation withBean(Object value) {
     try {
       Method[] methods = value.getClass().getMethods();
@@ -111,6 +116,7 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
     return this;
   }
 
+  @Override
   public Representation withFields(Object value) {
     try {
       for (Field field : value.getClass().getDeclaredFields()) {
@@ -124,15 +130,18 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
     return this;
   }
 
+  @Override
   public Representation withRepresentable(Representable representable) {
     representable.representResource(this);
     return this;
   }
 
+  @Override
   public Representation withFieldBasedRepresentation(String rel, String href, Object o) {
     return withRepresentation(rel, representationFactory.newRepresentation(href).withFields(o));
   }
 
+  @Override
   public Representation withBeanBasedRepresentation(String rel, String href, Object o) {
     return withRepresentation(rel, representationFactory.newRepresentation(href).withBean(o));
   }
@@ -145,11 +154,13 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
    *     resourceFactories baseref
    * @return
    */
+  @Override
   public Representation withNamespace(String namespace, String href) {
     namespaceManager.withNamespace(namespace, href);
     return this;
   }
 
+  @Override
   public MutableRepresentation withRepresentation(String rel, ReadableRepresentation resource) {
     Support.checkRelType(rel);
     resources.put(rel, resource);

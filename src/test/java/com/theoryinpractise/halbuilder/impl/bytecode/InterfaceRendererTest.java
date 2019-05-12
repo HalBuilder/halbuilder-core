@@ -1,20 +1,25 @@
 package com.theoryinpractise.halbuilder.impl.bytecode;
 
+import static org.fest.assertions.api.Assertions.assertThat;
+
 import com.theoryinpractise.halbuilder.DefaultRepresentationFactory;
 import com.theoryinpractise.halbuilder.api.Link;
 import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
 import com.theoryinpractise.halbuilder.api.RepresentationFactory;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.testng.annotations.Test;
-
-import java.util.*;
-
-import static org.fest.assertions.api.Assertions.assertThat;
 
 public class InterfaceRendererTest {
   private static final RepresentationFactory representationFactory =
       new DefaultRepresentationFactory();
 
-  public static interface IPerson {
+  public interface IPerson {
     Integer getAge();
 
     Boolean getExpired();

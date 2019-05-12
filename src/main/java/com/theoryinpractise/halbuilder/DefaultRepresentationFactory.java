@@ -4,17 +4,16 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.theoryinpractise.halbuilder.api.ContentRepresentation;
 import com.theoryinpractise.halbuilder.api.Link;
 import com.theoryinpractise.halbuilder.api.Representation;
 import com.theoryinpractise.halbuilder.api.RepresentationException;
 import com.theoryinpractise.halbuilder.api.RepresentationFactory;
 import com.theoryinpractise.halbuilder.api.RepresentationReader;
 import com.theoryinpractise.halbuilder.api.RepresentationWriter;
-import com.theoryinpractise.halbuilder.api.ContentRepresentation;
 import com.theoryinpractise.halbuilder.impl.ContentType;
 import com.theoryinpractise.halbuilder.impl.representations.MutableRepresentation;
 import com.theoryinpractise.halbuilder.impl.representations.NamespaceManager;
-
 import java.io.Reader;
 import java.lang.reflect.Constructor;
 import java.net.URI;
@@ -69,7 +68,7 @@ public class DefaultRepresentationFactory extends AbstractRepresentationFactory 
 
   @Override
   public Representation newRepresentation() {
-    return newRepresentation((String) null);
+    return newRepresentation("");
   }
 
   @Override
@@ -112,6 +111,7 @@ public class DefaultRepresentationFactory extends AbstractRepresentationFactory 
     }
   }
 
+  @Override
   public RepresentationWriter<String> lookupRenderer(String contentType) {
 
     for (Map.Entry<ContentType, Class<? extends RepresentationWriter>> entry :
@@ -130,6 +130,7 @@ public class DefaultRepresentationFactory extends AbstractRepresentationFactory 
     throw new IllegalArgumentException("Unsupported contentType: " + contentType);
   }
 
+  @Override
   public Set<URI> getFlags() {
     return ImmutableSet.copyOf(flags);
   }

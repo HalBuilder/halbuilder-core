@@ -1,10 +1,10 @@
 package com.theoryinpractise.halbuilder.impl.representations;
 
-import com.google.common.base.Optional;
-import org.testng.annotations.Test;
-
 import static com.theoryinpractise.halbuilder.impl.representations.MutableRepresentation.findPropertyReadMethod;
 import static org.fest.assertions.api.Assertions.assertThat;
+
+import com.google.common.base.Optional;
+import org.testng.annotations.Test;
 
 public class MutableRepresentationTest {
 

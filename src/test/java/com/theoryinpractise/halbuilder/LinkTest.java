@@ -1,10 +1,10 @@
 package com.theoryinpractise.halbuilder;
 
+import static org.fest.assertions.api.Assertions.assertThat;
+
 import com.theoryinpractise.halbuilder.api.Link;
 import com.theoryinpractise.halbuilder.api.RepresentationFactory;
 import org.testng.annotations.Test;
-
-import static org.fest.assertions.api.Assertions.assertThat;
 
 public class LinkTest {
   private RepresentationFactory representationFactory = new DefaultRepresentationFactory();
@@ -172,7 +172,8 @@ public class LinkTest {
     String toString = link.toString();
     assertThat(toString)
         .isEqualTo(
-            "<link rel=\"rel\" href=\"http://example.com/\" name=\"name\" title=\"title\" hreflang=\"hreflang\"/>");
+            "<link rel=\"rel\" href=\"http://example.com/\" name=\"name\" title=\"title\" "
+                + "hreflang=\"hreflang\"/>");
   }
 
   @Test

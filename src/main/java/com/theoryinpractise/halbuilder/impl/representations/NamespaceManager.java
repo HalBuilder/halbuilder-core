@@ -1,14 +1,14 @@
 package com.theoryinpractise.halbuilder.impl.representations;
 
+import static com.theoryinpractise.halbuilder.impl.api.Support.WHITESPACE_SPLITTER;
+import static java.lang.String.format;
+
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 import com.theoryinpractise.halbuilder.api.RepresentationException;
-
 import java.util.Map;
 import java.util.TreeMap;
-
-import static com.theoryinpractise.halbuilder.impl.api.Support.WHITESPACE_SPLITTER;
-import static java.lang.String.format;
+import javax.annotation.Nonnull;
 
 public class NamespaceManager {
 
@@ -43,6 +43,7 @@ public class NamespaceManager {
     }
   }
 
+  @Nonnull
   public String currieHref(String href) {
     for (Map.Entry<String, String> entry : namespaces.entrySet()) {
 
@@ -65,22 +66,28 @@ public class NamespaceManager {
       throw new RepresentationException("Namespaced value does not include : - not namespaced?");
     }
     String[] parts = ns.split(":");
-    if (namespaces.containsKey(parts[0])) {
-      return namespaces.get(parts[0]).replace("{rel}", parts[1]);
+    String key = parts[0];
+    if (namespaces.containsKey(key)) {
+      return namespaces.get(key).replace("{rel}", parts[1]);
     } else {
-      throw new RepresentationException("Unknown namespace key: " + parts[0]);
+      throw new RepresentationException("Unknown namespace key: " + key);
     }
   }
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
 
     NamespaceManager that = (NamespaceManager) o;
 
-    if (namespaces != null ? !namespaces.equals(that.namespaces) : that.namespaces != null)
+    if (namespaces != null ? !namespaces.equals(that.namespaces) : that.namespaces != null) {
       return false;
+    }
 
     return true;
   }

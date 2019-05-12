@@ -1,10 +1,10 @@
 package com.theoryinpractise.halbuilder;
 
+import static org.fest.assertions.api.Assertions.assertThat;
+
 import com.theoryinpractise.halbuilder.impl.ContentType;
 import org.fest.assertions.api.Assertions;
 import org.testng.annotations.Test;
-
-import static org.fest.assertions.api.Assertions.assertThat;
 
 public class ContentTypeTest {
 

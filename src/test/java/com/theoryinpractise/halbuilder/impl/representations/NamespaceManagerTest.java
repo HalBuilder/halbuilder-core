@@ -1,11 +1,11 @@
 package com.theoryinpractise.halbuilder.impl.representations;
 
+import static org.fest.assertions.api.Assertions.assertThat;
+import static org.fest.assertions.api.Fail.fail;
+
 import com.theoryinpractise.halbuilder.api.RepresentationException;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import static org.fest.assertions.api.Assertions.assertThat;
-import static org.fest.assertions.api.Fail.fail;
 
 public class NamespaceManagerTest {
 

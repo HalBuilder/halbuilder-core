@@ -1,13 +1,12 @@
 package com.theoryinpractise.halbuilder.impl.bytecode;
 
+import static com.theoryinpractise.halbuilder.impl.bytecode.InterfaceSupport.derivePropertyNameFromMethod;
+
 import com.google.common.base.Preconditions;
 import com.theoryinpractise.halbuilder.api.Contract;
 import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
-
 import java.lang.reflect.Method;
 import java.util.Map;
-
-import static com.theoryinpractise.halbuilder.impl.bytecode.InterfaceSupport.derivePropertyNameFromMethod;
 
 /** A Java Interface matching contract */
 public class InterfaceContract<T> implements Contract {
@@ -23,6 +22,7 @@ public class InterfaceContract<T> implements Contract {
     this.anInterface = anInterface;
   }
 
+  @Override
   public boolean isSatisfiedBy(ReadableRepresentation representation) {
     return isSatisfiedBy(representation.getProperties());
   }

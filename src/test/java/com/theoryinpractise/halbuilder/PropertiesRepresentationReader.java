@@ -2,10 +2,9 @@ package com.theoryinpractise.halbuilder;
 
 import com.google.common.base.Throwables;
 import com.google.common.io.CharStreams;
-import com.theoryinpractise.halbuilder.api.RepresentationReader;
 import com.theoryinpractise.halbuilder.api.ContentRepresentation;
+import com.theoryinpractise.halbuilder.api.RepresentationReader;
 import com.theoryinpractise.halbuilder.impl.representations.ContentBasedRepresentation;
-
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -19,6 +18,7 @@ public class PropertiesRepresentationReader implements RepresentationReader {
     this.representationFactory = representationFactory;
   }
 
+  @Override
   public ContentRepresentation read(Reader reader) {
     try {
       String source = CharStreams.toString(reader);

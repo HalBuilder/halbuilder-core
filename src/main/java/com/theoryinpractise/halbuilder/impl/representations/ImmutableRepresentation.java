@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMultimap;
 import com.theoryinpractise.halbuilder.AbstractRepresentationFactory;
 import com.theoryinpractise.halbuilder.api.Link;
 import com.theoryinpractise.halbuilder.api.ReadableRepresentation;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +34,7 @@ public class ImmutableRepresentation extends BaseRepresentation {
     this.hasNullProperties = hasNullProperties;
   }
 
+  @Override
   public Link getResourceLink() {
     return resourceLink;
   }
