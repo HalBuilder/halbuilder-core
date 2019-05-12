@@ -3,7 +3,7 @@
 
     <groupId>com.theoryinpractise</groupId>
     <artifactId>halbuilder-core</artifactId>
-    <version>4.0.7-SNAPSHOT</version>
+    <version>4.1.1-SNAPSHOT</version>
     <description>Java based builder for the Hal specification http://stateless.co/hal_specification.html</description>
     <packaging>jar</packaging>
 
