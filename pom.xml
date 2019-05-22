@@ -31,12 +31,12 @@
     <repository>
       <id>sonatype-staging</id>
       <name>oss.sonatype.org Staging Repository</name>
-      <url>http://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
     <snapshotRepository>
       <id>github-snapshots</id>
       <name>oss.sonatype.org github Release Repository Snapshot Repository</name>
-      <url>http://oss.sonatype.org/content/repositories/github-snapshots/</url>
+      <url>https://oss.sonatype.org/content/repositories/github-snapshots/</url>
     </snapshotRepository>
   </distributionManagement>
   <properties>
@@ -57,18 +57,18 @@
     <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
-      <version>6.8.8</version>
+      <version>6.14.3</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>17.0</version>
+      <version>27.1-jre</version>
     </dependency>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
       <artifactId>jsr305</artifactId>
-      <version>3.0.0</version>
+      <version>3.0.2</version>
     </dependency>
   </dependencies>
   <build>
@@ -80,13 +80,13 @@
         <extensions>true</extensions>
         <configuration>
           <tiles>
-            <tile>com.theoryinpractise:halbuilder-styleguide-tile:[1.0.18, 2)</tile>
+            <tile>com.theoryinpractise:halbuilder-styleguide-tile:[1.0.19]</tile>
           </tiles>
         </configuration>
       </plugin>
       <plugin>
         <artifactId>maven-release-plugin</artifactId>
-        <version>2.5</version>
+        <version>2.5.3</version>
         <configuration>
           <preparationGoals>clean install</preparationGoals>
           <goals>deploy</goals>
