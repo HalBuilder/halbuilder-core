@@ -23,22 +23,18 @@ import java.util.Set;
 
 public class DefaultRepresentationFactory extends AbstractRepresentationFactory {
 
-  private Map<ContentType, Class<? extends RepresentationWriter>> contentRenderers =
-      Maps.newHashMap();
-  private Map<ContentType, Class<? extends RepresentationReader>> representationReaders =
-      Maps.newHashMap();
+  private Map<ContentType, Class<? extends RepresentationWriter>> contentRenderers = Maps.newHashMap();
+  private Map<ContentType, Class<? extends RepresentationReader>> representationReaders = Maps.newHashMap();
   private NamespaceManager namespaceManager = new NamespaceManager();
   private List<Link> links = Lists.newArrayList();
   private Set<URI> flags = Sets.newHashSet();
 
-  public DefaultRepresentationFactory withRenderer(
-      String contentType, Class<? extends RepresentationWriter<String>> rendererClass) {
+  public DefaultRepresentationFactory withRenderer(String contentType, Class<? extends RepresentationWriter<String>> rendererClass) {
     contentRenderers.put(new ContentType(contentType), rendererClass);
     return this;
   }
 
-  public DefaultRepresentationFactory withReader(
-      String contentType, Class<? extends RepresentationReader> readerClass) {
+  public DefaultRepresentationFactory withReader(String contentType, Class<? extends RepresentationReader> readerClass) {
     representationReaders.put(new ContentType(contentType), readerClass);
     return this;
   }
@@ -82,13 +78,7 @@ public class DefaultRepresentationFactory extends AbstractRepresentationFactory 
 
     // Add factory standard links
     for (Link link : links) {
-      representation.withLink(
-          link.getRel(),
-          link.getHref(),
-          link.getName(),
-          link.getTitle(),
-          link.getHreflang(),
-          link.getProfile());
+      representation.withLink(link.getRel(), link.getHref(), link.getName(), link.getTitle(), link.getHreflang(), link.getProfile());
     }
 
     return representation;
@@ -97,14 +87,11 @@ public class DefaultRepresentationFactory extends AbstractRepresentationFactory 
   @Override
   public ContentRepresentation readRepresentation(String contentType, Reader reader) {
     try {
-      Class<? extends RepresentationReader> readerClass =
-          representationReaders.get(new ContentType(contentType));
+      Class<? extends RepresentationReader> readerClass = representationReaders.get(new ContentType(contentType));
       if (readerClass == null) {
-        throw new IllegalStateException(
-            "No representation reader for content type " + contentType + " registered.");
+        throw new IllegalStateException("No representation reader for content type " + contentType + " registered.");
       }
-      Constructor<? extends RepresentationReader> readerConstructor =
-          readerClass.getConstructor(AbstractRepresentationFactory.class);
+      Constructor<? extends RepresentationReader> readerConstructor = readerClass.getConstructor(AbstractRepresentationFactory.class);
       return readerConstructor.newInstance(this).read(reader);
     } catch (Exception e) {
       throw new RepresentationException(e);
@@ -114,8 +101,7 @@ public class DefaultRepresentationFactory extends AbstractRepresentationFactory 
   @Override
   public RepresentationWriter<String> lookupRenderer(String contentType) {
 
-    for (Map.Entry<ContentType, Class<? extends RepresentationWriter>> entry :
-        contentRenderers.entrySet()) {
+    for (Map.Entry<ContentType, Class<? extends RepresentationWriter>> entry : contentRenderers.entrySet()) {
       if (entry.getKey().matches(contentType)) {
         try {
           return entry.getValue().newInstance();

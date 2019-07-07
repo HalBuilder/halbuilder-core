@@ -133,9 +133,7 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
     return ImmutableList.copyOf(
         Iterables.filter(
             representation.getCanonicalLinks(),
-            relatable ->
-                rel.equals(relatable.getRel())
-                    || Iterables.contains(WHITESPACE_SPLITTER.split(relatable.getRel()), rel)));
+            relatable -> rel.equals(relatable.getRel()) || Iterables.contains(WHITESPACE_SPLITTER.split(relatable.getRel()), rel)));
   }
 
   @Override
@@ -176,12 +174,9 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
       Set<String> relTypes = linkTable.row(href).keySet();
       Collection<Link> hrefLinks = linkTable.row(href).values();
 
-      String rels =
-          mkSortableJoinerForIterable(" ", relTypes)
-              .apply(relType -> namespaceManager.currieHref(relType));
+      String rels = mkSortableJoinerForIterable(" ", relTypes).apply(relType -> namespaceManager.currieHref(relType));
 
-      Function<Function<Link, String>, String> nameFunc =
-          mkSortableJoinerForIterable(", ", hrefLinks);
+      Function<Function<Link, String>, String> nameFunc = mkSortableJoinerForIterable(", ", hrefLinks);
 
       String titles = nameFunc.apply(link -> link.getTitle());
 
@@ -191,29 +186,18 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
 
       String profile = nameFunc.apply(link -> link.getProfile());
 
-      collatedLinks.add(
-          new Link(
-              representationFactory,
-              rels,
-              href,
-              emptyToNull(names),
-              emptyToNull(titles),
-              emptyToNull(hreflangs),
-              emptyToNull(profile)));
+      collatedLinks.add(new Link(representationFactory, rels, href, emptyToNull(names), emptyToNull(titles), emptyToNull(hreflangs), emptyToNull(profile)));
     }
 
     return RELATABLE_ORDERING.sortedCopy(collatedLinks);
   }
 
-  private <T> Function<Function<T, String>, String> mkSortableJoinerForIterable(
-      final String join, final Iterable<T> ts) {
+  private <T> Function<Function<T, String>, String> mkSortableJoinerForIterable(final String join, final Iterable<T> ts) {
     return new Function<Function<T, String>, String>() {
       @Nullable
       @Override
       public String apply(Function<T, String> f) {
-        return Joiner.on(join)
-            .skipNulls()
-            .join(usingToString().nullsFirst().sortedCopy(newHashSet(transform(ts, f))));
+        return Joiner.on(join).skipNulls().join(usingToString().nullsFirst().sortedCopy(newHashSet(transform(ts, f))));
       }
     };
   }
@@ -260,29 +244,21 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
   }
 
   public ImmutableRepresentation toImmutableResource() {
-    return new ImmutableRepresentation(
-        representationFactory,
-        namespaceManager,
-        getCanonicalLinks(),
-        getProperties(),
-        getResources(),
-        hasNullProperties);
+    return new ImmutableRepresentation(representationFactory, namespaceManager, getCanonicalLinks(), getProperties(), getResources(), hasNullProperties);
   }
 
   /**
    * Renders the current Representation as a proxy to the provider interface
    *
    * @param anInterface The interface we wish to proxy the resource as
-   * @return A Guava Optional of the rendered class, this will be absent if the interface doesn't
-   *     satisfy the interface
+   * @return A Guava Optional of the rendered class, this will be absent if the interface doesn't satisfy the interface
    */
   @Override
   public <T> T toClass(Class<T> anInterface) {
     if (InterfaceContract.newInterfaceContract(anInterface).isSatisfiedBy(this)) {
       return InterfaceRenderer.newInterfaceRenderer(anInterface).render(this);
     } else {
-      throw new RepresentationException(
-          "Unable to write representation to " + anInterface.getName());
+      throw new RepresentationException("Unable to write representation to " + anInterface.getName());
     }
   }
 
@@ -311,10 +287,8 @@ public abstract class BaseRepresentation implements ReadableRepresentation {
   @Deprecated
   public void toString(String contentType, Set<URI> flags, Writer writer) {
     validateNamespaces(this);
-    RepresentationWriter<String> representationWriter =
-        representationFactory.lookupRenderer(contentType);
-    ImmutableSet.Builder<URI> uriBuilder =
-        ImmutableSet.<URI>builder().addAll(representationFactory.getFlags());
+    RepresentationWriter<String> representationWriter = representationFactory.lookupRenderer(contentType);
+    ImmutableSet.Builder<URI> uriBuilder = ImmutableSet.<URI>builder().addAll(representationFactory.getFlags());
     if (flags != null) {
       uriBuilder.addAll(flags);
     }

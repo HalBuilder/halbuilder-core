@@ -14,16 +14,14 @@ public class RepresentationFactoryTest {
   private static final String TEXT_X_JAVA_PROPERTIES = "text/x-java-properties";
 
   private static final RepresentationFactory representationFactory =
-      new DefaultRepresentationFactory()
-          .withReader(TEXT_X_JAVA_PROPERTIES, PropertiesRepresentationReader.class);
+      new DefaultRepresentationFactory().withReader(TEXT_X_JAVA_PROPERTIES, PropertiesRepresentationReader.class);
 
   @Test
   public void testWithCustomReader() {
 
     String source = "name=dummy";
 
-    ContentRepresentation representation =
-        representationFactory.readRepresentation(TEXT_X_JAVA_PROPERTIES, new StringReader(source));
+    ContentRepresentation representation = representationFactory.readRepresentation(TEXT_X_JAVA_PROPERTIES, new StringReader(source));
     assertThat(representation.getProperties().get("name")).isEqualTo("dummy");
     assertThat(representation.getContent()).isEqualTo(source);
   }

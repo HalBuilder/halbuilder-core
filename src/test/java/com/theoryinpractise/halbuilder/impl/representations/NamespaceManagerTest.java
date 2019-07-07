@@ -35,16 +35,14 @@ public class NamespaceManagerTest {
   }
 
   @Test(dataProvider = "provideNamespaceData")
-  public void testCurrieHref(String ns, String href, String original, String curried)
-      throws Exception {
+  public void testCurrieHref(String ns, String href, String original, String curried) throws Exception {
     NamespaceManager namespaceManager = new NamespaceManager();
     namespaceManager.withNamespace(ns, href);
     assertThat(namespaceManager.currieHref(original)).isEqualTo(curried);
   }
 
   @Test(dataProvider = "provideNamespaceData")
-  public void testUnCurrieHref(String ns, String href, String original, String curried)
-      throws Exception {
+  public void testUnCurrieHref(String ns, String href, String original, String curried) throws Exception {
     NamespaceManager namespaceManager = new NamespaceManager();
     namespaceManager.withNamespace(ns, href);
     assertThat(namespaceManager.resolve(curried)).isEqualTo(original);

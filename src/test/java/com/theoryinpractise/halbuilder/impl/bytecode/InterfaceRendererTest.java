@@ -16,8 +16,7 @@ import java.util.Set;
 import org.testng.annotations.Test;
 
 public class InterfaceRendererTest {
-  private static final RepresentationFactory representationFactory =
-      new DefaultRepresentationFactory();
+  private static final RepresentationFactory representationFactory = new DefaultRepresentationFactory();
 
   public interface IPerson {
     Integer getAge();
@@ -35,8 +34,7 @@ public class InterfaceRendererTest {
 
   private static final Map<String, Object> properties = new HashMap<String, Object>();
   private static final List<Link> links = new ArrayList<Link>();
-  private static final Map<String, Collection<ReadableRepresentation>> embedded =
-      new HashMap<String, Collection<ReadableRepresentation>>();
+  private static final Map<String, Collection<ReadableRepresentation>> embedded = new HashMap<String, Collection<ReadableRepresentation>>();
 
   static {
     properties.put("name", "Joe Smith");

@@ -24,8 +24,7 @@ public class ImmutableRepresentation extends BaseRepresentation {
     this.links = links;
     this.properties = properties;
 
-    ImmutableMultimap.Builder<String, ReadableRepresentation> resourceBuilder =
-        ImmutableMultimap.builder();
+    ImmutableMultimap.Builder<String, ReadableRepresentation> resourceBuilder = ImmutableMultimap.builder();
     for (Map.Entry<String, ReadableRepresentation> entry : resources) {
       resourceBuilder.putAll(entry.getKey(), entry.getValue());
     }

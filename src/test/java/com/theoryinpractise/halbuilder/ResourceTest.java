@@ -10,10 +10,7 @@ public class ResourceTest {
 
   @Test(expectedExceptions = RepresentationException.class)
   public void testUndeclaredLinkNamespace() {
-    representationFactory
-        .newRepresentation("/test")
-        .withLink("td:test", "http://localhost/test/2")
-        .toString(RepresentationFactory.HAL_XML);
+    representationFactory.newRepresentation("/test").withLink("td:test", "http://localhost/test/2").toString(RepresentationFactory.HAL_XML);
   }
 
   @Test(expectedExceptions = RepresentationException.class)
@@ -28,8 +25,7 @@ public class ResourceTest {
   public void testUndeclaredResourceLinkNamespace() {
     representationFactory
         .newRepresentation("http://localhost/test")
-        .withRepresentation(
-            "test", representationFactory.newRepresentation("/").withLink("td:test", "/"))
+        .withRepresentation("test", representationFactory.newRepresentation("/").withLink("td:test", "/"))
         .toString(RepresentationFactory.HAL_XML);
   }
 

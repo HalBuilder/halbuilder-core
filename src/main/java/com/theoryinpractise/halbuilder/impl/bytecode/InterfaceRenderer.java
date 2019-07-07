@@ -30,21 +30,14 @@ public class InterfaceRenderer<T> {
   }
 
   public T render(final ReadableRepresentation representation) {
-    return render(
-        representation.getProperties(), representation.getLinks(), representation.getResourceMap());
+    return render(representation.getProperties(), representation.getLinks(), representation.getResourceMap());
   }
 
   public T render(final Map<String, Object> map) {
-    return render(
-        map,
-        ImmutableList.<Link>of(),
-        ImmutableMap.<String, Collection<ReadableRepresentation>>of());
+    return render(map, ImmutableList.<Link>of(), ImmutableMap.<String, Collection<ReadableRepresentation>>of());
   }
 
-  public T render(
-      final Map<String, Object> properties,
-      final List<Link> links,
-      final Map<String, Collection<ReadableRepresentation>> resources) {
+  public T render(final Map<String, Object> properties, final List<Link> links, final Map<String, Collection<ReadableRepresentation>> resources) {
     if (InterfaceContract.newInterfaceContract(anInterface).isSatisfiedBy(properties)) {
       T proxy =
           (T)
@@ -73,16 +66,13 @@ public class InterfaceRenderer<T> {
                       if (propertyValue instanceof List) {
                         List propertyCollection = (List) propertyValue;
                         Object propertyHeadValue = propertyCollection.iterator().next();
-                        ParameterizedType genericReturnType =
-                            (ParameterizedType) method.getGenericReturnType();
-                        Class<?> collectionType =
-                            (Class<?>) genericReturnType.getActualTypeArguments()[0];
+                        ParameterizedType genericReturnType = (ParameterizedType) method.getGenericReturnType();
+                        Class<?> collectionType = (Class<?>) genericReturnType.getActualTypeArguments()[0];
 
                         if (collectionType.isInstance(propertyHeadValue)) {
                           returnValue = propertyValue;
                         } else {
-                          InterfaceRenderer collectionValueRenderer =
-                              new InterfaceRenderer(collectionType);
+                          InterfaceRenderer collectionValueRenderer = new InterfaceRenderer(collectionType);
                           returnValue = new ArrayList();
                           for (Object item : propertyCollection) {
                             ((List) returnValue).add(collectionValueRenderer.render((Map) item));
@@ -92,13 +82,9 @@ public class InterfaceRenderer<T> {
                         returnValue = propertyValue;
                       } else if (Map.class.isInstance(propertyValue)) {
                         InterfaceRenderer propertyValueRenderer = new InterfaceRenderer(returnType);
-                        returnValue =
-                            propertyValueRenderer.render((Map<String, Object>) propertyValue);
+                        returnValue = propertyValueRenderer.render((Map<String, Object>) propertyValue);
                       } else {
-                        returnValue =
-                            returnType
-                                .getConstructor(propertyValue.getClass())
-                                .newInstance(propertyValue);
+                        returnValue = returnType.getConstructor(propertyValue.getClass()).newInstance(propertyValue);
                       }
                     }
 
@@ -106,8 +92,7 @@ public class InterfaceRenderer<T> {
                   });
       return proxy;
     } else {
-      throw new RepresentationException(
-          "Unable to write representation to " + anInterface.getName());
+      throw new RepresentationException("Unable to write representation to " + anInterface.getName());
     }
   }
 }

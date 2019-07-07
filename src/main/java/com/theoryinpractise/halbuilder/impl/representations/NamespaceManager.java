@@ -20,12 +20,10 @@ public class NamespaceManager {
 
   public NamespaceManager withNamespace(String namespace, String href) {
     if (namespaces.containsKey(namespace)) {
-      throw new RepresentationException(
-          format("Duplicate namespace '%s' found for representation factory", namespace));
+      throw new RepresentationException(format("Duplicate namespace '%s' found for representation factory", namespace));
     }
     if (!href.contains("{rel}")) {
-      throw new RepresentationException(
-          format("Namespace '%s' does not include {rel} URI template argument.", namespace));
+      throw new RepresentationException(format("Namespace '%s' does not include {rel} URI template argument.", namespace));
     }
     namespaces.put(namespace, href);
     return this;
@@ -36,8 +34,7 @@ public class NamespaceManager {
       if (!rel.contains("://") && rel.contains(":")) {
         String[] relPart = rel.split(":");
         if (!namespaces.keySet().contains(relPart[0])) {
-          throw new RepresentationException(
-              format("Undeclared namespace in rel %s for resource", rel));
+          throw new RepresentationException(format("Undeclared namespace in rel %s for resource", rel));
         }
       }
     }

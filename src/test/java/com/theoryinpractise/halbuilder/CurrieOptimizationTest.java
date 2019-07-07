@@ -15,9 +15,7 @@ public class CurrieOptimizationTest {
           .withNamespace("rel", "http://localhost/api/rels/{rel}");
 
   Representation resource =
-      representationFactory
-          .newRepresentation("/api/1")
-          .withLink("http://localhost/api/rels/foo", "http://localhost/api/applications/app/1");
+      representationFactory.newRepresentation("/api/1").withLink("http://localhost/api/rels/foo", "http://localhost/api/applications/app/1");
 
   @Test
   public void testCurrieOptimizationOnFirstLink() {

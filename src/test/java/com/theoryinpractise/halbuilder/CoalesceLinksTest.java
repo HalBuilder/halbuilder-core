@@ -17,26 +17,13 @@ public class CoalesceLinksTest {
   @Test
   public void testNonCoalesceLinks() {
 
-    Representation resource =
-        new DefaultRepresentationFactory()
-            .newRepresentation("/foo")
-            .withLink("bar", "/bar")
-            .withLink("foo", "/bar");
+    Representation resource = new DefaultRepresentationFactory().newRepresentation("/foo").withLink("bar", "/bar").withLink("foo", "/bar");
 
-    assertThat(resource.getLinks())
-        .isNotEmpty()
-        .has(new ContainsRelCondition("bar"))
-        .has(new ContainsRelCondition("foo"));
+    assertThat(resource.getLinks()).isNotEmpty().has(new ContainsRelCondition("bar")).has(new ContainsRelCondition("foo"));
 
-    assertThat(resource.getLinksByRel("bar"))
-        .isNotNull()
-        .has(new ContainsRelCondition("bar"))
-        .doesNotHave(new ContainsRelCondition("foo"));
+    assertThat(resource.getLinksByRel("bar")).isNotNull().has(new ContainsRelCondition("bar")).doesNotHave(new ContainsRelCondition("foo"));
 
-    assertThat(resource.getLinksByRel("foo"))
-        .isNotNull()
-        .doesNotHave(new ContainsRelCondition("bar"))
-        .has(new ContainsRelCondition("foo"));
+    assertThat(resource.getLinksByRel("foo")).isNotNull().doesNotHave(new ContainsRelCondition("bar")).has(new ContainsRelCondition("foo"));
   }
 
   @Test
@@ -55,15 +42,9 @@ public class CoalesceLinksTest {
         .has(new ContainsRelCondition("bar"))
         .has(new ContainsRelCondition("foo"));
 
-    assertThat(resource.getLinksByRel("bar"))
-        .isNotNull()
-        .has(new ContainsRelCondition("bar"))
-        .doesNotHave(new ContainsRelCondition("foo"));
+    assertThat(resource.getLinksByRel("bar")).isNotNull().has(new ContainsRelCondition("bar")).doesNotHave(new ContainsRelCondition("foo"));
 
-    assertThat(resource.getLinksByRel("foo"))
-        .isNotNull()
-        .doesNotHave(new ContainsRelCondition("bar"))
-        .has(new ContainsRelCondition("foo"));
+    assertThat(resource.getLinksByRel("foo")).isNotNull().doesNotHave(new ContainsRelCondition("bar")).has(new ContainsRelCondition("foo"));
   }
 
   @Test
@@ -94,24 +75,21 @@ public class CoalesceLinksTest {
   @Test(expectedExceptions = IllegalArgumentException.class)
   @SuppressWarnings("NullAway")
   public void testRelLookupsWithNullFail() {
-    Representation resource =
-        new DefaultRepresentationFactory().newRepresentation("/foo").withLink("bar foo", "/bar");
+    Representation resource = new DefaultRepresentationFactory().newRepresentation("/foo").withLink("bar foo", "/bar");
 
     resource.getLinkByRel(null);
   }
 
   @Test(expectedExceptions = IllegalArgumentException.class)
   public void testRelLookupsWithEmptyRelFail() {
-    Representation resource =
-        new DefaultRepresentationFactory().newRepresentation("/foo").withLink("bar", "/bar");
+    Representation resource = new DefaultRepresentationFactory().newRepresentation("/foo").withLink("bar", "/bar");
 
     resource.getLinkByRel("");
   }
 
   @Test(expectedExceptions = IllegalArgumentException.class)
   public void testRelLookupsWithSpacesFail() {
-    Representation resource =
-        new DefaultRepresentationFactory().newRepresentation("/foo").withLink("bar", "/bar");
+    Representation resource = new DefaultRepresentationFactory().newRepresentation("/foo").withLink("bar", "/bar");
 
     resource.getLinkByRel("test fail");
   }
@@ -129,8 +107,7 @@ public class CoalesceLinksTest {
       boolean hasMatch = false;
       for (Object object : objects) {
         Link link = (Link) object;
-        if (rel.equals(link.getRel())
-            || Iterables.contains(WHITESPACE_SPLITTER.split(link.getRel()), rel)) {
+        if (rel.equals(link.getRel()) || Iterables.contains(WHITESPACE_SPLITTER.split(link.getRel()), rel)) {
           hasMatch = true;
         }
       }

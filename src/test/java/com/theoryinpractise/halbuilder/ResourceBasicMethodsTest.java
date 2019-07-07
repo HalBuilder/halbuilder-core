@@ -121,8 +121,7 @@ public class ResourceBasicMethodsTest {
 
   @Test
   public void testToStringRendersSelfHref() {
-    String toString =
-        new MutableRepresentation(representationFactory, "http://localhost/test").toString();
+    String toString = new MutableRepresentation(representationFactory, "http://localhost/test").toString();
     assertThat(toString).isEqualTo("<Representation: http://localhost/test>");
   }
 

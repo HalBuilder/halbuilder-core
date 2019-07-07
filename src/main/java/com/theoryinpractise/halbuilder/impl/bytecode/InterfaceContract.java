@@ -30,10 +30,7 @@ public class InterfaceContract<T> implements Contract {
   public boolean isSatisfiedBy(Map<String, Object> properties) {
     for (Method method : anInterface.getDeclaredMethods()) {
       String propertyName = derivePropertyNameFromMethod(method);
-      if (!"class".equals(propertyName)
-          && !"links".equals(propertyName)
-          && !"embedded".equals(propertyName)
-          && !properties.containsKey(propertyName)) {
+      if (!"class".equals(propertyName) && !"links".equals(propertyName) && !"embedded".equals(propertyName) && !properties.containsKey(propertyName)) {
         return false;
       }
     }

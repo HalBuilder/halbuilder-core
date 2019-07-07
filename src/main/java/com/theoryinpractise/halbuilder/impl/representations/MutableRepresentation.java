@@ -53,8 +53,7 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
    * @param href The target href for the link, relative to the href of this resource.
    */
   @Override
-  public MutableRepresentation withLink(
-      String rel, String href, String name, String title, String hreflang, String profile) {
+  public MutableRepresentation withLink(String rel, String href, String name, String title, String hreflang, String profile) {
     Support.checkRelType(rel);
     links.add(new Link(representationFactory, rel, href, name, title, hreflang, profile));
     return this;
@@ -150,8 +149,7 @@ public class MutableRepresentation extends BaseRepresentation implements Represe
    * Adds a new namespace
    *
    * @param namespace
-   * @param href The target href of the namespace being added. This may be relative to the
-   *     resourceFactories baseref
+   * @param href The target href of the namespace being added. This may be relative to the resourceFactories baseref
    * @return
    */
   @Override
