@@ -40,10 +40,32 @@
     </snapshotRepository>
   </distributionManagement>
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.Automatic-Module-Name>com.theoryinpractive.halbuilder</project.Automatic-Module-Name>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <dependencies>
+    <dependency>
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>jsr305</artifactId>
+      <version>3.0.2</version>
+      <exclusions>
+        <exclusion>
+          <groupId>*</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>28.0-jre</version>
+      <exclusions>
+        <exclusion>
+          <groupId>*</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
     <dependency>
       <groupId>com.theoryinpractise</groupId>
       <artifactId>halbuilder-api</artifactId>
@@ -61,28 +83,6 @@
       <version>6.14.3</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>28.0-jre</version>
-      <exclusions>
-        <exclusion>
-          <groupId>*</groupId>
-          <artifactId>*</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>com.google.code.findbugs</groupId>
-      <artifactId>jsr305</artifactId>
-      <version>3.0.2</version>
-      <exclusions>
-        <exclusion>
-          <groupId>*</groupId>
-          <artifactId>*</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -94,7 +94,7 @@
         <configuration>
           <tiles>
             <tile>com.theoryinpractise:halbuilder-styleguide-tile:[1.0.21]</tile>
-            <tile>com.theoryinpractise:halbuilder-build-tile:[1.0.1]</tile>
+            <tile>com.theoryinpractise:halbuilder-build-tile:[1.0.2]</tile>
           </tiles>
         </configuration>
       </plugin>
