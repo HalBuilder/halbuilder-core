@@ -41,6 +41,7 @@
   </distributionManagement>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.Automatic-Module-Name>com.theoryinpractive.halbuilder</project.Automatic-Module-Name>
   </properties>
   <dependencies>
     <dependency>
@@ -92,7 +93,8 @@
         <extensions>true</extensions>
         <configuration>
           <tiles>
-            <tile>com.theoryinpractise:halbuilder-styleguide-tile:[1.0.20]</tile>
+            <tile>com.theoryinpractise:halbuilder-styleguide-tile:[1.0.21]</tile>
+            <tile>com.theoryinpractise:halbuilder-build-tile:[1.0.1]</tile>
           </tiles>
         </configuration>
       </plugin>
