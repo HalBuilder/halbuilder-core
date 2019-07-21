@@ -4,7 +4,7 @@
 
   <groupId>com.theoryinpractise</groupId>
   <artifactId>halbuilder-core</artifactId>
-  <version>4.1.1-SNAPSHOT</version>
+  <version>4.1.1</version>
   <packaging>jar</packaging>
 
   <name>halbuilder</name>
@@ -28,7 +28,7 @@
   <scm>
     <connection>scm:git:git@github.com:HalBuilder/halbuilder-core.git</connection>
     <developerConnection>scm:git:git@github.com:HalBuilder/halbuilder-core.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>halbuilder-core-4.1.1</tag>
     <url>http://gotohal.net</url>
   </scm>
   <distributionManagement>
