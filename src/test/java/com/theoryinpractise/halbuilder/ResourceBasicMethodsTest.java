@@ -1,11 +1,11 @@
 package com.theoryinpractise.halbuilder;
 
-import static org.fest.assertions.api.Assertions.assertThat;
-
 import com.theoryinpractise.halbuilder.api.Representation;
 import com.theoryinpractise.halbuilder.impl.representations.MutableRepresentation;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import static com.google.common.truth.Truth.assertThat;
 
 public class ResourceBasicMethodsTest {
 

@@ -1,10 +1,10 @@
 package com.theoryinpractise.halbuilder;
 
-import static org.fest.assertions.api.Assertions.assertThat;
-
 import com.theoryinpractise.halbuilder.api.Link;
 import com.theoryinpractise.halbuilder.api.RepresentationFactory;
 import org.testng.annotations.Test;
+
+import static com.google.common.truth.Truth.assertThat;
 
 public class LinkTest {
   private RepresentationFactory representationFactory = new DefaultRepresentationFactory();

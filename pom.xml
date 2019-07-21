@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
   <groupId>com.theoryinpractise</groupId>
   <artifactId>halbuilder-core</artifactId>
   <version>4.1.1-SNAPSHOT</version>
   <packaging>jar</packaging>
+
   <name>halbuilder</name>
   <description>Java based builder for the Hal specification http://stateless.co/hal_specification.html</description>
   <url>http://maven.apache.org</url>
@@ -13,6 +15,7 @@
       <name>Apache License</name>
     </license>
   </licenses>
+
   <developers>
     <developer>
       <id>talios</id>
@@ -21,6 +24,7 @@
       <url>http://twitter.com/talios</url>
     </developer>
   </developers>
+
   <scm>
     <connection>scm:git:git@github.com:HalBuilder/halbuilder-core.git</connection>
     <developerConnection>scm:git:git@github.com:HalBuilder/halbuilder-core.git</developerConnection>
@@ -39,10 +43,13 @@
       <url>https://oss.sonatype.org/content/repositories/github-snapshots/</url>
     </snapshotRepository>
   </distributionManagement>
+
   <properties>
+    <dependency.check.fastfail>false</dependency.check.fastfail>
     <project.Automatic-Module-Name>com.theoryinpractive.halbuilder</project.Automatic-Module-Name>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
+
   <dependencies>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
@@ -69,12 +76,18 @@
     <dependency>
       <groupId>com.theoryinpractise</groupId>
       <artifactId>halbuilder-api</artifactId>
-      <version>4.1.1-SNAPSHOT</version>
+      <version>4.1.1</version>
     </dependency>
     <dependency>
-      <groupId>org.easytesting</groupId>
-      <artifactId>fest-assert-core</artifactId>
-      <version>2.0M10</version>
+      <groupId>com.google.truth</groupId>
+      <artifactId>truth</artifactId>
+      <version>1.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.truth.extensions</groupId>
+      <artifactId>truth-java8-extension</artifactId>
+      <version>1.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -84,6 +97,7 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
   <build>
     <plugins>
       <plugin>
@@ -111,6 +125,7 @@
       </plugin>
     </plugins>
   </build>
+
   <profiles>
     <profile>
       <id>release</id>

@@ -1,13 +1,14 @@
 package com.theoryinpractise.halbuilder;
 
-import static org.fest.assertions.api.Assertions.assertThat;
-
 import com.theoryinpractise.halbuilder.api.ContentRepresentation;
 import com.theoryinpractise.halbuilder.api.RepresentationFactory;
 import com.theoryinpractise.halbuilder.impl.representations.ImmutableRepresentation;
 import com.theoryinpractise.halbuilder.impl.representations.MutableRepresentation;
-import java.io.StringReader;
 import org.testng.annotations.Test;
+
+import java.io.StringReader;
+
+import static com.google.common.truth.Truth.assertThat;
 
 public class RepresentationFactoryTest {
 
