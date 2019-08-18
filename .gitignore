@@ -1,6 +1,23 @@
-target
-.idea
+bazel*
+
+#eclipse
+.classpath
+.project
+.settings/
+
+# intellij
 *.iml
 *.ipr
 *.iws
-bazel*
+.idea/
+
+# maven
+target/
+
+# MacOS
+._*
+.DS_Store
+
+# Windows
+[Dd]esktop.ini
+Thumbs.db
