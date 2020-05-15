@@ -25,7 +25,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <checkstyle.suppressions.location>checkstyle-supressions.xml</checkstyle.suppressions.location>
     <dependency.check.fastfail>false</dependency.check.fastfail>
-    <jackson.version>2.9.6</jackson.version>
+    <jackson.version>2.11.0</jackson.version>
     <jacoco.check.skip>false</jacoco.check.skip>
     <jacoco.check.ratio>0.50</jacoco.check.ratio>
     <jacoco.check.missed>9</jacoco.check.missed>
