@@ -107,8 +107,8 @@
         <extensions>true</extensions>
         <configuration>
           <tiles>
-            <tile>com.theoryinpractise:halbuilder-styleguide-tile:[1.0.24]</tile>
-            <tile>com.theoryinpractise:halbuilder-build-tile:[1.0.3]</tile>
+            <tile>com.theoryinpractise:halbuilder-styleguide-tile:[1.0.25]</tile>
+            <tile>com.theoryinpractise:halbuilder-build-tile:[1.0.4]</tile>
           </tiles>
         </configuration>
       </plugin>
